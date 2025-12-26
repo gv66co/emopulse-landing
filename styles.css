@@ -3793,3 +3793,1060 @@ footer {
     opacity: 1;
     filter: blur(22px);
 }
+/* Spiral drift motion */
+@keyframes drift-spiral {
+    0% {
+        transform: rotate(0deg) scale(1);
+        opacity: 0.8;
+    }
+    25% {
+        transform: rotate(90deg) scale(1.05);
+        opacity: 1;
+    }
+    50% {
+        transform: rotate(180deg) scale(1);
+        opacity: 0.85;
+    }
+    75% {
+        transform: rotate(270deg) scale(1.08);
+        opacity: 1;
+    }
+    100% {
+        transform: rotate(360deg) scale(1);
+        opacity: 0.8;
+    }
+}
+
+.drift-spiral {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 20%, rgba(77,240,166,0.6), rgba(10,20,30,0.4));
+    box-shadow: 0 0 18px rgba(77,240,166,0.45);
+    animation: drift-spiral 3.5s linear infinite;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Stress variant */
+.drift-spiral.stress {
+    background: radial-gradient(circle at 30% 20%, rgba(255,59,59,0.6), rgba(40,10,20,0.4));
+    box-shadow: 0 0 18px rgba(255,59,59,0.45);
+}
+
+/* Neutral variant */
+.drift-spiral.neutral {
+    background: radial-gradient(circle at 30% 20%, rgba(245,211,106,0.6), rgba(40,35,20,0.4));
+    box-shadow: 0 0 18px rgba(245,211,106,0.35);
+}
+/* Strong mode – intensyvesnė emocinė spiralė */
+.drift-spiral-strong .drift-layer {
+    opacity: 1;
+    filter: blur(22px);
+}
+
+/* Alternatyvi spiralės animacija (gilesnis pulsavimas) */
+@keyframes drift-spiral-strong {
+    0% {
+        transform: rotate(0deg) scale(1);
+        opacity: 0.9;
+    }
+    25% {
+        transform: rotate(90deg) scale(1.12);
+        opacity: 1;
+    }
+    50% {
+        transform: rotate(180deg) scale(1.05);
+        opacity: 0.92;
+    }
+    75% {
+        transform: rotate(270deg) scale(1.15);
+        opacity: 1;
+    }
+    100% {
+        transform: rotate(360deg) scale(1);
+        opacity: 0.9;
+    }
+}
+
+/* Strong mode spiralė */
+.drift-spiral.strong {
+    animation: drift-spiral-strong 2.8s linear infinite;
+    box-shadow: 0 0 26px rgba(77, 240, 166, 0.55);
+}
+/* ===========================
+   EMOPULSE GLOBAL THEME
+   =========================== */
+
+:root {
+  --emo-bg-main: #050712;
+  --emo-bg-elevated: #0b0f1c;
+  --emo-bg-soft: #101426;
+
+  --emo-border-soft: rgba(255, 255, 255, 0.06);
+  --emo-border-strong: rgba(255, 255, 255, 0.12);
+
+  --emo-text-primary: #f5f4ff;
+  --emo-text-secondary: rgba(232, 232, 255, 0.78);
+  --emo-text-muted: rgba(200, 200, 230, 0.55);
+
+  --emo-color-violet: #7a3fff;
+  --emo-color-pink: #ff4fb7;
+  --emo-color-blue: #3abeff;
+  --emo-color-yellow: #ffd75e;
+  --emo-color-red: #ff3b3b;
+  --emo-color-green: #4df0a6;
+
+  --emo-glow-soft: 0 16px 40px rgba(0, 0, 0, 0.45);
+  --emo-radius-lg: 18px;
+  --emo-radius-md: 12px;
+  --emo-radius-pill: 999px;
+
+  --emo-font-main: system-ui, -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+
+  --emo-gradient-spectrum: linear-gradient(135deg, #7a3fff, #ff4fb7, #3abeff, #ffd75e);
+  --emo-gradient-aura: radial-gradient(circle at 30% 20%, #ff4fb7, #7a3fff 45%, #050712 100%);
+  --emo-gradient-card: radial-gradient(circle at 0% 0%, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.8));
+}
+
+body.emopulse-theme {
+  margin: 0;
+  background: radial-gradient(circle at top, #111428 0, #050712 55%, #020309 100%);
+  color: var(--emo-text-primary);
+  font-family: var(--emo-font-main);
+}
+
+/* Utility */
+
+.emo-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.emo-grid-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.emo-grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.emo-flex {
+  display: flex;
+  align-items: center;
+}
+
+.emo-flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.emo-pill {
+  border-radius: var(--emo-radius-pill);
+  padding: 4px 10px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.emo-tag-soft {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: var(--emo-text-secondary);
+}
+
+/* ===========================
+   CORE CARD SHELLS
+   =========================== */
+
+.emo-card {
+  background: var(--emo-bg-elevated);
+  border-radius: var(--emo-radius-lg);
+  border: 1px solid var(--emo-border-soft);
+  box-shadow: var(--emo-glow-soft);
+  padding: 16px 18px;
+  color: var(--emo-text-primary);
+}
+
+.emo-card-soft {
+  background: rgba(10, 12, 26, 0.92);
+  border-radius: var(--emo-radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  padding: 12px 14px;
+}
+
+.emo-card-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.emo-card-title {
+  font-size: 13px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--emo-text-muted);
+}
+
+.emo-card-value {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+/* ===========================
+   EMOTIONAL AURA
+   =========================== */
+
+.emo-aura-wrapper {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emo-aura-core {
+  position: relative;
+  z-index: 2;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.2));
+  box-shadow: 0 0 28px rgba(255, 255, 255, 0.45);
+}
+
+.emo-aura-ring {
+  position: absolute;
+  border-radius: 50%;
+  inset: 6px;
+  background: radial-gradient(circle, rgba(122, 63, 255, 0.6), rgba(5, 7, 18, 0));
+  filter: blur(8px);
+  opacity: 0.9;
+  animation: emo-aura-pulse 3.5s ease-in-out infinite;
+}
+
+.emo-aura-ring:nth-child(1) {
+  inset: 0;
+  background: radial-gradient(circle, rgba(255, 79, 183, 0.4), rgba(5, 7, 18, 0));
+  animation-delay: 0s;
+}
+
+.emo-aura-ring:nth-child(2) {
+  inset: 10px;
+  background: radial-gradient(circle, rgba(58, 190, 255, 0.45), rgba(5, 7, 18, 0));
+  animation-delay: 0.7s;
+}
+
+.emo-aura-ring:nth-child(3) {
+  inset: 24px;
+  background: radial-gradient(circle, rgba(77, 240, 166, 0.5), rgba(5, 7, 18, 0));
+  animation-delay: 1.3s;
+}
+
+/* states */
+
+.emo-aura-wrapper.calm .emo-aura-ring {
+  background: radial-gradient(circle, rgba(58, 190, 255, 0.6), rgba(5, 7, 18, 0));
+}
+
+.emo-aura-wrapper.stress .emo-aura-ring {
+  background: radial-gradient(circle, rgba(255, 59, 59, 0.6), rgba(5, 7, 18, 0));
+}
+
+.emo-aura-wrapper.joy .emo-aura-ring {
+  background: radial-gradient(circle, rgba(255, 215, 94, 0.7), rgba(5, 7, 18, 0));
+}
+
+.emo-aura-wrapper.focus .emo-aura-ring {
+  background: radial-gradient(circle, rgba(122, 63, 255, 0.7), rgba(5, 7, 18, 0));
+}
+
+@keyframes emo-aura-pulse {
+  0% {
+    transform: scale(0.96);
+    opacity: 0.85;
+  }
+  40% {
+    transform: scale(1.04);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.96);
+    opacity: 0.82;
+  }
+}
+
+/* ===========================
+   EMOTIONAL DRIFT SPIRAL
+   =========================== */
+
+.drift-core {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.drift-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--emo-text-muted);
+}
+
+.drift-value {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.drift-value.positive {
+  color: var(--emo-color-green);
+}
+
+.drift-value.negative {
+  color: var(--emo-color-red);
+}
+
+.drift-caption {
+  font-size: 12px;
+  color: var(--emo-text-secondary);
+}
+
+/* spiral base */
+
+.drift-spiral-shell {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 30% 20%, rgba(77, 240, 166, 0.55), rgba(6, 9, 18, 0.9));
+  box-shadow: 0 0 22px rgba(77, 240, 166, 0.55);
+}
+
+.drift-layer {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  inset: 6px;
+  opacity: 0.8;
+  filter: blur(14px);
+}
+
+.drift-layer:nth-child(1) {
+  inset: 4px;
+}
+
+.drift-layer:nth-child(2) {
+  inset: 10px;
+}
+
+.drift-layer:nth-child(3) {
+  inset: 18px;
+}
+
+.drift-spiral-orbit {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px dashed rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: drift-spiral-orbit 4.2s linear infinite;
+}
+
+.drift-spiral-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+/* spiral motion */
+
+@keyframes drift-spiral-orbit {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes drift-spiral {
+  0% {
+    transform: rotate(0deg) scale(1);
+    opacity: 0.8;
+  }
+  25% {
+    transform: rotate(90deg) scale(1.05);
+    opacity: 1;
+  }
+  50% {
+    transform: rotate(180deg) scale(1);
+    opacity: 0.88;
+  }
+  75% {
+    transform: rotate(270deg) scale(1.08);
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+    opacity: 0.8;
+  }
+}
+
+.drift-spiral {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 20%, rgba(77, 240, 166, 0.6), rgba(10, 20, 30, 0.4));
+  box-shadow: 0 0 18px rgba(77, 240, 166, 0.45);
+  animation: drift-spiral 3.5s linear infinite;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* calm / stress / neutral variants */
+
+.drift-calm {
+  background: radial-gradient(circle, rgba(58, 190, 255, 0.55), rgba(58, 190, 255, 0));
+}
+
+.drift-joy {
+  background: radial-gradient(circle, rgba(255, 215, 94, 0.65), rgba(255, 215, 94, 0));
+}
+
+.drift-focus {
+  background: radial-gradient(circle, rgba(122, 63, 255, 0.7), rgba(122, 63, 255, 0));
+}
+
+.drift-stress {
+  background: radial-gradient(circle, rgba(255, 59, 59, 0.55), rgba(255, 59, 59, 0));
+}
+
+/* Spiral drift motion – wrapper using background variants */
+
+.drift-spiral.calm {
+  background: radial-gradient(circle at 30% 20%, rgba(58, 190, 255, 0.6), rgba(10, 20, 30, 0.4));
+  box-shadow: 0 0 18px rgba(58, 190, 255, 0.45);
+}
+
+.drift-spiral.stress {
+  background: radial-gradient(circle at 30% 20%, rgba(255, 59, 59, 0.6), rgba(40, 10, 20, 0.4));
+  box-shadow: 0 0 18px rgba(255, 59, 59, 0.45);
+}
+
+.drift-spiral.neutral {
+  background: radial-gradient(circle at 30% 20%, rgba(245, 211, 106, 0.6), rgba(40, 35, 20, 0.4));
+  box-shadow: 0 0 18px rgba(245, 211, 106, 0.35);
+}
+
+/* Strong mode */
+
+.drift-spiral-strong .drift-layer {
+  opacity: 1;
+  filter: blur(22px);
+}
+
+@keyframes drift-spiral-strong {
+  0% {
+    transform: rotate(0deg) scale(1);
+    opacity: 0.9;
+  }
+  25% {
+    transform: rotate(90deg) scale(1.12);
+    opacity: 1;
+  }
+  50% {
+    transform: rotate(180deg) scale(1.05);
+    opacity: 0.92;
+  }
+  75% {
+    transform: rotate(270deg) scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+    opacity: 0.9;
+  }
+}
+
+.drift-spiral.strong {
+  animation: drift-spiral-strong 2.8s linear infinite;
+  box-shadow: 0 0 26px rgba(77, 240, 166, 0.55);
+}
+
+/* ===========================
+   EMOTION RINGS (Apple-style)
+   =========================== */
+
+.emotion-rings {
+  position: relative;
+  width: 110px;
+  height: 110px;
+}
+
+.emotion-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 3px solid;
+  inset: 0;
+  opacity: 0.85;
+  box-shadow: 0 0 18px rgba(0, 0, 0, 0.7);
+}
+
+.emotion-ring.calm {
+  border-color: var(--emo-color-blue);
+}
+
+.emotion-ring.focus {
+  border-color: var(--emo-color-violet);
+  inset: 10px;
+}
+
+.emotion-ring.stress {
+  border-color: var(--emo-color-red);
+  inset: 20px;
+}
+
+.emotion-ring.joy {
+  border-color: var(--emo-color-yellow);
+  inset: 30px;
+}
+
+.emotion-ring-fill {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  clip-path: polygon(50% 50%, 100% 0, 100% 50%, 50% 50%);
+  transform-origin: center;
+}
+
+/* simple animation */
+
+.emotion-rings.animate .emotion-ring {
+  animation: emotion-ring-pulse 4s ease-in-out infinite;
+}
+
+@keyframes emotion-ring-pulse {
+  0% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.8;
+  }
+}
+
+/* ===========================
+   MOOD MAP (valence / arousal)
+   =========================== */
+
+.mood-map {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  border-radius: 20px;
+  background: radial-gradient(circle at top, rgba(58, 190, 255, 0.12), transparent 60%),
+              radial-gradient(circle at bottom, rgba(255, 59, 59, 0.12), transparent 60%),
+              radial-gradient(circle at left, rgba(255, 215, 94, 0.14), transparent 60%),
+              radial-gradient(circle at right, rgba(122, 63, 255, 0.16), transparent 60%),
+              #050712;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.mood-map-grid {
+  position: absolute;
+  inset: 10px;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 22px 22px;
+  opacity: 0.7;
+}
+
+.mood-map-axis-label {
+  position: absolute;
+  font-size: 11px;
+  color: var(--emo-text-muted);
+}
+
+.mood-map-axis-label.top {
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.mood-map-axis-label.bottom {
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.mood-map-axis-label.left {
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%) rotate(-90deg);
+  transform-origin: left center;
+}
+
+.mood-map-axis-label.right {
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%) rotate(90deg);
+  transform-origin: right center;
+}
+
+.mood-map-dot {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 18px rgba(255, 255, 255, 0.85);
+  transform: translate(-50%, -50%);
+}
+
+/* ===========================
+   EMOTION TIMELINE
+   =========================== */
+
+.emotion-timeline {
+  width: 100%;
+  max-width: 480px;
+}
+
+.emotion-timeline-track {
+  position: relative;
+  width: 100%;
+  height: 62px;
+  border-radius: 999px;
+  background: radial-gradient(circle at top, rgba(122, 63, 255, 0.18), rgba(5, 7, 16, 0.95));
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.emotion-timeline-progress {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg,
+    rgba(58, 190, 255, 0.45),
+    rgba(255, 215, 94, 0.6),
+    rgba(255, 59, 59, 0.65),
+    rgba(122, 63, 255, 0.6)
+  );
+  opacity: 0.9;
+  mix-blend-mode: screen;
+  transform-origin: left;
+}
+
+.emotion-timeline-emotion-dot {
+  position: absolute;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+}
+
+.emotion-timeline-emotion-dot.calm {
+  background: var(--emo-color-blue);
+}
+
+.emotion-timeline-emotion-dot.joy {
+  background: var(--emo-color-yellow);
+}
+
+.emotion-timeline-emotion-dot.stress {
+  background: var(--emo-color-red);
+}
+
+.emotion-timeline-emotion-dot.focus {
+  background: var(--emo-color-violet);
+}
+
+/* ===========================
+   MINI DASHBOARD (4 metrics)
+   =========================== */
+
+.mini-dashboard {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.mini-metric-card {
+  background: rgba(8, 10, 22, 0.92);
+  border-radius: var(--emo-radius-md);
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.mini-metric-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--emo-text-muted);
+  margin-bottom: 4px;
+}
+
+.mini-metric-value {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.mini-metric-pill {
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--emo-text-secondary);
+}
+
+/* ===========================
+   EMOPULSE SCORE
+   =========================== */
+
+.emopulse-score-card {
+  background: radial-gradient(circle at 0% 0%, rgba(255, 255, 255, 0.08), rgba(5, 7, 18, 0.95));
+  border-radius: var(--emo-radius-lg);
+  padding: 18px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  max-width: 260px;
+}
+
+.emopulse-score-label {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--emo-text-muted);
+}
+
+.emopulse-score-value {
+  font-size: 30px;
+  font-weight: 700;
+  margin-top: 6px;
+}
+
+.emopulse-score-bar {
+  margin-top: 10px;
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.emopulse-score-bar-fill {
+  width: 72%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--emo-color-red), var(--emo-color-yellow), var(--emo-color-green));
+}
+
+/* ===========================
+   STRESS / FOCUS / ENERGY BADGES
+   =========================== */
+
+.emotion-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.emotion-badge {
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.emotion-badge.calm {
+  border-color: rgba(58, 190, 255, 0.8);
+  color: #cdeeff;
+}
+
+.emotion-badge.focus {
+  border-color: rgba(122, 63, 255, 0.8);
+  color: #e0d3ff;
+}
+
+.emotion-badge.stress {
+  border-color: rgba(255, 59, 59, 0.8);
+  color: #ffd0d0;
+}
+
+.emotion-badge.joy {
+  border-color: rgba(255, 215, 94, 0.9);
+  color: #fff3c9;
+}
+
+/* ===========================
+   EMOTIONAL WEATHER
+   =========================== */
+
+.emotional-weather-card {
+  background: var(--emo-bg-elevated);
+  border-radius: var(--emo-radius-lg);
+  border: 1px solid var(--emo-border-soft);
+  padding: 14px 16px;
+  max-width: 260px;
+}
+
+.emotional-weather-main {
+  font-size: 14px;
+  color: var(--emo-text-secondary);
+  margin-top: 4px;
+}
+
+.emotional-weather-tag {
+  margin-top: 6px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--emo-text-muted);
+}
+
+/* icon container */
+
+.emotional-weather-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emotional-weather-icon.calm {
+  background: radial-gradient(circle, rgba(58, 190, 255, 0.4), rgba(5, 7, 18, 0.9));
+}
+
+.emotional-weather-icon.stress {
+  background: radial-gradient(circle, rgba(255, 59, 59, 0.45), rgba(5, 7, 18, 0.9));
+}
+
+.emotional-weather-icon.joy {
+  background: radial-gradient(circle, rgba(255, 215, 94, 0.6), rgba(5, 7, 18, 0.9));
+}
+
+/* ===========================
+   AI COACH BUTTON
+   =========================== */
+
+.ai-coach-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #7a3fff, #ff4fb7);
+  border: none;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.6);
+}
+
+.ai-coach-button span {
+  font-size: 13px;
+}
+
+.ai-coach-pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.9);
+  animation: ai-coach-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes ai-coach-pulse {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.9);
+    opacity: 0.7;
+  }
+}
+
+/* ===========================
+   ROADMAP PHASE PILL
+   =========================== */
+
+.roadmap-phase {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: rgba(10, 14, 28, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 12px;
+  color: var(--emo-text-secondary);
+}
+
+.roadmap-phase-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--emo-color-violet);
+  box-shadow: 0 0 12px rgba(122, 63, 255, 0.8);
+}
+
+/* ===========================
+   PRIVACY MESSAGE
+   =========================== */
+
+.privacy-banner {
+  border-radius: var(--emo-radius-md);
+  padding: 10px 12px;
+  background: rgba(5, 10, 22, 0.92);
+  border: 1px solid rgba(132, 214, 255, 0.5);
+  font-size: 12px;
+  color: var(--emo-text-secondary);
+}
+
+/* ===========================
+   SESSION TAGS
+   =========================== */
+
+.session-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.session-tag {
+  font-size: 11px;
+  border-radius: 999px;
+  padding: 4px 9px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--emo-text-secondary);
+}
+
+/* ===========================
+   EMOTION HEATMAP (simple)
+   =========================== */
+
+.emotion-heatmap {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 3px;
+}
+
+.emotion-heatmap-cell {
+  width: 100%;
+  padding-top: 100%;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.emotion-heatmap-cell.low {
+  background: rgba(58, 190, 255, 0.45);
+}
+
+.emotion-heatmap-cell.medium {
+  background: rgba(255, 215, 94, 0.6);
+}
+
+.emotion-heatmap-cell.high {
+  background: rgba(255, 59, 59, 0.7);
+}
+
+/* ===========================
+   EMOTIONAL SIGNATURE PILL
+   =========================== */
+
+.emotional-signature-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(10, 14, 30, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 12px;
+}
+
+.emotional-signature-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--emo-gradient-spectrum);
+}
+
+/* ===========================
+   EMOTION CHALLENGE
+   =========================== */
+
+.emotion-challenge {
+  background: rgba(10, 14, 24, 0.96);
+  border-radius: var(--emo-radius-md);
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 13px;
+  color: var(--emo-text-secondary);
+}
+
+.emotion-challenge-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--emo-text-muted);
+  margin-bottom: 4px;
+}
+
+/* ===========================
+   FOCUS MODE OVERLAY
+   =========================== */
+
+.focus-mode-overlay {
+  position: relative;
+  border-radius: var(--emo-radius-lg);
+  background: radial-gradient(circle at top, rgba(122, 63, 255, 0.16), rgba(1, 2, 8, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 18px 20px;
+}
+
+/* ===========================
+   TRY-IT SCENARIO BUTTONS
+   =========================== */
+
+.scenario-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.scenario-button {
+  border-radius: 999px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 12px;
+  color: var(--emo-text-secondary);
+  cursor: pointer;
+}
+
+/* ===========================
+   END
+   =========================== */
+
