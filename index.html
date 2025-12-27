@@ -512,3 +512,24 @@
 <video id="camera" autoplay playsinline></video>
 <div id="emotionOutput">Waiting for data...</div>
 <script src="script.js"></script>
+<section class="emotion-section">
+  <h2>Live Emotion Scan</h2>
+
+  <div class="emotion-layout">
+    <!-- Kairė pusė – pagrindinė emocija -->
+    <div class="emotion-panel">
+      <div id="emotionLabel">Waiting for data...</div>
+      <div id="emotionIntensity">Intensity: 0%</div>
+      <div id="emotionHistoryTitle">Recent emotions:</div>
+      <ul id="emotionHistory"></ul>
+    </div>
+
+    <!-- Dešinė pusė – radaras -->
+    <div class="emotion-radar-wrapper">
+      <canvas id="emotionRadar" width="300" height="300"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- Nepamiršk, kad kažkur apačioje būtų: -->
+<script src="script.js"></script>
