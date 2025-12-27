@@ -475,3 +475,52 @@ const driftValueEl = document.querySelector(".drift-value");
 const driftCaptionEl = document.querySelector(".drift-caption");
 const driftSpiralEl = document.querySelector(".drift-spiral");
 const driftOrbitEl = document.querySelector(".drift-spiral-orbit");
+function updateDrift(emotion, intensity) {
+  if (!driftValueEl || !driftCaptionEl || !driftSpiralEl || !driftOrbitEl) return;
+
+  // drift reikšmė: kaip keičiasi „bendra emocinė būsena“
+  const driftRaw = intensity - 0.5; // -0.5 .. +0.5
+  const driftPercent = Math.round(driftRaw * 100); // -50 .. +50
+
+  // tekstas
+  if (driftPercent >= 0) {
+    driftValueEl.innerText = `+${driftPercent}%`;
+    driftValueEl.classList.add("positive");
+    driftValueEl.classList.remove("negative");
+  } else {
+    driftValueEl.innerText = `${driftPercent}%`;
+    driftValueEl.classList.add("negative");
+    driftValueEl.classList.remove("positive");
+  }
+
+  if (emotion === "calm") {
+    driftCaptionEl.innerText = driftPercent >= 0
+      ? "Calmness increasing"
+      : "Calmness softening";
+  } else if (emotion === "focus") {
+    driftCaptionEl.innerText = driftPercent >= 0
+      ? "Focus sharpening"
+      : "Focus diffusing";
+  } else if (emotion === "stress") {
+    driftCaptionEl.innerText = driftPercent >= 0
+      ? "Stress building"
+      : "Stress releasing";
+  } else {
+    driftCaptionEl.innerText = "Emotional state drifting";
+  }
+
+  // spiralės vizualas
+  const color = EMOTION_COLORS[emotion] || EMOTION_COLORS.default;
+  driftSpiralEl.style.borderColor = color;
+  driftOrbitEl.style.borderColor = hexToRgba(color, 0.6);
+
+  // greitis pagal intensity
+  const speed = 8 - intensity * 5; // 3–8s
+  driftSpiralEl.style.animationDuration = `${speed}s`;
+  driftOrbitEl.style.animationDuration = `${speed * 0.8}s`;
+
+  // orbitos dydis
+  const scale = 0.9 + intensity * 0.4; // 0.9–1.3
+  driftOrbitEl.style.transform = `scale(${scale})`;
+}
+  updateDrift(emotion, intensity);
