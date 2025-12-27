@@ -470,3 +470,8 @@ window.onload = () => {
   startCamera();
   startAnalysisLoop();
 };
+// DRIFT ELEMENTAI
+const driftValueEl = document.querySelector(".drift-value");
+const driftCaptionEl = document.querySelector(".drift-caption");
+const driftSpiralEl = document.querySelector(".drift-spiral");
+const driftOrbitEl = document.querySelector(".drift-spiral-orbit");
