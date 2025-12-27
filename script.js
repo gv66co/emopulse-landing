@@ -659,3 +659,90 @@ function updateTrendline(intensity) {
   emotionTrendCtx.stroke();
 }
   updateTrendline(intensity);
+/* === EMOPULSE INTERACTION LAYER === */
+/* Scroll reveal, stagger, navbar shrink, smooth motion */
+
+/* 1. Scroll reveal for .reveal-on-scroll */
+const revealElements = document.querySelectorAll('.reveal-on-scroll');
+
+function handleScrollReveal() {
+  const trigger = window.innerHeight * 0.85;
+
+  revealElements.forEach(el => {
+    const top = el.getBoundingClientRect().top;
+    if (top < trigger) {
+      el.classList.add('visible');
+    }
+  });
+}
+
+window.addEventListener('scroll', handleScrollReveal);
+handleScrollReveal();
+
+/* 2. Staggered section reveal (.section-stagger) */
+const staggerSections = document.querySelectorAll('.section-stagger');
+
+function handleStagger() {
+  const trigger = window.innerHeight * 0.85;
+
+  staggerSections.forEach((el, index) => {
+    const top = el.getBoundingClientRect().top;
+    if (top < trigger) {
+      setTimeout(() => {
+        el.classList.add('visible');
+      }, index * 120); // stagger delay
+    }
+  });
+}
+
+window.addEventListener('scroll', handleStagger);
+handleStagger();
+
+/* 3. Navbar shrink on scroll */
+const navbar = document.querySelector('.navbar');
+
+function handleNavbar() {
+  if (!navbar) return;
+
+  if (window.scrollY > 60) {
+    navbar.classList.add('shrink');
+  } else {
+    navbar.classList.remove('shrink');
+  }
+}
+
+window.addEventListener('scroll', handleNavbar);
+handleNavbar();
+
+/* 4. Smooth fade-in for images (CSS handles animation) */
+document.querySelectorAll('img').forEach(img => {
+  img.addEventListener('load', () => {
+    img.classList.add('loaded');
+  });
+});
+
+/* 5. Optional: reveal footer when visible */
+const footer = document.querySelector('.footer');
+
+function handleFooterReveal() {
+  if (!footer) return;
+
+  const rect = footer.getBoundingClientRect();
+  if (rect.top < window.innerHeight) {
+    footer.classList.add('visible');
+  }
+}
+
+window.addEventListener('scroll', handleFooterReveal);
+handleFooterReveal();
+
+/* 6. Mobile nav toggle (if you have a burger menu) */
+const burger = document.querySelector('.burger');
+const mobileNav = document.querySelector('.mobile-nav');
+
+if (burger && mobileNav) {
+  burger.addEventListener('click', () => {
+    mobileNav.classList.toggle('open');
+    burger.classList.toggle('open');
+  });
+}
