@@ -81,6 +81,9 @@ const badgeCalm = document.getElementById("badgeCalm");
 const badgeFocus = document.getElementById("badgeFocus");
 const badgeStress = document.getElementById("badgeStress");
 
+const emotionalSignaturePill = document.querySelector(".emotional-signature-pill span");
+const emotionalSignatureDot = document.querySelector(".emotional-signature-dot");
+
 // ======================================================
 // 4. Emocijų istorija
 // ======================================================
@@ -524,3 +527,31 @@ function updateDrift(emotion, intensity) {
   driftOrbitEl.style.transform = `scale(${scale})`;
 }
   updateDrift(emotion, intensity);
+function updateEmotionalSignature(emotion, intensity) {
+  if (!emotionalSignaturePill || !emotionalSignatureDot) return;
+
+  let label = "Calm Focused Energy";
+
+  if (emotion === "calm" && intensity > 0.7) {
+    label = "Deep Calm Stability";
+  } else if (emotion === "calm") {
+    label = "Soft Calm Presence";
+  } else if (emotion === "focus" && intensity > 0.7) {
+    label = "Hyper Focused Clarity";
+  } else if (emotion === "focus") {
+    label = "Steady Focused Flow";
+  } else if (emotion === "stress") {
+    label = intensity > 0.7 ? "High Tension Recovery Mode" : "Adaptive Stress Response";
+  } else if (emotion === "joy") {
+    label = "Joyful Expanding Energy";
+  } else {
+    label = "Mixed Adaptive State";
+  }
+
+  emotionalSignaturePill.innerText = `Today’s emotional signature: ${label}`;
+
+  const color = EMOTION_COLORS[emotion] || EMOTION_COLORS.default;
+  emotionalSignatureDot.style.background = `radial-gradient(circle, ${color}, ${hexToRgba(color, 0.1)})`;
+  emotionalSignatureDot.style.boxShadow = `0 0 20px ${hexToRgba(color, 0.8)}`;
+}
+  updateEmotionalSignature(emotion, intensity);
