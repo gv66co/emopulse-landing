@@ -5,8 +5,13 @@
     <title>Emopulse – Emotional AI Demo</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- CSS: pakeisk kelią, jeigu failas vadinasi kitaip -->
+    <!-- CSS -->
     <link rel="stylesheet" href="styles.css">
+
+    <!-- Icons & theme -->
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="apple-touch-icon" href="favicon.png">
+    <meta name="theme-color" content="#0b0f1c">
 </head>
 <body class="emopulse-theme">
     <header class="emo-page-header">
@@ -104,9 +109,9 @@
                     <div class="hero-metrics-row">
                         <div class="emopulse-score-card">
                             <div class="emopulse-score-label">Emopulse Score</div>
-                            <div class="emopulse-score-value">78 / 100</div>
+                            <div class="emopulse-score-value" id="emopulseScoreValue">78 / 100</div>
                             <div class="emopulse-score-bar">
-                                <div class="emopulse-score-bar-fill"></div>
+                                <div class="emopulse-score-bar-fill" id="emopulseScoreBarFill"></div>
                             </div>
                         </div>
 
@@ -116,15 +121,15 @@
                             </div>
                             <div class="emo-flex emo-flex-between">
                                 <div>
-                                    <div class="emotional-weather-main">
+                                    <div class="emotional-weather-main" id="emotionalWeatherMain">
                                         Clear with a chance of focus
                                     </div>
-                                    <div class="emotional-weather-tag">
+                                    <div class="emotional-weather-tag" id="emotionalWeatherTag">
                                         short-term outlook: low stress, rising clarity
                                     </div>
                                 </div>
-                                <div class="emotional-weather-icon calm">
-                                    <!-- ikoną galima dėti vėliau -->
+                                <div class="emotional-weather-icon calm" id="emotionalWeatherIcon">
+                                    <!-- icon later -->
                                 </div>
                             </div>
                         </div>
@@ -143,28 +148,27 @@
             <div class="mini-dashboard">
                 <div class="mini-metric-card">
                     <div class="mini-metric-label">Pulse</div>
-                    <div class="mini-metric-value">74 bpm</div>
-                    <div class="mini-metric-pill">Signal quality: high</div>
+                    <div class="mini-metric-value" id="pulseValue">74 bpm</div>
+                    <div class="mini-metric-pill" id="pulseQuality">Signal quality: high</div>
                 </div>
                 <div class="mini-metric-card">
                     <div class="mini-metric-label">Emotion</div>
-                    <div class="mini-metric-value">Calm</div>
-                    <div class="mini-metric-pill">Valence: positive</div>
+                    <div class="mini-metric-value" id="miniEmotionValue">Calm</div>
+                    <div class="mini-metric-pill" id="miniValence">Valence: positive</div>
                 </div>
                 <div class="mini-metric-card">
                     <div class="mini-metric-label">Confidence</div>
-                    <div class="mini-metric-value">91%</div>
-                    <div class="mini-metric-pill">Stable pattern</div>
+                    <div class="mini-metric-value" id="confidenceValue">91%</div>
+                    <div class="mini-metric-pill" id="patternStability">Stable pattern</div>
                 </div>
                 <div class="mini-metric-card">
                     <div class="mini-metric-label">Stress risk</div>
-                    <div class="mini-metric-value">18 / 100</div>
-                    <div class="mini-metric-pill">Low & contained</div>
+                    <div class="mini-metric-value" id="stressRiskValue">18 / 100</div>
+                    <div class="mini-metric-pill" id="stressRiskLabel">Low & contained</div>
                 </div>
             </div>
         </section>
-
-        <!-- MOOD MAP + TIMELINE -->
+                <!-- MOOD MAP + TIMELINE -->
         <section class="section-block" id="mood-map-timeline">
             <h2>Emotional map & timeline</h2>
             <div class="emo-grid emo-grid-2">
@@ -180,7 +184,7 @@
                         <div class="mood-map-axis-label bottom">Low arousal</div>
                         <div class="mood-map-axis-label left">Negative</div>
                         <div class="mood-map-axis-label right">Positive</div>
-                        <div class="mood-map-dot" style="left: 65%; top: 42%;"></div>
+                        <div class="mood-map-dot" id="moodMapDot" style="left: 65%; top: 42%;"></div>
                     </div>
                 </div>
 
@@ -192,11 +196,11 @@
                     </div>
                     <div class="emotion-timeline">
                         <div class="emotion-timeline-track">
-                            <div class="emotion-timeline-progress" style="transform: scaleX(1);"></div>
-                            <div class="emotion-timeline-emotion-dot calm" style="left: 10%;"></div>
-                            <div class="emotion-timeline-emotion-dot focus" style="left: 35%;"></div>
-                            <div class="emotion-timeline-emotion-dot stress" style="left: 58%;"></div>
-                            <div class="emotion-timeline-emotion-dot calm" style="left: 82%;"></div>
+                            <div class="emotion-timeline-progress" id="emotionTimelineProgress" style="transform: scaleX(1);"></div>
+                            <div class="emotion-timeline-emotion-dot calm" id="timelineDot1" style="left: 10%;"></div>
+                            <div class="emotion-timeline-emotion-dot focus" id="timelineDot2" style="left: 35%;"></div>
+                            <div class="emotion-timeline-emotion-dot stress" id="timelineDot3" style="left: 58%;"></div>
+                            <div class="emotion-timeline-emotion-dot calm" id="timelineDot4" style="left: 82%;"></div>
                         </div>
                     </div>
                 </div>
@@ -213,10 +217,10 @@
                         <span class="emo-pill emo-tag-soft">Calm / Focus / Stress</span>
                     </div>
                     <div class="emotion-rings animate">
-                        <div class="emotion-ring calm"></div>
-                        <div class="emotion-ring focus"></div>
-                        <div class="emotion-ring stress"></div>
-                        <div class="emotion-ring joy"></div>
+                        <div class="emotion-ring calm" id="ringCalm"></div>
+                        <div class="emotion-ring focus" id="ringFocus"></div>
+                        <div class="emotion-ring stress" id="ringStress"></div>
+                        <div class="emotion-ring joy" id="ringJoy"></div>
                     </div>
                 </div>
 
@@ -225,8 +229,8 @@
                         <div class="emo-card-title">Emotion heatmap</div>
                         <span class="emo-pill emo-tag-soft">Intensity over time</span>
                     </div>
-                    <div class="emotion-heatmap">
-                        <!-- fake pattern -->
+                    <div class="emotion-heatmap" id="emotionHeatmap">
+                        <!-- fake pattern, vėliau galima generuoti -->
                         <div class="emotion-heatmap-cell low"></div>
                         <div class="emotion-heatmap-cell low"></div>
                         <div class="emotion-heatmap-cell medium"></div>
@@ -239,7 +243,6 @@
                         <div class="emotion-heatmap-cell high"></div>
                         <div class="emotion-heatmap-cell medium"></div>
                         <div class="emotion-heatmap-cell low"></div>
-                        <!-- dar daug mažų langelių gali dubliuoti -->
                     </div>
                 </div>
             </div>
@@ -256,9 +259,9 @@
                     </div>
                     <div class="emotion-challenge">
                         <div class="emotion-challenge-label">Session narrative</div>
-                        <p>Your emotional journey today began in calmness.</p>
-                        <p>You transitioned into focused clarity.</p>
-                        <p>A brief stress spike appeared but resolved quickly.</p>
+                        <p id="storyLine1">Your emotional journey today began in calmness.</p>
+                        <p id="storyLine2">You transitioned into focused clarity.</p>
+                        <p id="storyLine3">A brief stress spike appeared but resolved quickly.</p>
                     </div>
                 </div>
 
@@ -269,8 +272,8 @@
                     </div>
                     <div class="emotion-challenge">
                         <div class="emotion-challenge-label">Challenge</div>
-                        <p>Hold calmness for 60 seconds.</p>
-                        <button class="scenario-button">Start challenge</button>
+                        <p id="challengeText">Hold calmness for 60 seconds.</p>
+                        <button class="scenario-button" id="challengeButton">Start challenge</button>
                     </div>
                 </div>
             </div>
@@ -284,11 +287,11 @@
                     <div class="emotion-streaks">
                         <div class="streak-item">
                             <span class="streak-label">Calm streak</span>
-                            <span class="streak-value">3 days</span>
+                            <span class="streak-value" id="calmStreak">3 days</span>
                         </div>
                         <div class="streak-item">
                             <span class="streak-label">Focus streak</span>
-                            <span class="streak-value">1 day</span>
+                            <span class="streak-value" id="focusStreak">1 day</span>
                         </div>
                     </div>
                 </div>
@@ -299,9 +302,9 @@
                         <div class="emo-card-title">Emotional milestones</div>
                     </div>
                     <div class="emotion-badges">
-                        <div class="emotion-badge calm">Calm Master</div>
-                        <div class="emotion-badge focus">Focus Achiever</div>
-                        <div class="emotion-badge stress">Stress Recovery</div>
+                        <div class="emotion-badge calm" id="badgeCalm">Calm Master</div>
+                        <div class="emotion-badge focus" id="badgeFocus">Focus Achiever</div>
+                        <div class="emotion-badge stress" id="badgeStress">Stress Recovery</div>
                     </div>
                 </div>
             </div>
@@ -317,8 +320,8 @@
                         <div class="emo-card-title">AI reflection</div>
                     </div>
                     <div class="emotion-challenge">
-                        <p>“Your emotional flow today shows resilience.”</p>
-                        <p>“You adapted well to stress fluctuations.”</p>
+                        <p id="aiReflectionLine1">“Your emotional flow today shows resilience.”</p>
+                        <p id="aiReflectionLine2">“You adapted well to stress fluctuations.”</p>
                     </div>
                 </div>
 
@@ -330,7 +333,7 @@
                     <p class="hero-subtitle" style="margin-bottom: 12px;">
                         Ask: <em>“What should I do now?”</em> and get a short, emotionally precise suggestion.
                     </p>
-                    <button class="ai-coach-button">
+                    <button class="ai-coach-button" id="aiCoachButton">
                         <div class="ai-coach-pulse"></div>
                         <span>What should I do now?</span>
                     </button>
@@ -348,13 +351,13 @@
                         <div class="emo-card-title">Emotional compass</div>
                     </div>
                     <div class="focus-mode-overlay">
-                        <div class="session-tags">
+                        <div class="session-tags" id="compassTags">
                             <span class="session-tag">Calm</span>
                             <span class="session-tag">Joy</span>
                             <span class="session-tag">Focus</span>
                             <span class="session-tag">Stress</span>
                         </div>
-                        <p style="margin-top: 10px; font-size: 13px;">
+                        <p style="margin-top: 10px; font-size: 13px;" id="compassHeading">
                             Current heading: calm + focus, low stress, high stability.
                         </p>
                     </div>
@@ -365,7 +368,7 @@
                     <div class="emo-card-header">
                         <div class="emo-card-title">Session tags</div>
                     </div>
-                    <div class="session-tags">
+                    <div class="session-tags" id="sessionTags">
                         <span class="session-tag">calm</span>
                         <span class="session-tag">focused</span>
                         <span class="session-tag">stable</span>
@@ -381,15 +384,15 @@
                     <div class="mini-report">
                         <div class="report-item">
                             <span class="label">Peak calm</span>
-                            <span class="value">82%</span>
+                            <span class="value" id="peakCalm">82%</span>
                         </div>
                         <div class="report-item">
                             <span class="label">Focus duration</span>
-                            <span class="value">14 min</span>
+                            <span class="value" id="focusDuration">14 min</span>
                         </div>
                         <div class="report-item">
                             <span class="label">Stress recovery</span>
-                            <span class="value">Fast</span>
+                            <span class="value" id="stressRecovery">Fast</span>
                         </div>
                     </div>
                 </div>
@@ -406,13 +409,13 @@
                         <div class="emo-card-title">Emotional aura & DNA</div>
                     </div>
                     <div class="emo-flex" style="gap: 18px; align-items: center;">
-                        <div class="emo-aura-wrapper calm">
+                        <div class="emo-aura-wrapper calm" id="emotionalAura">
                             <div class="emo-aura-ring"></div>
                             <div class="emo-aura-ring"></div>
                             <div class="emo-aura-ring"></div>
                             <div class="emo-aura-core"></div>
                         </div>
-                        <div class="emotion-dna">
+                        <div class="emotion-dna" id="emotionDna">
                             <div class="dna-strand">A — Calm</div>
                             <div class="dna-strand">T — Focus</div>
                             <div class="dna-strand">G — Stability</div>
@@ -426,7 +429,7 @@
                     <div class="emo-card-header">
                         <div class="emo-card-title">Trail & calm breath</div>
                     </div>
-                    <div class="emotion-trail">
+                    <div class="emotion-trail" id="emotionTrail">
                         <div class="trail-step">Calm → Focus</div>
                         <div class="trail-step">Focus → Stress</div>
                         <div class="trail-step">Stress → Calm</div>
@@ -438,8 +441,7 @@
                 </div>
             </div>
         </section>
-
-        <!-- NATASHA SIGNATURE + HORIZON -->
+                <!-- NATASHA SIGNATURE + HORIZON -->
         <section class="section-block" id="natasha-layer">
             <h2>Natasha layer</h2>
             <div class="emo-grid emo-grid-2">
@@ -496,6 +498,34 @@
                 </div>
             </div>
         </section>
+
+        <!-- LIVE EMOTION SCAN + RADAR -->
+        <section class="section-block emotion-section" id="live-emotion-scan">
+            <h2>Live Emotion Scan</h2>
+
+            <!-- Kamera (paslėpta arba stilizuojama vėliau) -->
+            <video id="camera" autoplay playsinline style="display:none;"></video>
+
+            <div class="emotion-layout">
+                <!-- Kairė pusė – pagrindinė emocija -->
+                <div class="emotion-panel">
+                    <div id="emotionLabel">Waiting for data...</div>
+                    <div id="emotionIntensity">Intensity: 0%</div>
+                    <div id="emotionHistoryTitle">Recent emotions:</div>
+                    <ul id="emotionHistory"></ul>
+                </div>
+
+                <!-- Dešinė pusė – radaras -->
+                <div class="emotion-radar-wrapper">
+                    <canvas id="emotionRadar" width="300" height="300"></canvas>
+                </div>
+            </div>
+
+            <!-- Paprastas tekstinis output, jei norėsi -->
+            <div id="emotionOutput" style="margin-top: 12px; font-size: 13px; opacity: 0.8;">
+                Waiting for data...
+            </div>
+        </section>
     </main>
 
     <footer class="emo-page-footer">
@@ -504,32 +534,8 @@
             <span>Built around privacy, clarity and emotional resonance.</span>
         </div>
     </footer>
+
+    <!-- Vienintelis script įkėlimas -->
+    <script src="script.js"></script>
 </body>
 </html>
-<link rel="icon" type="image/png" href="favicon.png">
-<link rel="apple-touch-icon" href="favicon.png">
-<meta name="theme-color" content="#0b0f1c">
-<video id="camera" autoplay playsinline></video>
-<div id="emotionOutput">Waiting for data...</div>
-<script src="script.js"></script>
-<section class="emotion-section">
-  <h2>Live Emotion Scan</h2>
-
-  <div class="emotion-layout">
-    <!-- Kairė pusė – pagrindinė emocija -->
-    <div class="emotion-panel">
-      <div id="emotionLabel">Waiting for data...</div>
-      <div id="emotionIntensity">Intensity: 0%</div>
-      <div id="emotionHistoryTitle">Recent emotions:</div>
-      <ul id="emotionHistory"></ul>
-    </div>
-
-    <!-- Dešinė pusė – radaras -->
-    <div class="emotion-radar-wrapper">
-      <canvas id="emotionRadar" width="300" height="300"></canvas>
-    </div>
-  </div>
-</section>
-
-<!-- Nepamiršk, kad kažkur apačioje būtų: -->
-<script src="script.js"></script>
