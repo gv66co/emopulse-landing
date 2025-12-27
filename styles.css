@@ -4946,3 +4946,60 @@ body.emopulse-theme {
     grid-template-columns: 1fr;
   }
 }
+/* === EMOPULSE ENHANCEMENTS BLOCK === */
+/* Premium polish layer — safe to append at bottom of styles.css */
+/* Author: Natasha (zuikeli mode ON) */
+
+/* 1. Spiralė — gyvas jausmas */
+@keyframes driftSpiral {
+  0% { transform: rotate(0deg) scale(1); opacity: 0.2; }
+  50% { transform: rotate(180deg) scale(1.05); opacity: 0.6; }
+  100% { transform: rotate(360deg) scale(1); opacity: 0.2; }
+}
+
+.spiral-logo {
+  animation: driftSpiral 12s infinite ease-in-out;
+  transform-origin: center;
+  transition: filter 0.3s ease;
+  filter: drop-shadow(0 0 6px rgba(0, 153, 255, 0.4));
+}
+
+/* 2. Hero section — entrance reveal */
+.hero-section {
+  opacity: 0;
+  transform: translateY(40px);
+  animation: fadeInUp 1.2s ease-out 0.3s forwards;
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 3. Buttons — hover glow */
+.button-glow {
+  background-color: #0077ff;
+  color: white;
+  border-radius: 8px;
+  padding: 12px 24px;
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.button-glow:hover {
+  box-shadow: 0 0 12px rgba(0, 153, 255, 0.6);
+  transform: scale(1.05);
+}
+
+/* 4. Scroll reveal — universal class */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.reveal-on-scroll.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
