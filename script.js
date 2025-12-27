@@ -5,6 +5,11 @@ const API_URL = "https://emopulse-api-1009590211108.europe-west4.run.app";
 
 const aiCoachButton = document.getElementById("aiCoachButton");
 
+const emotionTrendCanvas = document.getElementById("emotionTrend");
+const emotionTrendCtx = emotionTrendCanvas ? emotionTrendCanvas.getContext("2d") : null;
+const emotionTrendData = [];
+const MAX_TREND_POINTS = 50;
+
 const moodTrail = [];
 const MAX_MOOD_TRAIL = 30;
 
@@ -621,3 +626,36 @@ function updateMoodMap(data) {
   // optional: jei nori, galim generuoti mažus foninius taškus
   // per CSS pseudo-elementus, bet čia palieku JS trail logiką.
 }
+function updateTrendline(intensity) {
+  if (!emotionTrendCtx || !emotionTrendCanvas) return;
+
+  const width = emotionTrendCanvas.width;
+  const height = emotionTrendCanvas.height;
+
+  emotionTrendData.push(clamp(intensity, 0, 1));
+  if (emotionTrendData.length > MAX_TREND_POINTS) emotionTrendData.shift();
+
+  emotionTrendCtx.clearRect(0, 0, width, height);
+
+  // grid
+  emotionTrendCtx.strokeStyle = "rgba(148, 163, 184, 0.3)";
+  emotionTrendCtx.lineWidth = 1;
+  emotionTrendCtx.beginPath();
+  emotionTrendCtx.moveTo(0, height / 2);
+  emotionTrendCtx.lineTo(width, height / 2);
+  emotionTrendCtx.stroke();
+
+  // line
+  emotionTrendCtx.beginPath();
+  emotionTrendData.forEach((val, i) => {
+    const x = (i / (MAX_TREND_POINTS - 1)) * width;
+    const y = height - val * height;
+    if (i === 0) emotionTrendCtx.moveTo(x, y);
+    else emotionTrendCtx.lineTo(x, y);
+  });
+
+  emotionTrendCtx.strokeStyle = "#38bdf8";
+  emotionTrendCtx.lineWidth = 2;
+  emotionTrendCtx.stroke();
+}
+  updateTrendline(intensity);
