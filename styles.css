@@ -4849,4 +4849,100 @@ body.emopulse-theme {
 /* ===========================
    END
    =========================== */
+/* Emotions panel layout */
+.emotion-section {
+  margin: 3rem auto;
+  max-width: 900px;
+  padding: 2rem;
+  border-radius: 16px;
+  background: radial-gradient(circle at top, #141b33, #050814);
+  color: #f7f7ff;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+}
 
+.emotion-section h2 {
+  font-size: 1.6rem;
+  margin-bottom: 1.5rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #9fb4ff;
+}
+
+.emotion-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.emotion-panel {
+  padding: 1.5rem;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(10, 14, 30, 0.95), rgba(42, 55, 110, 0.85));
+  border: 1px solid rgba(159, 180, 255, 0.28);
+  backdrop-filter: blur(14px);
+}
+
+#emotionLabel {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+#emotionIntensity {
+  font-size: 0.95rem;
+  opacity: 0.85;
+  margin-bottom: 1rem;
+}
+
+#emotionHistoryTitle {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  opacity: 0.7;
+  margin-bottom: 0.4rem;
+}
+
+#emotionHistory {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 160px;
+  overflow-y: auto;
+  font-size: 0.9rem;
+}
+
+#emotionHistory li {
+  padding: 0.25rem 0;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.12);
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+#emotionHistory li span.emotion-tag {
+  font-weight: 500;
+}
+
+#emotionHistory li span.emotion-time {
+  opacity: 0.7;
+  font-size: 0.8rem;
+}
+
+/* Radar wrapper */
+.emotion-radar-wrapper {
+  padding: 1rem;
+  border-radius: 14px;
+  background: radial-gradient(circle at bottom, rgba(10, 20, 60, 0.9), rgba(3, 5, 15, 0.95));
+  border: 1px solid rgba(112, 178, 255, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Responsyvus perėjimas į vieną stulpelį */
+@media (max-width: 768px) {
+  .emotion-layout {
+    grid-template-columns: 1fr;
+  }
+}
