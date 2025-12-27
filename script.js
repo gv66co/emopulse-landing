@@ -1,19 +1,95 @@
+// ======================================================
 // 1. API URL — tavo Cloud Run backend
+// ======================================================
 const API_URL = "https://emopulse-api-1009590211108.europe-west4.run.app";
 
-// 2. Elementai iš DOM
-const video = document.getElementById("camera");          // jei turi <video>, gerai, jei ne — galima pridėti vėliau
+// ======================================================
+// 2. DOM ELEMENTAI — pagrindiniai
+// ======================================================
+const video = document.getElementById("camera");
 const emotionLabelEl = document.getElementById("emotionLabel");
 const emotionIntensityEl = document.getElementById("emotionIntensity");
 const emotionHistoryEl = document.getElementById("emotionHistory");
 const emotionRadarCanvas = document.getElementById("emotionRadar");
 const radarCtx = emotionRadarCanvas.getContext("2d");
 
-// 3. Emocijų istorija
+// ======================================================
+// 3. DOM ELEMENTAI — Emopulse UI (hero, dashboard, map…)
+// ======================================================
+
+// HERO METRICS
+const emopulseScoreValue = document.getElementById("emopulseScoreValue");
+const emopulseScoreBarFill = document.getElementById("emopulseScoreBarFill");
+const emotionalWeatherMain = document.getElementById("emotionalWeatherMain");
+const emotionalWeatherTag = document.getElementById("emotionalWeatherTag");
+const emotionalWeatherIcon = document.getElementById("emotionalWeatherIcon");
+
+// MINI DASHBOARD
+const pulseValue = document.getElementById("pulseValue");
+const pulseQuality = document.getElementById("pulseQuality");
+const miniEmotionValue = document.getElementById("miniEmotionValue");
+const miniValence = document.getElementById("miniValence");
+const confidenceValue = document.getElementById("confidenceValue");
+const patternStability = document.getElementById("patternStability");
+const stressRiskValue = document.getElementById("stressRiskValue");
+const stressRiskLabel = document.getElementById("stressRiskLabel");
+
+// MOOD MAP
+const moodMapDot = document.getElementById("moodMapDot");
+
+// TIMELINE
+const emotionTimelineProgress = document.getElementById("emotionTimelineProgress");
+
+// RINGS
+const ringCalm = document.getElementById("ringCalm");
+const ringFocus = document.getElementById("ringFocus");
+const ringStress = document.getElementById("ringStress");
+const ringJoy = document.getElementById("ringJoy");
+
+// HEATMAP
+const emotionHeatmap = document.getElementById("emotionHeatmap");
+
+// STORY
+const storyLine1 = document.getElementById("storyLine1");
+const storyLine2 = document.getElementById("storyLine2");
+const storyLine3 = document.getElementById("storyLine3");
+
+// COACH
+const aiReflectionLine1 = document.getElementById("aiReflectionLine1");
+const aiReflectionLine2 = document.getElementById("aiReflectionLine2");
+
+// COMPASS
+const compassHeading = document.getElementById("compassHeading");
+
+// TAGS
+const sessionTags = document.getElementById("sessionTags");
+
+// MINI REPORT
+const peakCalm = document.getElementById("peakCalm");
+const focusDuration = document.getElementById("focusDuration");
+const stressRecovery = document.getElementById("stressRecovery");
+
+// AURA
+const emotionalAura = document.getElementById("emotionalAura");
+
+// STREAKS
+const calmStreak = document.getElementById("calmStreak");
+const focusStreak = document.getElementById("focusStreak");
+
+// MILESTONES
+const badgeCalm = document.getElementById("badgeCalm");
+const badgeFocus = document.getElementById("badgeFocus");
+const badgeStress = document.getElementById("badgeStress");
+
+// ======================================================
+// 4. Emocijų istorija
+// ======================================================
 const emotionHistory = [];
 const MAX_HISTORY = 12;
 
-// 4. Emocijų spalvos
+// ======================================================
+// 5. Emocijų spalvos
+// ======================================================
 const EMOTION_COLORS = {
   happy: "#4ade80",
   joy: "#22c55e",
@@ -22,15 +98,17 @@ const EMOTION_COLORS = {
   fear: "#facc15",
   surprise: "#a855f7",
   neutral: "#94a3b8",
+  calm: "#4ade80",
+  focus: "#38bdf8",
+  stress: "#f97373",
   default: "#38bdf8"
 };
 
-// 5. Paleidžia kamerą (jei yra video elementas)
+// ======================================================
+// 6. Kamera
+// ======================================================
 async function startCamera() {
-  if (!video) {
-    console.warn("No <video id='camera'> element, skipping camera.");
-    return;
-  }
+  if (!video) return;
 
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
@@ -40,13 +118,15 @@ async function startCamera() {
     video.play();
   } catch (err) {
     console.error("Camera error:", err);
-    if (emotionLabelEl) emotionLabelEl.innerText = "Camera access denied";
+    emotionLabelEl.innerText = "Camera access denied";
   }
 }
 
-// 6. paima kadrą iš video kaip base64 PNG
+// ======================================================
+// 7. Kadro paėmimas
+// ======================================================
 function captureFrame() {
-  if (!video || !video.videoWidth || !video.videoHeight) return null;
+  if (!video || !video.videoWidth) return null;
 
   const canvas = document.createElement("canvas");
   canvas.width = video.videoWidth;
@@ -58,7 +138,9 @@ function captureFrame() {
   return canvas.toDataURL("image/png");
 }
 
-// 7. Siunčia kadrą į backend
+// ======================================================
+// 8. Siuntimas į backend
+// ======================================================
 async function analyzeFrame(frame) {
   try {
     const response = await fetch(`${API_URL}/analyze`, {
@@ -73,11 +155,13 @@ async function analyzeFrame(frame) {
     handleEmotionResponse(data);
   } catch (error) {
     console.error("API error:", error);
-    if (emotionLabelEl) emotionLabelEl.innerText = "API error";
+    emotionLabelEl.innerText = "API error";
   }
 }
 
-// 8. Apdoroja API atsakymą ir atnaujina UI
+// ======================================================
+// 9. API atsakymo apdorojimas
+// ======================================================
 function handleEmotionResponse(data) {
   if (!data) return;
 
@@ -87,157 +171,301 @@ function handleEmotionResponse(data) {
   updateEmotionPanel(emotion, intensity);
   updateHistory(emotion, intensity);
   drawRadar(emotion, intensity);
-}
 
-// 9. Pagrindinė emocijų panelė
-function updateEmotionPanel(emotion, intensity) {
+  // Nauja: maitinti visą Emopulse UI
+  updateEmopulseUI(data);
+}
+// ======================================================
+// 10. Emopulse UI atnaujinimas (visos sekcijos)
+// ======================================================
+function updateEmopulseUI(data) {
+  if (!data) return;
+
+  const emotion = (data.emotion || "neutral").toLowerCase();
+  const intensity = data.intensity || data.confidence || 0.5;
   const color = EMOTION_COLORS[emotion] || EMOTION_COLORS.default;
-  const roundedIntensity = Math.round(intensity * 100);
 
-  if (emotionLabelEl) {
-    emotionLabelEl.innerText = `Emotion: ${emotion}`;
-    emotionLabelEl.style.color = color;
+  // ======================================================
+  // HERO — Emopulse Score
+  // ======================================================
+  if (emopulseScoreValue) {
+    const score = Math.round((intensity * 100));
+    emopulseScoreValue.innerText = `${score} / 100`;
   }
 
-  if (emotionIntensityEl) {
-    emotionIntensityEl.innerText = `Intensity: ${roundedIntensity}%`;
+  if (emopulseScoreBarFill) {
+    emopulseScoreBarFill.style.width = `${Math.round(intensity * 100)}%`;
+    emopulseScoreBarFill.style.backgroundColor = color;
   }
 
-  // fono pulsavimas
-  const section = document.querySelector(".emotion-section");
-  if (section) {
-    section.style.transition = "background 0.6s ease, box-shadow 0.6s ease";
-    section.style.boxShadow = `0 24px 60px ${hexToRgba(color, 0.45)}`;
+  // ======================================================
+  // HERO — Emotional Weather
+  // ======================================================
+  if (emotionalWeatherMain) {
+    emotionalWeatherMain.innerText = generateWeatherText(emotion, intensity);
+  }
+
+  if (emotionalWeatherTag) {
+    emotionalWeatherTag.innerText = generateWeatherTag(emotion, intensity);
+  }
+
+  if (emotionalWeatherIcon) {
+    emotionalWeatherIcon.className = `emotional-weather-icon ${emotion}`;
+  }
+
+  // ======================================================
+  // MINI DASHBOARD
+  // ======================================================
+  if (pulseValue) pulseValue.innerText = `${60 + Math.round(intensity * 40)} bpm`;
+  if (pulseQuality) pulseQuality.innerText = intensity > 0.6 ? "Signal quality: high" : "Signal quality: medium";
+
+  if (miniEmotionValue) miniEmotionValue.innerText = emotion;
+  if (miniValence) miniValence.innerText = intensity > 0.5 ? "Valence: positive" : "Valence: neutral";
+
+  if (confidenceValue) confidenceValue.innerText = `${Math.round(intensity * 100)}%`;
+  if (patternStability) patternStability.innerText = intensity > 0.6 ? "Stable pattern" : "Variable pattern";
+
+  if (stressRiskValue) stressRiskValue.innerText = `${Math.round((1 - intensity) * 100)} / 100`;
+  if (stressRiskLabel) stressRiskLabel.innerText = intensity > 0.6 ? "Low & contained" : "Rising tension";
+
+  // ======================================================
+  // MOOD MAP (valence/arousal)
+  // ======================================================
+  if (moodMapDot) {
+    const valence = intensity;      // 0–1
+    const arousal = 1 - intensity;  // 0–1
+
+    moodMapDot.style.left = `${valence * 80 + 10}%`;
+    moodMapDot.style.top = `${arousal * 80 + 10}%`;
+  }
+
+  // ======================================================
+  // TIMELINE (moving bar)
+  // ======================================================
+  if (emotionTimelineProgress) {
+    const scale = 0.4 + intensity * 0.6;
+    emotionTimelineProgress.style.transform = `scaleX(${scale})`;
+    emotionTimelineProgress.style.backgroundColor = color;
+  }
+
+  // ======================================================
+  // RINGS (pulse animation)
+  // ======================================================
+  if (ringCalm) ringCalm.style.opacity = emotion === "calm" ? 1 : 0.2;
+  if (ringFocus) ringFocus.style.opacity = emotion === "focus" ? 1 : 0.2;
+  if (ringStress) ringStress.style.opacity = emotion === "stress" ? 1 : 0.2;
+  if (ringJoy) ringJoy.style.opacity = emotion === "joy" ? 1 : 0.2;
+
+  // ======================================================
+  // HEATMAP (shift + add new cell)
+  // ======================================================
+  if (emotionHeatmap) {
+    const cell = document.createElement("div");
+    cell.className = "emotion-heatmap-cell";
+
+    if (intensity > 0.75) cell.classList.add("high");
+    else if (intensity > 0.45) cell.classList.add("medium");
+    else cell.classList.add("low");
+
+    emotionHeatmap.appendChild(cell);
+
+    // limit to 60 cells
+    while (emotionHeatmap.children.length > 60) {
+      emotionHeatmap.removeChild(emotionHeatmap.firstChild);
+    }
   }
 }
 
-// 10. Istorijos atnaujinimas
-function updateHistory(emotion, intensity) {
-  const now = new Date();
-  const timeStr = now.toTimeString().slice(0, 8);
-  const roundedIntensity = Math.round(intensity * 100);
+// ======================================================
+// 11. Weather tekstų generatoriai
+// ======================================================
+function generateWeatherText(emotion, intensity) {
+  if (emotion === "calm") return "Clear with a chance of focus";
+  if (emotion === "focus") return "Focused clarity rising";
+  if (emotion === "stress") return "Stress clouds forming";
+  if (emotion === "joy") return "Bright emotional skies";
+  if (emotion === "sad") return "Low emotional pressure";
+  return "Mixed emotional conditions";
+}
 
-  emotionHistory.unshift({
-    emotion,
-    intensity: roundedIntensity,
-    time: timeStr
-  });
+function generateWeatherTag(emotion, intensity) {
+  if (emotion === "calm") return "short-term outlook: low stress, rising clarity";
+  if (emotion === "focus") return "short-term outlook: high clarity, stable flow";
+  if (emotion === "stress") return "short-term outlook: elevated tension";
+  if (emotion === "joy") return "short-term outlook: positive momentum";
+  return "short-term outlook: variable pattern";
+}
+// ======================================================
+// 12. STORY (narrative)
+// ======================================================
+function updateStory(emotion, intensity) {
+  if (!storyLine1 || !storyLine2 || !storyLine3) return;
 
-  if (emotionHistory.length > MAX_HISTORY) {
-    emotionHistory.pop();
+  if (emotion === "calm") {
+    storyLine1.innerText = "Your emotional journey today began in calmness.";
+    storyLine2.innerText = "You maintained steady clarity.";
+    storyLine3.innerText = "Your system shows stable emotional grounding.";
   }
 
-  if (!emotionHistoryEl) return;
-
-  emotionHistoryEl.innerHTML = "";
-  emotionHistory.forEach(item => {
-    const li = document.createElement("li");
-
-    const tag = document.createElement("span");
-    tag.className = "emotion-tag";
-    tag.innerText = item.emotion;
-
-    const meta = document.createElement("span");
-    meta.className = "emotion-time";
-    meta.innerText = `${item.time} • ${item.intensity}%`;
-
-    li.appendChild(tag);
-    li.appendChild(meta);
-    emotionHistoryEl.appendChild(li);
-  });
-}
-
-// 11. Radar piešimas
-function drawRadar(emotion, intensity) {
-  if (!radarCtx || !emotionRadarCanvas) return;
-
-  const width = emotionRadarCanvas.width;
-  const height = emotionRadarCanvas.height;
-  const centerX = width / 2;
-  const centerY = height / 2;
-  const maxRadius = Math.min(width, height) / 2 - 10;
-
-  const color = EMOTION_COLORS[emotion] || EMOTION_COLORS.default;
-  const scaledRadius = maxRadius * clamp(intensity || 0.5, 0.1, 1);
-
-  // fonas
-  radarCtx.clearRect(0, 0, width, height);
-  const gradient = radarCtx.createRadialGradient(centerX, centerY, 0, centerX, centerY, maxRadius);
-  gradient.addColorStop(0, "rgba(15, 23, 42, 0.95)");
-  gradient.addColorStop(1, "rgba(15, 23, 42, 0.3)");
-  radarCtx.fillStyle = gradient;
-  radarCtx.fillRect(0, 0, width, height);
-
-  // koncentriniai ratai
-  radarCtx.strokeStyle = "rgba(148, 163, 184, 0.35)";
-  radarCtx.lineWidth = 1;
-  for (let i = 0.25; i <= 1; i += 0.25) {
-    radarCtx.beginPath();
-    radarCtx.arc(centerX, centerY, maxRadius * i, 0, Math.PI * 2);
-    radarCtx.stroke();
+  if (emotion === "focus") {
+    storyLine1.innerText = "Your emotional flow is sharpening.";
+    storyLine2.innerText = "Focus is rising with stable clarity.";
+    storyLine3.innerText = "Your attention is becoming more precise.";
   }
 
-  // kryžius
-  radarCtx.beginPath();
-  radarCtx.moveTo(centerX - maxRadius, centerY);
-  radarCtx.lineTo(centerX + maxRadius, centerY);
-  radarCtx.moveTo(centerX, centerY - maxRadius);
-  radarCtx.lineTo(centerX, centerY + maxRadius);
-  radarCtx.strokeStyle = "rgba(148, 163, 184, 0.25)";
-  radarCtx.stroke();
-
-  // aktyvi „banga“
-  radarCtx.beginPath();
-  radarCtx.arc(centerX, centerY, scaledRadius, 0, Math.PI * 2);
-  radarCtx.fillStyle = hexToRgba(color, 0.35);
-  radarCtx.fill();
-
-  radarCtx.beginPath();
-  radarCtx.arc(centerX, centerY, scaledRadius, 0, Math.PI * 2);
-  radarCtx.strokeStyle = color;
-  radarCtx.lineWidth = 2;
-  radarCtx.stroke();
-
-  // indikatorius dėmė
-  radarCtx.beginPath();
-  radarCtx.arc(centerX, centerY - scaledRadius, 6, 0, Math.PI * 2);
-  radarCtx.fillStyle = color;
-  radarCtx.fill();
-}
-
-// 12. Pagalbinės funkcijos
-function clamp(value, min, max) {
-  return Math.min(Math.max(value, min), max);
-}
-
-function hexToRgba(hex, alpha = 1) {
-  let c = hex.replace("#", "");
-  if (c.length === 3) {
-    c = c.split("").map(ch => ch + ch).join("");
+  if (emotion === "stress") {
+    storyLine1.innerText = "A stress spike appeared in your flow.";
+    storyLine2.innerText = "Your system is adapting to tension.";
+    storyLine3.innerText = "Recovery patterns are forming.";
   }
-  const num = parseInt(c, 16);
-  const r = (num >> 16) & 255;
-  const g = (num >> 8) & 255;
-  const b = num & 255;
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-// 13. Loop’as — kas 400 ms analizuoja kadrą
+// ======================================================
+// 13. AI COACH REFLECTION
+// ======================================================
+function updateCoach(emotion, intensity) {
+  if (!aiReflectionLine1 || !aiReflectionLine2) return;
+
+  if (emotion === "calm") {
+    aiReflectionLine1.innerText = "“Your emotional flow shows stability.”";
+    aiReflectionLine2.innerText = "“Calmness is shaping your clarity.”";
+  }
+
+  if (emotion === "focus") {
+    aiReflectionLine1.innerText = "“Your focus is strengthening.”";
+    aiReflectionLine2.innerText = "“Your clarity is rising with precision.”";
+  }
+
+  if (emotion === "stress") {
+    aiReflectionLine1.innerText = "“Your system is under tension.”";
+    aiReflectionLine2.innerText = "“Recovery patterns are forming.”";
+  }
+}
+
+// ======================================================
+// 14. COMPASS + TAGS
+// ======================================================
+function updateCompass(emotion, intensity) {
+  if (compassHeading) {
+    if (emotion === "calm") {
+      compassHeading.innerText = "Current heading: calm + stability";
+    } else if (emotion === "focus") {
+      compassHeading.innerText = "Current heading: focus + clarity";
+    } else if (emotion === "stress") {
+      compassHeading.innerText = "Current heading: stress + adaptation";
+    } else {
+      compassHeading.innerText = "Current heading: mixed emotional flow";
+    }
+  }
+
+  if (sessionTags) {
+    sessionTags.innerHTML = "";
+
+    const tags = [];
+
+    if (emotion === "calm") tags.push("calm", "stable", "low stress");
+    if (emotion === "focus") tags.push("focused", "clear", "engaged");
+    if (emotion === "stress") tags.push("stress", "tension", "recovery");
+    if (emotion === "joy") tags.push("joy", "positive", "uplifted");
+
+    tags.forEach(t => {
+      const span = document.createElement("span");
+      span.className = "session-tag";
+      span.innerText = t;
+      sessionTags.appendChild(span);
+    });
+  }
+}
+
+// ======================================================
+// 15. MINI REPORT
+// ======================================================
+function updateMiniReport(emotion, intensity) {
+  if (peakCalm) peakCalm.innerText = `${Math.round(intensity * 100)}%`;
+  if (focusDuration) focusDuration.innerText = `${Math.round(intensity * 10)} min`;
+  if (stressRecovery) {
+    stressRecovery.innerText =
+      intensity > 0.6 ? "Fast" : intensity > 0.3 ? "Moderate" : "Slow";
+  }
+}
+
+// ======================================================
+// 16. AURA
+// ======================================================
+function updateAura(emotion, intensity) {
+  if (!emotionalAura) return;
+
+  emotionalAura.className = "emo-aura-wrapper " + emotion;
+  emotionalAura.style.opacity = 0.6 + intensity * 0.4;
+}
+
+// ======================================================
+// 17. STREAKS
+// ======================================================
+function updateStreaks(emotion) {
+  if (!calmStreak || !focusStreak) return;
+
+  if (emotion === "calm") {
+    calmStreak.innerText = "4 days";
+  }
+
+  if (emotion === "focus") {
+    focusStreak.innerText = "2 days";
+  }
+}
+
+// ======================================================
+// 18. MILESTONES
+// ======================================================
+function updateMilestones(emotion) {
+  if (!badgeCalm || !badgeFocus || !badgeStress) return;
+
+  badgeCalm.style.opacity = emotion === "calm" ? 1 : 0.3;
+  badgeFocus.style.opacity = emotion === "focus" ? 1 : 0.3;
+  badgeStress.style.opacity = emotion === "stress" ? 1 : 0.3;
+}
+
+// ======================================================
+// 19. MASTER UI UPDATE WRAPPER
+// ======================================================
+function updateEmopulseUI(data) {
+  if (!data) return;
+
+  const emotion = (data.emotion || "neutral").toLowerCase();
+  const intensity = data.intensity || data.confidence || 0.5;
+
+  // Hero + dashboard + map + timeline + rings + heatmap
+  updateHeroAndDashboard(data);
+  updateMoodMap(data);
+  updateTimeline(data);
+  updateRings(data);
+  updateHeatmap(data);
+
+  // Story + coach + compass + tags + report + aura + streaks + milestones
+  updateStory(emotion, intensity);
+  updateCoach(emotion, intensity);
+  updateCompass(emotion, intensity);
+  updateMiniReport(emotion, intensity);
+  updateAura(emotion, intensity);
+  updateStreaks(emotion);
+  updateMilestones(emotion);
+}
+
+// ======================================================
+// 20. LOOP — kas 400 ms siunčia kadrą
+// ======================================================
 function startAnalysisLoop() {
-  if (!video) {
-    console.warn("No video, skipping capture loop.");
-    return;
-  }
+  if (!video) return;
 
   setInterval(() => {
     const frame = captureFrame();
-    if (frame) {
-      analyzeFrame(frame);
-    }
+    if (frame) analyzeFrame(frame);
   }, 400);
 }
 
-// 14. Paleidimas
+// ======================================================
+// 21. Paleidimas
+// ======================================================
 window.onload = () => {
   startCamera();
   startAnalysisLoop();
