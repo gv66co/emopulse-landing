@@ -5,6 +5,9 @@ const API_URL = "https://emopulse-api-1009590211108.europe-west4.run.app";
 
 const aiCoachButton = document.getElementById("aiCoachButton");
 
+const moodTrail = [];
+const MAX_MOOD_TRAIL = 30;
+
 // ======================================================
 // 2. DOM ELEMENTAI — pagrindiniai
 // ======================================================
@@ -557,3 +560,64 @@ function updateEmotionalSignature(emotion, intensity) {
   emotionalSignatureDot.style.boxShadow = `0 0 20px ${hexToRgba(color, 0.8)}`;
 }
   updateEmotionalSignature(emotion, intensity);
+async function askCoach(currentEmotion, intensity) {
+  if (!aiCoachButton) return;
+
+  const originalText = aiCoachButton.querySelector("span").innerText;
+  aiCoachButton.querySelector("span").innerText = "Thinking...";
+  aiCoachButton.disabled = true;
+
+  try {
+    const response = await fetch(`${API_URL}/coach`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        emotion: currentEmotion,
+        intensity
+      })
+    });
+
+    const data = await response.json();
+    const suggestion = data.suggestion || "Take one deep breath and reset your focus.";
+
+    if (aiReflectionLine1 && aiReflectionLine2) {
+      aiReflectionLine1.innerText = `“${suggestion}”`;
+      aiReflectionLine2.innerText = "“Your emotional system is adapting.”";
+    }
+  } catch (e) {
+    console.error("Coach error:", e);
+  } finally {
+    aiCoachButton.querySelector("span").innerText = originalText;
+    aiCoachButton.disabled = false;
+  }
+}
+  if (aiCoachButton) {
+    aiCoachButton.addEventListener("click", () => {
+      // imam paskutinę emociją iš istorijos arba default calm
+      const last = emotionHistory[0] || { emotion: "calm", intensity: 0.6 };
+      askCoach(last.emotion, last.intensity / 100 || 0.6);
+    });
+  }
+function updateMoodMap(data) {
+  if (!moodMapDot) return;
+
+  const emotion = (data.emotion || "neutral").toLowerCase();
+  const intensity = data.intensity || data.confidence || 0.5;
+
+  // paprastas mappingas
+  const valence = emotion === "stress" || emotion === "sad" ? 0.2 : 0.8;
+  const arousal = emotion === "calm" ? 0.3 : 0.7;
+
+  const x = valence * 80 + 10; // %
+  const y = (1 - arousal) * 80 + 10;
+
+  moodMapDot.style.left = `${x}%`;
+  moodMapDot.style.top = `${y}%`;
+
+  // trail
+  moodTrail.unshift({ x, y, emotion, intensity });
+  if (moodTrail.length > MAX_MOOD_TRAIL) moodTrail.pop();
+
+  // optional: jei nori, galim generuoti mažus foninius taškus
+  // per CSS pseudo-elementus, bet čia palieku JS trail logiką.
+}
