@@ -3,6 +3,8 @@
 // ======================================================
 const API_URL = "https://emopulse-api-1009590211108.europe-west4.run.app";
 
+const aiCoachButton = document.getElementById("aiCoachButton");
+
 // ======================================================
 // 2. DOM ELEMENTAI — pagrindiniai
 // ======================================================
