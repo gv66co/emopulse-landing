@@ -1,18 +1,97 @@
 <!DOCTYPE html>
- <html class="emopulse-theme" lang="en"> <head> <meta charset="utf-8"/>
-<title>Emopulse â€ª Emotional AI Demo</title> <meta content="width=device-width, 
-initial-scale=1" name="viewport"/> <!-- CSS: update path if filename differs --> <link href="styles.css" rel="stylesheet"/><link href="manifest.json" rel="manifest"/>
-<link href="favicon.png" rel="icon" type="image/png"/> <link href="favicon.png" rel="apple-touch-icon"/>
-<meta content="#0b0f1c" name="theme-color"/> <script defer="True" src="https://cdn.jsdelivr.net/npm/face-api.js"></script></head> <body class="emopulse-theme"> <header class="emo-page-header"> <div class="emo-header-inner"> <div class="emo-logo-block"> <div class="emo-logo-mark"></div> <div class="emo-logo-text"> <span class="emo-logo-title">Emopulse</span> <span class="emo-logo-sub">Emotional AI that sees, feels, 
-understands</span> </div> </div> <button class="ai-coach-button"> <div class="ai-coach-pulse"></div> <span>Ask Natasha</span> </button> </div> </header>
-<main class="emo-main"> <!-- HERO / LIVE DEMO BAND --> <section class="hero-section"> <div class="hero-grid"> <!-- Left: Aura + Drift --> <div class="hero-visual"> <div class="emo-card"> <div class="emo-card-header"> <div class="emo-card-title">Live emotional radar</div> <span class="emo-pill emo-tag-soft">Demo mode</span> </div> <div class="emo-hero-visual-row"> <!-- 
-Aura --> <div class="emo-aura-wrapper calm"> <div class="emo-aura-ring"></div> <div class="emo-aura-ring"></div> <div class="emo-aura-ring"></div> <div class="emo-aura-core"></div>
-</div> <!-- Drift spiral --> <div class="drift-core"> <div class="drift-spiral-shell"> <div class="drift-layer"></div> <div class="drift-layer"></div> <div class="drift-layer"></div> <div class="drift-spiral calm strong"></div> <div class="drift-spiral-orbit"> <div class="drift-spiral-dot"></div>
-</div> </div> <div> <div class="drift-label">Emotional drift</div> <div class="drift-value positive">+12%</div> <div class="drift-caption">Calmness increasing</div> </div> </div> </div> <div class="scenario-buttons"> <button class="scenario-button">Smile</button> <button class="scenario-button">Neutral</button> <button class="scenario-button">Stress</button> <button class="scenario-button">High stress</button> <button class="scenario-button">Calm mode</button>
-<button class="scenario-button">Focus mode</button> </div> </div> </div>
-<!-- Right: Copy + Score + Weather -->
-<div class="hero-copy">
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Emotional AI demo</div>
-<span class="emo-pill emo-tag-soft">Prototype âÐ
+<html lang="lt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emopulse – Emotional AI</title>
+
+  <meta name="description" content="Emotional AI that reads your signals and creates a real-time emotional dashboard.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://emopulse.app/">
+
+  <meta name="theme-color" content="#0b0f1c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <meta property="og:title" content="Emopulse – Emotional AI">
+  <meta property="og:description" content="Real-time emotional intelligence powered by AI.">
+  <meta property="og:image" content="favicon.png">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://emopulse.app">
+  <meta property="og:site_name" content="Emopulse">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Emopulse – Emotional AI">
+  <meta name="twitter:description" content="Real-time emotional intelligence powered by AI.">
+  <meta name="twitter:image" content="favicon.png">
+
+  <!-- FIXED: all paths now relative -->
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="icon" sizes="192x192" href="android-chrome-192x192.png">
+  <link rel="icon" sizes="512x512" href="android-chrome-512x512.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="manifest" href="manifest.json">
+  <link rel="preload" href="favicon.png" as="image">
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+  <!-- ========================= HERO ========================== -->
+  <section class="hero section reveal parallax">
+    <img src="logo.svg" alt="Emopulse logo" class="logo" loading="lazy">
+    <h1>Emotional AI</h1>
+    <p class="lead">Real-time emotional intelligence powered by your signals.</p>
+
+    <div class="hero-buttons">
+      <button id="start-demo" class="btn big interactive glide" aria-label="Start demo">Start Demo</button>
+
+      <a href="demo.html">
+        <button class="btn ghost interactive glide" aria-label="Open demo">Open Demo</button>
+      </a>
+    </div>
+  </section>
+
+  <!-- ========================= SPIRAL + AURA ========================== -->
+  <div class="spiral-container reveal parallax">
+    <div id="aura"></div>
+    <img src="favicon.png" alt="Emopulse spiral" class="spiral" loading="lazy">
+  </div>
+
+  <!-- ========================= PULSE CANVAS ========================== -->
+  <canvas id="pulseCanvas" width="700" height="200" class="reveal section-tight"></canvas>
+
+  <!-- ========================= RESULTS ========================== -->
+  <section class="block section-tight reveal">
+    <div class="results-box card-physics tilt">
+      <div id="result" class="hidden"></div>
+    </div>
+  </section>
+
+  <!-- ========================= COACH ========================== -->
+  <div class="coach-box card-physics tilt reveal section-tight">
+    <div class="coach-avatar">
+      <img src="favicon.png" alt="Coach avatar" loading="lazy">
+    </div>
+    <div id="coachText" class="coach-text">Įvesk tekstą analizei…</div>
+  </div>
+
+  <!-- ========================= INPUT ========================== -->
+  <div class="emopulse-box reveal section-tight">
+    <label for="userInput" class="visually-hidden">Įvesk tekstą analizei</label>
+    <textarea id="userInput" placeholder="Įvesk tekstą…" aria-label="Text input"></textarea>
+    <button id="sendBtn" class="btn big interactive glide" aria-label="Analyze text">Analizuoti</button>
+  </div>
+
+  <!-- ========================= FOOTER ========================== -->
+  <footer class="reveal section-tight">
+    © 2025 Emopulse. All rights reserved.
+  </footer>
+
+  <!-- ========================= SCRIPTS ========================== -->
+  <script src="app.js" defer></script>
+
+</body>
+</html>
