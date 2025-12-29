@@ -1,17 +1,1 @@
 
-version: "3.8"
-services:
-  api:
-    build: ./apps/api
-    ports:
-      - "8080:8080"
-    depends_on:
-      - ppg-demo
-    environment:
-      - PORT=8080
-  ppg-demo:
-    build: ./apps/ppg-demo
-    ports:
-      - "8501:8501"
-    environment:
-      - STREAMLIT_SERVER_PORT=8501
