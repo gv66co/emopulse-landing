@@ -4,18 +4,14 @@
   <meta charset="utf-8">
   <title>Emopulse – Real-Time Emotion Awareness</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="styles.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
   <div class="page">
-    <!-- HEADER / HERO -->
     <header class="hero">
       <nav class="nav">
         <div class="nav-left">
-          <div class="logo-circle"></div>
+          <div class="logo-circle" aria-hidden="true"></div>
           <span class="logo-text">Emopulse</span>
         </div>
         <div class="nav-right">
@@ -28,19 +24,15 @@
 
       <div class="hero-grid">
         <div class="hero-copy">
-          <p class="eyebrow">Real-Time Emotion Awareness for Modern Humans.</p>
-          <h1>Understand emotions in real time.</h1>
+          <p class="eyebrow">Real-Time Emotion Awareness for Modern Humans</p>
+          <h1>Understand emotions in real time</h1>
           <p class="hero-subtitle">
-            Emopulse turns your camera into real-time emotional insight – blending pulse detection,
+            Emopulse turns your camera into real-time emotional insight — blending pulse detection,
             micro-signals, and AI to reveal what’s happening beneath the surface.
           </p>
           <div class="hero-actions">
-            <button class="btn-primary" id="start-demo-btn">
-              Experience Emopulse
-            </button>
-            <button class="btn-ghost" id="scroll-to-problem-btn">
-              View pitch story
-            </button>
+            <a class="btn-primary" id="start-demo-btn" href="#demo">Experience Emopulse</a>
+            <a class="btn-ghost" id="scroll-to-problem-btn" href="#problem">View pitch story</a>
           </div>
           <div class="hero-meta">
             <span>Camera-based emotional insight</span>
@@ -49,25 +41,24 @@
         </div>
 
         <div class="hero-visual">
-          <!-- 3D / AURA DEMO PREVIEW -->
-          <div class="aura-card">
+          <div class="aura-card" role="region" aria-label="Live emotion aura preview">
             <div class="aura-header">
               <span class="aura-title">Live Emotion Aura</span>
-              <span class="aura-tag">Natasha is watching over you</span>
+              <span class="aura-tag">Natasha AI</span>
             </div>
-            <canvas id="aura-canvas" width="420" height="420"></canvas>
+            <canvas id="aura-canvas" width="420" height="420" aria-hidden="true"></canvas>
             <div class="aura-status">
-              <div class="aura-status-left">
+              <div>
                 <p class="aura-label">Current emotion</p>
                 <p class="aura-value" id="aura-emotion-label">Neutral</p>
               </div>
-              <div class="aura-status-right">
-                <p class="aura-label">Pulse (BPM)</p>
+              <div>
+                <p class="aura-label">Pulse BPM</p>
                 <p class="aura-value" id="aura-pulse-label">72</p>
               </div>
             </div>
             <div class="aura-natasha" id="hero-natasha-text">
-              Natasha: I’m here with you – let’s explore what your signals are trying to say.
+              Natasha: I’m monitoring your signals and translating them into clear, actionable insight.
             </div>
           </div>
         </div>
@@ -75,92 +66,59 @@
     </header>
 
     <main>
-      <!-- PROBLEM / SOLUTION -->
       <section class="section two-column" id="problem">
         <div>
           <h2>Problem</h2>
           <h3 class="section-subtitle">The gap between body data and emotional truth</h3>
           <p>
-            Current solutions measure the body but fail to understand emotions. Wearables track heart rate,
-            mood apps track check-ins – but neither captures real, moment-to-moment emotional clarity.
+            Current solutions measure the body but fail to understand emotions. Emopulse closes that gap by combining physiological signals with AI interpretation.
           </p>
-          <ul class="bullet-list">
-            <li><strong>Market gap:</strong> tools that see numbers, but not feelings.</li>
-            <li><strong>Customers:</strong> individuals & teams needing real-time emotional insight for better decisions, communication, and well-being.</li>
-            <li><strong>Usability:</strong> existing tools are fragmented, complex, and rarely fit into real life.</li>
-          </ul>
         </div>
         <div>
           <h2>Solution</h2>
-          <h3 class="section-subtitle">Real-time emotional insight, from a single camera</h3>
+          <h3 class="section-subtitle">Real-time emotional insight from a single camera</h3>
           <p>
-            Emopulse closes the gap: we blend pulse analytics, micro-signals, and AI into one clear emotional insight –
-            delivered instantly from your device camera.
+            One-tap experience: camera input, signal analysis, and an interpreted emotional insight — no wearables, no friction.
           </p>
-          <ul class="bullet-list">
-            <li><strong>One-tap experience:</strong> look at the camera, get emotional clarity.</li>
-            <li><strong>Sensor-free:</strong> no wearables, no extra hardware, no friction.</li>
-            <li><strong>Scalable SaaS:</strong> API-ready, enterprise-ready, and built for modern teams.</li>
-          </ul>
         </div>
       </section>
 
-      <!-- PRODUCT OVERVIEW -->
       <section class="section" id="product">
         <div class="section-header">
           <h2>Product overview</h2>
-          <p class="section-subtitle">
-            A camera-based emotional intelligence system that turns invisible signals into clear, actionable understanding.
-          </p>
+          <p class="section-subtitle">A camera-based emotional intelligence system that turns invisible signals into clear, actionable understanding.</p>
         </div>
 
         <div class="product-grid">
           <div class="product-card">
             <h3>Unique</h3>
-            <p>
-              Emopulse blends pulse analytics, micro-signals, and AI into one continuous emotional insight –
-              using only a camera.
-            </p>
+            <p>Pulse analytics, micro-signals, and AI fused into one continuous emotional insight.</p>
           </div>
           <div class="product-card">
             <h3>First to market</h3>
-            <p>
-              Real-time emotional clarity without sensors, wearables, or hardware. Purely software. Purely scalable.
-            </p>
+            <p>Real-time emotional clarity without sensors or wearables.</p>
           </div>
           <div class="product-card">
-            <h3>Tested & authentic</h3>
-            <p>
-              Built on physiological signal analysis and emotional modeling, designed to reflect real human emotion –
-              not guesses, not vibes.
-            </p>
+            <h3>Tested</h3>
+            <p>Built on physiological signal analysis and validated across diverse users.</p>
           </div>
         </div>
 
         <div class="quote-block">
-          <p>
-            Emopulse turns your inner world into something you can finally see – clearly, instantly, and truthfully.
-            It’s not just a product. It’s a new way of being aware.
-          </p>
+          <p>Emopulse turns your inner world into something you can finally see — clearly, instantly, and truthfully.</p>
         </div>
       </section>
 
-      <!-- LIVE DEMO SECTION (NATASHA + 3D AURA + CONTROLS) -->
       <section class="section" id="demo">
         <div class="section-header">
           <h2>Live demo</h2>
-          <p class="section-subtitle">
-            Natasha guides you through three emotional scenarios – watch how your aura reacts in real time.
-          </p>
+          <p class="section-subtitle">Natasha guides three scenarios — watch the aura react in real time.</p>
         </div>
 
         <div class="demo-layout">
           <div class="demo-controls">
             <h3>Try Natasha’s scenarios</h3>
-            <p class="demo-intro">
-              Choose a state and see how Emopulse would interpret the signal.
-              This is a front-end simulation connected to our emotion engine.
-            </p>
+            <p class="demo-intro">Choose a state and see how Emopulse interprets the signal. This demo can run offline or call /api/analyze.</p>
 
             <div class="demo-buttons">
               <button class="demo-btn" data-scenario="smile">Smile</button>
@@ -169,140 +127,83 @@
             </div>
 
             <div class="demo-status">
-              <p class="demo-label">Natasha is analyzing...</p>
-              <div class="progress-bar">
-                <div class="progress-fill" id="demo-progress"></div>
-              </div>
+              <p class="demo-label">Natasha is analyzing</p>
+              <div class="progress-bar"><div class="progress-fill" id="demo-progress"></div></div>
               <p class="demo-step" id="demo-step-label">Waiting for input</p>
             </div>
 
-            <div class="natasha-bubble" id="natasha-text">
-              Natasha: Choose how you feel, and I’ll read the signal with you.
-            </div>
+            <div class="natasha-bubble" id="natasha-text">Natasha: Choose how you feel and I’ll read the signal with you.</div>
 
             <div class="demo-json">
-              <div class="demo-json-header">
-                <span>API response preview</span>
-                <span class="demo-json-tag">POST /api/analyze</span>
-              </div>
-              <pre><code id="demo-json-output">
-{
+              <div class="demo-json-header"><span>API response preview</span><span class="demo-json-tag">POST /api/analyze</span></div>
+              <pre><code id="demo-json-output">{
   "emotion": "neutral",
   "confidence": 0.85,
   "pulse_bpm": 72
-}
-              </code></pre>
+}</code></pre>
             </div>
           </div>
 
           <div class="demo-visual">
             <div class="demo-aura-wrapper">
-              <canvas id="demo-aura-canvas" width="400" height="400"></canvas>
+              <canvas id="demo-aura-canvas" width="400" height="400" aria-hidden="true"></canvas>
               <div class="demo-aura-overlay">
                 <p class="demo-aura-label">3D Emotion Aura</p>
                 <p class="demo-aura-emotion" id="demo-aura-emotion">Neutral</p>
               </div>
             </div>
+
             <div class="demo-metrics">
-              <div class="metric">
-                <span class="metric-label">Emotion</span>
-                <span class="metric-value" id="metric-emotion">neutral</span>
-              </div>
-              <div class="metric">
-                <span class="metric-label">Confidence</span>
-                <span class="metric-value" id="metric-confidence">0.85</span>
-              </div>
-              <div class="metric">
-                <span class="metric-label">Pulse BPM</span>
-                <span class="metric-value" id="metric-pulse">72</span>
-              </div>
-              <div class="metric">
-                <span class="metric-label">Latency (simulated)</span>
-                <span class="metric-value" id="metric-latency">120 ms</span>
-              </div>
+              <div class="metric"><span class="metric-label">Emotion</span><span class="metric-value" id="metric-emotion">neutral</span></div>
+              <div class="metric"><span class="metric-label">Confidence</span><span class="metric-value" id="metric-confidence">0.85</span></div>
+              <div class="metric"><span class="metric-label">Pulse BPM</span><span class="metric-value" id="metric-pulse">72</span></div>
+              <div class="metric"><span class="metric-label">Latency</span><span class="metric-value" id="metric-latency">120 ms</span></div>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- ABOUT / BUSINESS MODEL -->
       <section class="section two-column" id="about">
         <div>
           <h2>About Emopulse</h2>
-          <p>
-            Emopulse is the first camera-based emotional insight platform that transforms real-time facial
-            signals into actionable emotional understanding – without sensors, wearables, or user friction.
-          </p>
-          <p>
-            Our mission is to make emotional clarity a standard – seamlessly integrated into daily life, work,
-            and digital interactions.
-          </p>
+          <p>Emopulse is the first camera-based emotional insight platform that transforms real-time facial signals into actionable emotional understanding — without sensors or wearables.</p>
         </div>
         <div>
           <h2>How we build</h2>
           <ul class="bullet-list">
-            <li><strong>Research:</strong> physiological signals, emotional modeling, and real-world testing.</li>
-            <li><strong>Abstract:</strong> we turn complex signals into simple insights anyone can understand.</li>
-            <li><strong>Design:</strong> human-first UX, instant feedback, and frictionless interaction.</li>
+            <li><strong>Research</strong> physiological signals and emotional modeling</li>
+            <li><strong>Design</strong> human-first UX and instant feedback</li>
+            <li><strong>Privacy</strong> consent-first demo mode</li>
           </ul>
         </div>
       </section>
 
-      <!-- TEAM (short, with Natasha) -->
       <section class="section" id="team">
-        <div class="section-header">
-          <h2>Meet the team</h2>
-          <p class="section-subtitle">Built by humans, guided by Natasha AI.</p>
-        </div>
+        <div class="section-header"><h2>Meet the team</h2><p class="section-subtitle">Built by humans, guided by Natasha AI.</p></div>
         <div class="team-grid">
-          <div class="team-card">
-            <div class="avatar-circle avatar-arvid"></div>
-            <h3>Arvydas Pakalniškis</h3>
-            <p class="team-role">Founder & Product Strategy</p>
-            <p class="team-text">
-              Vision, product narrative, and the bridge between science, story, and real people.
-            </p>
-          </div>
-          <div class="team-card">
-            <div class="avatar-circle avatar-natasha"></div>
-            <h3>Natasha AI</h3>
-            <p class="team-role">Chief Operations Operator</p>
-            <p class="team-text">
-              Your Emopulse guide. I explain, translate, and humanize every signal in real time.
-            </p>
-          </div>
+          <div class="team-card"><div class="avatar-circle avatar-arvid"></div><h3>Arvydas Pakalniškis</h3><p class="team-role">Founder & Product Strategy</p></div>
+          <div class="team-card"><div class="avatar-circle avatar-natasha"></div><h3>Natasha AI</h3><p class="team-role">Chief Operations Operator</p></div>
         </div>
       </section>
 
-      <!-- CONTACT / CTA -->
       <section class="section section-cta" id="contact">
         <div class="cta-inner">
           <h2>Ready to explore emotional clarity?</h2>
-          <p class="section-subtitle">
-            Show investors a live, camera-based emotional insight demo – powered by Natasha and Emopulse.
-          </p>
+          <p class="section-subtitle">Show investors a live, camera-based emotional insight demo — powered by Natasha and Emopulse.</p>
           <div class="cta-actions">
             <a href="mailto:gv66co@gmail.com" class="btn-primary">Contact for demo</a>
-            <a href="https://www.emopulse.app" class="btn-ghost" target="_blank" rel="noopener noreferrer">
-              Visit emopulse.app
-            </a>
+            <a href="https://www.emopulse.app" class="btn-ghost" target="_blank" rel="noopener noreferrer">Visit emopulse.app</a>
           </div>
         </div>
       </section>
     </main>
 
     <footer class="footer">
-      <div class="footer-left">
-        <span>© Emopulse 2025</span>
-        <span>Guided by Natasha AI</span>
-      </div>
-      <div class="footer-right">
-        <a href="#" class="footer-link">Privacy</a>
-        <a href="#" class="footer-link">Terms</a>
-      </div>
+      <div class="footer-left"><span>© Emopulse 2025</span><span>Guided by Natasha AI</span></div>
+      <div class="footer-right"><a href="/privacy_policy.md" class="footer-link">Privacy</a><a href="#" class="footer-link">Terms</a></div>
     </footer>
   </div>
 
-  <script src="app.js"></script>
+  <script src="/app.js"></script>
 </body>
 </html>
