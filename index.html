@@ -1,1319 +1,160 @@
-<!DOCTYPE html>
- <html class="emopulse-theme" lang="en"> <head> <meta charset="utf-8"/>
-<title>Emopulse â€ª Emotional AI Demo</title> <meta content="width=device-width, 
-initial-scale=1" name="viewport"/> <!-- CSS: update path if filename differs --> <link href="styles.css" rel="stylesheet"/><link href="manifest.json" rel="manifest"/>
-<link href="favicon.png" rel="icon" type="image/png"/> <link href="favicon.png" rel="apple-touch-icon"/>
-<meta content="#0b0f1c" name="theme-color"/> <script defer="True" src="https://cdn.jsdelivr.net/npm/face-api.js"></script></head> <body class="emopulse-theme"> <header class="emo-page-header"> <div class="emo-header-inner"> <div class="emo-logo-block"> <div class="emo-logo-mark"></div> <div class="emo-logo-text"> <span class="emo-logo-title">Emopulse</span> <span class="emo-logo-sub">Emotional AI that sees, feels, 
-understands</span> </div> </div> <button class="ai-coach-button"> <div class="ai-coach-pulse"></div> <span>Ask Natasha</span> </button> </div> </header>
-<main class="emo-main"> <!-- HERO / LIVE DEMO BAND --> <section class="hero-section"> <div class="hero-grid"> <!-- Left: Aura + Drift --> <div class="hero-visual"> <div class="emo-card"> <div class="emo-card-header"> <div class="emo-card-title">Live emotional radar</div> <span class="emo-pill emo-tag-soft">Demo mode</span> </div> <div class="emo-hero-visual-row"> <!-- 
-Aura --> <div class="emo-aura-wrapper calm"> <div class="emo-aura-ring"></div> <div class="emo-aura-ring"></div> <div class="emo-aura-ring"></div> <div class="emo-aura-core"></div>
-</div> <!-- Drift spiral --> <div class="drift-core"> <div class="drift-spiral-shell"> <div class="drift-layer"></div> <div class="drift-layer"></div> <div class="drift-layer"></div> <div class="drift-spiral calm strong"></div> <div class="drift-spiral-orbit"> <div class="drift-spiral-dot"></div>
-</div> </div> <div> <div class="drift-label">Emotional drift</div> <div class="drift-value positive">+12%</div> <div class="drift-caption">Calmness increasing</div> </div> </div> </div> <div class="scenario-buttons"> <button class="scenario-button">Smile</button> <button class="scenario-button">Neutral</button> <button class="scenario-button">Stress</button> <button class="scenario-button">High stress</button> <button class="scenario-button">Calm mode</button>
-<button class="scenario-button">Focus mode</button> </div> </div> </div>
-<!-- Right: Copy + Score + Weather -->
-<div class="hero-copy">
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Emotional AI demo</div>
-<span class="emo-pill emo-tag-soft">Prototype âÐ  LLM + signals</span>
-</div>
-<h1 class="hero-title">  
-          Real-time emotional intelligence<br/>  
-          from your camera &amp; micro-signals  
-        </h1>
-<p class="hero-subtitle">  
-          Emopulse transforms pulse, micro-signals, and context into a living emotional dashboard: drift, 
-stability, risk, and narrative â€ª in seconds.  
-        </p>
-<div class="hero-cta-row">
-<button class="ai-coach-button">
-<div class="ai-coach-pulse"></div>
-<span>Try live demo</span>
-</button>
-<div class="emotional-signature-pill">
-<div class="emotional-signature-dot"></div>
-<span>Todayâ€™s emotional signature: Calm Focused Energy</span>
-</div>
-</div>
-</div>
-<div class="hero-metrics-row">
-<div class="emopulse-score-card">
-<div class="emopulse-score-label">Emopulse Score</div>
-<div class="emopulse-score-value">78 / 100</div> <div class="emopulse-score-bar">
-<div class="emopulse-score-bar-fill"></div>
-</div>
-</div>
-<div class="emotional-weather-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Emotional weather</div>
-</div>
-<div class="emo-flex emo-flex-between">
-<div>
-<div class="emotional-weather-main">Clear with a chance of focus</div>
-<div class="emotional-weather-tag">short-term outlook: low stress, rising clarity</div>
-</div>
-<div class="emotional-weather-icon calm">
-<!-- icon can be added later -->
-</div>
-</div>
-</div>
-</div>
-<div class="privacy-banner">  
-        We never store your data. All processing is real-time. You stay in control.  
-      </div>
-</div>
-</div>
-</section>
-<!-- MINI DASHBOARD LAYER -->
-<section class="section-block" id="mini-dashboard">
-<h2>Mini dashboard</h2>
-<div class="mini-dashboard">
-<div class="mini-metric-card">
-<div class="mini-metric-label">Pulse</div>
-<div class="mini-metric-value">74 bpm</div>
-<div class="mini-metric-pill">Signal quality: high</div>
-</div>
-<div class="mini-metric-card">
-<div class="mini-metric-label">Emotion</div>
-<div class="mini-metric-value">Calm</div>
-<div class="mini-metric-pill">Valence: positive</div>
-</div>
-<div class="mini-metric-card">
-<div class="mini-metric-label">Confidence</div>
-<div class="mini-metric-value">91%</div>
-<div class="mini-metric-pill">Stable pattern</div>
-</div>
-<div class="mini-metric-card">
-<div class="mini-metric-label">Stress risk</div>
-<div class="mini-metric-value">18 / 100</div>
-<div class="mini-metric-pill">Low &amp; contained</div>
-</div>
-</div>
-</section>
-<!-- MOOD MAP + TIMELINE -->
-<section class="section-block" id="mood-map-timeline">
-<h2>Emotional map &amp; timeline</h2> <div class="emo-grid emo-grid-2">
-<!-- Mood Map -->
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Mood map</div>
-<span class="emo-pill emo-tag-soft">Valence / arousal</span>
-</div>
-<div class="mood-map">
-<div class="mood-map-grid"></div>
-<div class="mood-map-axis-label top">High arousal</div>
-<div class="mood-map-axis-label bottom">Low arousal</div>
-<div class="mood-map-axis-label left">Negative</div>
-<div class="mood-map-axis-label right">Positive</div>
-<div class="mood-map-dot" style="left: 65%; top: 42%;"></div>
-</div>
-</div>
-<!-- Timeline -->
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Emotion timeline</div>
-<span class="emo-pill emo-tag-soft">Last 60 seconds</span>
-</div>
-<div class="emotion-timeline">
-<div class="emotion-timeline-track">
-<div class="emotion-timeline-progress" style="transform: scaleX(1);"></div>
-<div class="emotion-timeline-emotion-dot calm" style="left: 10%;"></div>
-<div class="emotion-timeline-emotion-dot focus" style="left: 35%;"></div>
-<div class="emotion-timeline-emotion-dot stress" style="left: 58%;"></div>
-<div class="emotion-timeline-emotion-dot calm" style="left: 82%;"></div>
-</div>
-</div>
-</div>
-</div>
-</section>
-<!-- EMOTION RINGS + HEATMAP -->
-<section class="section-block" id="rings-heatmap">
-<h2>Rings &amp; heatmap</h2>
-<div class="emo-grid emo-grid-2">
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Emotion rings</div>
-<span class="emo-pill emo-tag-soft">Calm / Focus / Stress</span>
-</div>
-<div class="emotion-rings animate">
-<div class="emotion-ring calm"></div>
-<div class="emotion-ring focus"></div>
-<div class="emotion-ring stress"></div>
-<div class="emotion-ring joy"></div>
-</div>
-</div>
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Emotion heatmap</div>
-<span class="emo-pill emo-tag-soft">Intensity over time</span>
-</div> <div class="emotion-heatmap">
-<!-- fake pattern -->
-<div class="emotion-heatmap-cell low"></div>
-<div class="emotion-heatmap-cell low"></div>
-<div class="emotion-heatmap-cell medium"></div>
-<div class="emotion-heatmap-cell high"></div>
-<div class="emotion-heatmap-cell medium"></div>
-<div class="emotion-heatmap-cell low"></div>
-<div class="emotion-heatmap-cell low"></div>
-<div class="emotion-heatmap-cell medium"></div>
-<div class="emotion-heatmap-cell high"></div>
-<div class="emotion-heatmap-cell high"></div>
-<div class="emotion-heatmap-cell medium"></div>
-<div class="emotion-heatmap-cell low"></div>
-<!-- more small cells can be duplicated -->
-</div>
-</div>
-</div>
-</section>
-<!-- EXPERIENCE LAYER: STORY, CHALLENGE, STREAKS, MILESTONES -->
-<section class="section-block" id="experience-layer">
-<h2>Experience layer</h2>
-<div class="emo-grid emo-grid-2">
-<!-- Emotion Story -->
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Emotion story</div>
-</div>
-<div class="emotion-challenge">
-<div class="emotion-challenge-label">Session narrative</div>
-<p>Your emotional journey today began in calmness.</p>
-<p>You transitioned into focused clarity.</p>
-<p>A brief stress spike appeared but resolved quickly.</p>
-</div>
-</div>
-<!-- Emotion Challenge -->
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Emotion challenge</div>
-</div>
-<div class="emotion-challenge">
-<div class="emotion-challenge-label">Challenge</div>
-<p>Hold calmness for 60 seconds.</p>
-<button class="scenario-button">Start challenge</button>
-</div>
-</div>
-</div>
-<div class="emo-grid emo-grid-2" style="margin-top: 16px;">
-<!-- Emotion streaks -->
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Emotion streaks</div>
-</div>
-<div class="emotion-streaks">
-<div class="streak-item"> <span class="streak-label">Calm streak</span>
-<span class="streak-value">3 days</span>
-</div>
-<div class="streak-item">
-<span class="streak-label">Focus streak</span>
-<span class="streak-value">1 day</span>
-</div>
-</div>
-</div>
-<!-- Emotional milestones -->
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Emotional milestones</div>
-</div>
-<div class="emotion-badges">
-<div class="emotion-badge calm">Calm Master</div>
-<div class="emotion-badge focus">Focus Achiever</div>
-<div class="emotion-badge stress">Stress Recovery</div>
-</div>
-</div>
-</div>
-</section>
-<!-- AI COACH + INSIGHTS -->
-<section class="section-block" id="ai-coach-layer">
-<h2>AI insights &amp; coach</h2>
-<div class="emo-grid emo-grid-2">
-<!-- AI Reflection -->
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">AI reflection</div>
-</div>
-<div class="emotion-challenge">
-<p>â€úYour emotional flow today shows resilience.â€ </p>
-<p>â€úYou adapted well to stress fluctuations.â€ </p>
-</div>
-</div>
-<!-- AI Mood Coach -->
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">AI mood coach</div>
-</div>
-<p class="hero-subtitle" style="margin-bottom: 12px;">  
-        Ask: <em>â€úWhat should I do now?â€ </em> and get a short, emotionally precise suggestion.  
-      </p>
-<button class="ai-coach-button">
-<div class="ai-coach-pulse"></div>
-<span>What should I do now?</span>
-</button>
-</div>
-</div>
-</section>
-<!-- EMOTIONAL COMPASS & TAGS & MINI REPORT -->
-<section class="section-block" id="compass-tags-report">
-<h2>Compass, tags &amp; mini report</h2> <div class="emo-grid emo-grid-3">
-<!-- Compass -->
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Emotional compass</div>
-</div>
-<div class="focus-mode-overlay">
-<div class="session-tags">
-<span class="session-tag">Calm</span>
-<span class="session-tag">Joy</span>
-<span class="session-tag">Focus</span>
-<span class="session-tag">Stress</span>
-</div>
-<p style="margin-top: 10px; font-size: 13px;">  
-          Current heading: calm + focus, low stress, high stability.  
-        </p>
-</div>
-</div>
-<!-- Session tags -->
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Session tags</div>
-</div>
-<div class="session-tags">
-<span class="session-tag">calm</span>
-<span class="session-tag">focused</span>
-<span class="session-tag">stable</span>
-<span class="session-tag">low stress</span>
-</div>
-</div>
-<!-- Mini report -->
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Mini emotional report</div>
-</div>
-<div class="mini-report">
-<div class="report-item">
-<span class="label">Peak calm</span>
-<span class="value">82%</span>
-</div>
-<div class="report-item">
-<span class="label">Focus duration</span>
-<span class="value">14 min</span>
-</div>
-<div class="report-item">
-<span class="label">Stress recovery</span>
-<span class="value">Fast</span>
-</div>
-</div>
-</div>
-</div>
-</section>
-<!-- EMOTIONAL AURA / DNA / TRAIL / BREATH -->
-<section class="section-block" id="visual-layer">
-<h2>Visual emotional layer</h2> <div class="emo-grid emo-grid-2">
-<!-- Aura + DNA -->
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Emotional aura &amp; DNA</div>
-</div>
-<div class="emo-flex" style="gap: 18px; align-items: center;">
-<div class="emo-aura-wrapper calm">
-<div class="emo-aura-ring"></div>
-<div class="emo-aura-ring"></div>
-<div class="emo-aura-ring"></div>
-<div class="emo-aura-core"></div>
-</div>
-<div class="emotion-dna">
-<div class="dna-strand">A â€º Calm</div>
-<div class="dna-strand">T â€º Focus</div>
-<div class="dna-strand">G â€º Stability</div>
-<div class="dna-strand">C â€º Recovery</div>
-</div>
-</div>
-</div>
-<!-- Trail + Calm Breath -->
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Trail &amp; calm breath</div>
-</div>
-<div class="emotion-trail">
-<div class="trail-step">Calm â²' Focus</div>
-<div class="trail-step">Focus â²' Stress</div>
-<div class="trail-step">Stress â²' Calm</div>
-</div>
-<div class="calm-breath" style="margin-top: 14px;">
-<div class="breath-circle"></div>
-<p class="breath-instruction">Inhaleâ€¦ Exhaleâ€¦</p>
-</div>
-</div>
-</div>
-</section>
-<!-- NATASHA SIGNATURE + HORIZON -->
-<section class="section-block" id="natasha-layer">
-<h2>Natasha layer</h2>
-<div class="emo-grid emo-grid-2">
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Natasha signature</div>
-</div>
-<div class="emotion-challenge">
-<p>Soft intuition. Deep clarity. Emotional precision.</p>
-<p>Your companionâ€™s unique emotional fingerprint.</p>
-</div>
-</div>
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Emotional horizon</div>
-</div>
-<div class="emotion-challenge"> <p>Your emotional trajectory is expanding toward clarity.</p>
-<p>Long-term trend: steady growth in calmness and focus.</p>
-</div>
-</div>
-</div>
-</section>
-<!-- ROADMAP -->
-<section class="section-block" id="roadmap">
-<h2>Roadmap</h2>
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">From demo to platform</div>
-</div>
-<div class="emo-grid">
-<div class="roadmap-phase">
-<div class="roadmap-phase-dot"></div>
-<span>Phase 1: PPG + LLM (done)</span>
-</div>
-<div class="roadmap-phase">
-<div class="roadmap-phase-dot"></div>
-<span>Phase 2: Face + Voice</span>
-</div>
-<div class="roadmap-phase">
-<div class="roadmap-phase-dot"></div>
-<span>Phase 3: Multimodal fusion</span>
-</div>
-<div class="roadmap-phase">
-<div class="roadmap-phase-dot"></div>
-<span>Phase 4: AI Coach</span>
-</div>
-<div class="roadmap-phase">
-<div class="roadmap-phase-dot"></div>
-<span>Phase 5: Emotional OS platform</span>
-</div>
-</div>
-</div>
-</section>
-</main>
-<footer class="emo-page-footer"> <div class="emo-footer-inner"> <span>Emopulse Â· Emotional AI 
-prototype</span> <span>Built around privacy, clarity and emotional resonance.</span> </div>
-</footer> </body> </html> <!DOCTYPE html>
- <html class="emopulse-theme" lang="en"> <head>
-<meta charset="utf-8"/> <title>Emopulse â€ª Emotional AI Demo</title> <meta content="width=device-width, initial-scale=1" name="viewport"/> <!-- CSS: update path if filename differs --> <link href="styles.css" rel="stylesheet"/> <link href="favicon.png" rel="icon" type="image/png"/> <link href="favicon.png" rel="apple-touch-icon"/> <meta content="#0b0f1c" name="theme-color"/> </head>
-<body class="emopulse-theme"> <header class="emo-page-header"> <div class="emo-header-inner"> <div class="emo-logo-block"> <div class="emo-logo-mark"></div> <div class="emo-logo-text"> <span class="emo-logo-title">Emopulse</span> <span class="emo-logo-sub">Emotional AI that sees, feels, understands</span> </div> </div> <button class="ai-coach-button"> <div class="ai-coach-pulse"></div> <span>Ask Natasha</span> </button>
-</div> </header>
-<main class="emo-main"> <!-- HERO / LIVE DEMO BAND --> <section class="hero-section"> <div class="hero-grid"> <!-- Left: Aura + Drift --> <div class="hero-visual"> <div class="emo-card"> <div class="emo-card-header"> <div class="emo-card-title">Live emotional radar</div> <span class="emo-pill emo-tag-soft">Demo mode</span> </div> <div class="emo-hero-visual-row"> <!-- 
-Aura --> <div class="emo-aura-wrapper calm"> <div class="emo-aura-ring"></div> <div class="emo-aura-ring"></div> <div class="emo-aura-ring"></div> <div class="emo-aura-core"></div>
-</div> <!-- Drift spiral --> <div class="drift-core"> <div class="drift-spiral-shell"> <div class="drift-layer"></div> <div class="drift-layer"></div> <div class="drift-layer"></div> <div class="drift-spiral calm strong"></div> <div class="drift-spiral-orbit"> <div class="drift-spiral-dot"></div>
-</div> </div> <div> <div class="drift-label">Emotional drift</div> <div class="drift-value positive">+12%</div> <div class="drift-caption">Calmness increasing</div> </div> </div> </div> <div class="scenario-buttons"> <button class="scenario-button">Smile</button> <button class="scenario-button">Neutral</button> <button class="scenario-button">Stress</button> <button class="scenario-button">High stress</button> <button class="scenario-button">Calm mode</button>
-<button class="scenario-button">Focus mode</button> </div> </div> </div>
-<!-- Right: Copy + Score + Weather -->
-<div class="hero-copy">
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Emotional AI demo</div>
-<span class="emo-pill emo-tag-soft">Prototype âÐ  LLM + signals</span>
-</div>
-<h1 class="hero-title">  
-          Real-time emotional intelligence<br/>  
-          from your camera &amp; micro-signals  
-        </h1>
-<p class="hero-subtitle">  
-          Emopulse transforms pulse, micro-signals, and context into a living emotional dashboard: drift, 
-stability, risk, and narrative â€ª in seconds.  
-        </p>
-<div class="hero-cta-row">
-<button class="ai-coach-button">
-<div class="ai-coach-pulse"></div>
-<span>Try live demo</span>
-</button>
-<div class="emotional-signature-pill">
-<div class="emotional-signature-dot"></div>
-<span>Todayâ€™s emotional signature: Calm Focused Energy</span>
-</div>
-</div>
-</div>
-<div class="hero-metrics-row">
-<div class="emopulse-score-card">
-<div class="emopulse-score-label">Emopulse Score</div>
-<div class="emopulse-score-value">78 / 100</div>
-<div class="emopulse-score-bar">
-<div class="emopulse-score-bar-fill"></div>
-</div>
-</div>
-<div class="emotional-weather-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Emotional weather</div>
-</div>
-<div class="emo-flex emo-flex-between">
-<div>
-<div class="emotional-weather-main">Clear with a chance of focus</div>
-<div class="emotional-weather-tag">short-term outlook: low stress, rising clarity</div>
-</div> <div class="emotional-weather-icon calm">
-<!-- icon can be added later -->
-</div>
-</div>
-</div>
-</div>
-<div class="privacy-banner">  
-        We never store your data. All processing is real-time. You stay in control.  
-      </div>
-</div>
-</div>
-</section>
-<!-- MINI DASHBOARD LAYER -->
-<section class="section-block" id="mini-dashboard">
-<h2>Mini dashboard</h2>
-<div class="mini-dashboard">
-<div class="mini-metric-card">
-<div class="mini-metric-label">Pulse</div>
-<div class="mini-metric-value">74 bpm</div>
-<div class="mini-metric-pill">Signal quality: high</div>
-</div>
-<div class="mini-metric-card">
-<div class="mini-metric-label">Emotion</div>
-<div class="mini-metric-value">Calm</div>
-<div class="mini-metric-pill">Valence: positive</div>
-</div>
-<div class="mini-metric-card">
-<div class="mini-metric-label">Confidence</div>
-<div class="mini-metric-value">91%</div>
-<div class="mini-metric-pill">Stable pattern</div>
-</div>
-<div class="mini-metric-card">
-<div class="mini-metric-label">Stress risk</div>
-<div class="mini-metric-value">18 / 100</div>
-<div class="mini-metric-pill">Low &amp; contained</div>
-</div>
-</div>
-</section>
-<!-- MOOD MAP + TIMELINE -->
-<section class="section-block" id="mood-map-timeline">
-<h2>Emotional map &amp; timeline</h2>
-<div class="emo-grid emo-grid-2">
-<!-- Mood Map -->
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Mood map</div>
-<span class="emo-pill emo-tag-soft">Valence / arousal</span>
-</div>
-<div class="mood-map">
-<div class="mood-map-grid"></div>
-<div class="mood-map-axis-label top">High arousal</div>
-<div class="mood-map-axis-label bottom">Low arousal</div>
-<div class="mood-map-axis-label left">Negative</div>
-<div class="mood-map-axis-label right">Positive</div>
-<div class="mood-map-dot" style="left: 65%; top: 42%;"></div> </div>
-</div>
-<!-- Timeline -->
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Emotion timeline</div>
-<span class="emo-pill emo-tag-soft">Last 60 seconds</span>
-</div>
-<div class="emotion-timeline">
-<div class="emotion-timeline-track">
-<div class="emotion-timeline-progress" style="transform: scaleX(1);"></div>
-<div class="emotion-timeline-emotion-dot calm" style="left: 10%;"></div>
-<div class="emotion-timeline-emotion-dot focus" style="left: 35%;"></div>
-<div class="emotion-timeline-emotion-dot stress" style="left: 58%;"></div>
-<div class="emotion-timeline-emotion-dot calm" style="left: 82%;"></div>
-</div>
-</div>
-</div>
-</div>
-</section>
-<!-- EMOTION RINGS + HEATMAP -->
-<section class="section-block" id="rings-heatmap">
-<h2>Rings &amp; heatmap</h2>
-<div class="emo-grid emo-grid-2">
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Emotion rings</div>
-<span class="emo-pill emo-tag-soft">Calm / Focus / Stress</span>
-</div>
-<div class="emotion-rings animate">
-<div class="emotion-ring calm"></div>
-<div class="emotion-ring focus"></div>
-<div class="emotion-ring stress"></div>
-<div class="emotion-ring joy"></div>
-</div>
-</div>
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Emotion heatmap</div>
-<span class="emo-pill emo-tag-soft">Intensity over time</span>
-</div>
-<div class="emotion-heatmap">
-<!-- fake pattern -->
-<div class="emotion-heatmap-cell low"></div>
-<div class="emotion-heatmap-cell low"></div>
-<div class="emotion-heatmap-cell medium"></div>
-<div class="emotion-heatmap-cell high"></div>
-<div class="emotion-heatmap-cell medium"></div>
-<div class="emotion-heatmap-cell low"></div>
-<div class="emotion-heatmap-cell low"></div>
-<div class="emotion-heatmap-cell medium"></div>
-<div class="emotion-heatmap-cell high"></div>
-<div class="emotion-heatmap-cell high"></div>
-<div class="emotion-heatmap-cell medium"></div>
-<div class="emotion-heatmap-cell low"></div> <!-- more small cells can be duplicated -->
-</div>
-</div>
-</div>
-</section>
-<!-- EXPERIENCE LAYER: STORY, CHALLENGE, STREAKS, MILESTONES -->
-<section class="section-block" id="experience-layer">
-<h2>Experience layer</h2>
-<div class="emo-grid emo-grid-2">
-<!-- Emotion Story -->
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Emotion story</div>
-</div>
-<div class="emotion-challenge">
-<div class="emotion-challenge-label">Session narrative</div>
-<p>Your emotional journey today began in calmness.</p>
-<p>You transitioned into focused clarity.</p>
-<p>A brief stress spike appeared but resolved quickly.</p>
-</div>
-</div>
-<!-- Emotion Challenge -->
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Emotion challenge</div>
-</div>
-<div class="emotion-challenge">
-<div class="emotion-challenge-label">Challenge</div>
-<p>Hold calmness for 60 seconds.</p>
-<button class="scenario-button">Start challenge</button>
-</div>
-</div>
-</div>
-<div class="emo-grid emo-grid-2" style="margin-top: 16px;">
-<!-- Emotion streaks -->
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Emotion streaks</div>
-</div>
-<div class="emotion-streaks">
-<div class="streak-item">
-<span class="streak-label">Calm streak</span>
-<span class="streak-value">3 days</span>
-</div>
-<div class="streak-item">
-<span class="streak-label">Focus streak</span>
-<span class="streak-value">1 day</span>
-</div>
-</div>
-</div>
-<!-- Emotional milestones -->
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Emotional milestones</div> </div>
-<div class="emotion-badges">
-<div class="emotion-badge calm">Calm Master</div>
-<div class="emotion-badge focus">Focus Achiever</div>
-<div class="emotion-badge stress">Stress Recovery</div>
-</div>
-</div>
-</div>
-</section>
-<!-- AI COACH + INSIGHTS -->
-<section class="section-block" id="ai-coach-layer">
-<h2>AI insights &amp; coach</h2>
-<div class="emo-grid emo-grid-2">
-<!-- AI Reflection -->
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">AI reflection</div>
-</div>
-<div class="emotion-challenge">
-<p>â€úYour emotional flow today shows resilience.â€ </p>
-<p>â€úYou adapted well to stress fluctuations.â€ </p>
-</div>
-</div>
-<!-- AI Mood Coach -->
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">AI mood coach</div>
-</div>
-<p class="hero-subtitle" style="margin-bottom: 12px;">  
-        Ask: <em>â€úWhat should I do now?â€ </em> and get a short, emotionally precise suggestion.  
-      </p>
-<button class="ai-coach-button">
-<div class="ai-coach-pulse"></div>
-<span>What should I do now?</span>
-</button>
-</div>
-</div>
-</section>
-<!-- EMOTIONAL COMPASS & TAGS & MINI REPORT -->
-<section class="section-block" id="compass-tags-report">
-<h2>Compass, tags &amp; mini report</h2>
-<div class="emo-grid emo-grid-3">
-<!-- Compass -->
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Emotional compass</div>
-</div>
-<div class="focus-mode-overlay">
-<div class="session-tags">
-<span class="session-tag">Calm</span>
-<span class="session-tag">Joy</span>
-<span class="session-tag">Focus</span>
-<span class="session-tag">Stress</span>
-</div>
-<p style="margin-top: 10px; font-size: 13px;">            Current heading: calm + focus, low stress, high stability.  
-        </p>
-</div>
-</div>
-<!-- Session tags -->
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Session tags</div>
-</div>
-<div class="session-tags">
-<span class="session-tag">calm</span>
-<span class="session-tag">focused</span>
-<span class="session-tag">stable</span>
-<span class="session-tag">low stress</span>
-</div>
-</div>
-<!-- Mini report -->
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Mini emotional report</div>
-</div>
-<div class="mini-report">
-<div class="report-item">
-<span class="label">Peak calm</span>
-<span class="value">82%</span>
-</div>
-<div class="report-item">
-<span class="label">Focus duration</span>
-<span class="value">14 min</span>
-</div>
-<div class="report-item">
-<span class="label">Stress recovery</span>
-<span class="value">Fast</span>
-</div>
-</div>
-</div>
-</div>
-</section>
-<!-- EMOTIONAL AURA / DNA / TRAIL / BREATH -->
-<section class="section-block" id="visual-layer">
-<h2>Visual emotional layer</h2>
-<div class="emo-grid emo-grid-2">
-<!-- Aura + DNA -->
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Emotional aura &amp; DNA</div>
-</div>
-<div class="emo-flex" style="gap: 18px; align-items: center;">
-<div class="emo-aura-wrapper calm">
-<div class="emo-aura-ring"></div>
-<div class="emo-aura-ring"></div>
-<div class="emo-aura-ring"></div>
-<div class="emo-aura-core"></div>
-</div>
-<div class="emotion-dna"> <div class="dna-strand">A â€º Calm</div>
-<div class="dna-strand">T â€º Focus</div>
-<div class="dna-strand">G â€º Stability</div>
-<div class="dna-strand">C â€º Recovery</div>
-</div>
-</div>
-</div>
-<!-- Trail + Calm Breath -->
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Trail &amp; calm breath</div>
-</div>
-<div class="emotion-trail">
-<div class="trail-step">Calm â²' Focus</div>
-<div class="trail-step">Focus â²' Stress</div>
-<div class="trail-step">Stress â²' Calm</div>
-</div>
-<div class="calm-breath" style="margin-top: 14px;">
-<div class="breath-circle"></div>
-<p class="breath-instruction">Inhaleâ€¦ Exhaleâ€¦</p>
-</div>
-</div>
-</div>
-</section>
-<!-- NATASHA SIGNATURE + HORIZON -->
-<section class="section-block" id="natasha-layer">
-<h2>Natasha layer</h2>
-<div class="emo-grid emo-grid-2">
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Natasha signature</div>
-</div>
-<div class="emotion-challenge">
-<p>Soft intuition. Deep clarity. Emotional precision.</p>
-<p>Your companionâ€™s unique emotional fingerprint.</p>
-</div>
-</div>
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Emotional horizon</div>
-</div>
-<div class="emotion-challenge">
-<p>Your emotional trajectory is expanding toward clarity.</p>
-<p>Long-term trend: steady growth in calmness and focus.</p>
-</div>
-</div>
-</div>
-</section>
-<!-- ROADMAP -->
-<section class="section-block" id="roadmap">
-<h2>Roadmap</h2>
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">From demo to platform</div>
-</div> <div class="emo-grid">
-<div class="roadmap-phase">
-<div class="roadmap-phase-dot"></div>
-<span>Phase 1: PPG + LLM (done)</span>
-</div>
-<div class="roadmap-phase">
-<div class="roadmap-phase-dot"></div>
-<span>Phase 2: Face + Voice</span>
-</div>
-<div class="roadmap-phase">
-<div class="roadmap-phase-dot"></div>
-<span>Phase 3: Multimodal fusion</span>
-</div>
-<div class="roadmap-phase">
-<div class="roadmap-phase-dot"></div>
-<span>Phase 4: AI Coach</span>
-</div>
-<div class="roadmap-phase">
-<div class="roadmap-phase-dot"></div>
-<span>Phase 5: Emotional OS platform</span>
-</div>
-</div>
-</div>
-</section>
-</main>
-<footer class="emo-page-footer"> <div class="emo-footer-inner"> <span>Emopulse Â· Emotional AI 
-prototype</span> <span>Built around privacy, clarity and emotional resonance.</span> </div>
-</footer> </body> </html>  
-  
-  
-kias skriptas:  
-  
-<!DOCTYPE html>
+html,body {
+  height: 100%;
+}
 
-<html class="emopulse-theme" lang="en">
-<head>
-<meta charset="utf-8"/>
-<title>Emopulse â€ª Emotional AI Demo</title>
-<meta content="width=device-width, initial-scale=1" name="viewport"/>
-<!-- CSS -->
-<link href="styles.css" rel="stylesheet"/>
-<!-- Icons & theme -->
-<link href="favicon.png" rel="icon" type="image/png"/>
-<link href="favicon.png" rel="apple-touch-icon"/>
-<meta content="#0b0f1c" name="theme-color"/>
-</head>
-<body class="emopulse-theme">
-<header class="emo-page-header">
-<div class="emo-header-inner">
-<div class="emo-logo-block">
-<div class="emo-logo-mark"></div>
-<div class="emo-logo-text">
-<span class="emo-logo-title">Emopulse</span>
-<span class="emo-logo-sub">Emotional AI that sees, feels, understands</span>
-</div> </div>
-<button class="ai-coach-button">
-<div class="ai-coach-pulse"></div>
-<span>Ask Natasha</span>
-</button>
-</div>
-</header>
-<main class="emo-main">
-<!-- HERO / LIVE DEMO BAND -->
-<section class="hero-section">
-<div class="hero-grid">
-<!-- Left: Aura + Drift -->
-<div class="hero-visual">
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Live emotional radar</div>
-<span class="emo-pill emo-tag-soft">Demo mode</span>
-</div>
-<div class="emo-hero-visual-row">
-<!-- Aura -->
-<div class="emo-aura-wrapper calm">
-<div class="emo-aura-ring"></div>
-<div class="emo-aura-ring"></div>
-<div class="emo-aura-ring"></div>
-<div class="emo-aura-core"></div>
-</div>
-<!-- Drift spiral -->
-<div class="drift-core">
-<div class="drift-spiral-shell">
-<div class="drift-layer"></div>
-<div class="drift-layer"></div>
-<div class="drift-layer"></div>
-<div class="drift-spiral calm strong"></div>
-<div class="drift-spiral-orbit">
-<div class="drift-spiral-dot"></div>
-</div>
-</div>
-<div>
-<div class="drift-label">Emotional drift</div>
-<div class="drift-value positive">+12%</div>
-<div class="drift-caption">Calmness increasing</div>
-</div>
-</div>
-</div>
-<div class="scenario-buttons">
-<button class="scenario-button">Smile</button>
-<button class="scenario-button">Neutral</button>
-<button class="scenario-button">Stress</button>
-<button class="scenario-button">High stress</button>
-<button class="scenario-button">Calm mode</button>
-<button class="scenario-button">Focus mode</button>
-</div>
-</div>
-</div>
-<!-- Right: Copy + Score + Weather --> <div class="hero-copy">
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Emotional AI demo</div>
-<span class="emo-pill emo-tag-soft">Prototype âÐ  LLM + signals</span>
-</div>
-<h1 class="hero-title">  
-                            Real-time emotional intelligence<br/>  
-                            from your camera &amp; micro-signals  
-                        </h1>
-<p class="hero-subtitle">  
-                            Emopulse transforms pulse, micro-signals, and context into a living emotional 
-dashboard:  
-                            drift, stability, risk, and narrative â€ª in seconds.  
-                        </p>
-<div class="hero-cta-row">
-<button class="ai-coach-button">
-<div class="ai-coach-pulse"></div>
-<span>Try live demo</span>
-</button>
-<div class="emotional-signature-pill">
-<div class="emotional-signature-dot"></div>
-<span>Todayâ€™s emotional signature: Calm Focused Energy</span>
-</div>
-</div>
-</div>
-<div class="hero-metrics-row">
-<div class="emopulse-score-card">
-<div class="emopulse-score-label">Emopulse Score</div>
-<div class="emopulse-score-value" id="emopulseScoreValue">78 / 100</div>
-<div class="emopulse-score-bar">
-<div class="emopulse-score-bar-fill" id="emopulseScoreBarFill"></div>
-</div>
-</div>
-<div class="emotional-weather-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Emotional weather</div>
-</div>
-<div class="emo-flex emo-flex-between">
-<div>
-<div class="emotional-weather-main" id="emotionalWeatherMain">  
-                                        Clear with a chance of focus  
-                                    </div>
-<div class="emotional-weather-tag" id="emotionalWeatherTag">  
-                                        short-term outlook: low stress, rising clarity  
-                                    </div>
-</div>
-<div class="emotional-weather-icon calm" id="emotionalWeatherIcon">
-<!-- icon later -->
-</div>
-</div>
-</div>
-</div>
-<div class="privacy-banner">  
-                        We never store your data. All processing is real-time. You stay in control.                      </div>
-</div>
-</div>
-</section>
-<!-- MINI DASHBOARD LAYER -->
-<section class="section-block" id="mini-dashboard">
-<h2>Mini dashboard</h2>
-<div class="mini-dashboard">
-<div class="mini-metric-card">
-<div class="mini-metric-label">Pulse</div>
-<div class="mini-metric-value" id="pulseValue">74 bpm</div>
-<div class="mini-metric-pill" id="pulseQuality">Signal quality: high</div>
-</div>
-<div class="mini-metric-card">
-<div class="mini-metric-label">Emotion</div>
-<div class="mini-metric-value" id="miniEmotionValue">Calm</div>
-<div class="mini-metric-pill" id="miniValence">Valence: positive</div>
-</div>
-<div class="mini-metric-card">
-<div class="mini-metric-label">Confidence</div>
-<div class="mini-metric-value" id="confidenceValue">91%</div>
-<div class="mini-metric-pill" id="patternStability">Stable pattern</div>
-</div>
-<div class="mini-metric-card">
-<div class="mini-metric-label">Stress risk</div>
-<div class="mini-metric-value" id="stressRiskValue">18 / 100</div>
-<div class="mini-metric-pill" id="stressRiskLabel">Low &amp; contained</div>
-</div>
-</div>
-</section>
-<!-- MOOD MAP + TIMELINE -->
-<section class="section-block" id="mood-map-timeline">
-<h2>Emotional map &amp; timeline</h2>
-<div class="emo-grid emo-grid-2">
-<!-- Mood Map -->
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Mood map</div>
-<span class="emo-pill emo-tag-soft">Valence / arousal</span>
-</div>
-<div class="mood-map">
-<div class="mood-map-grid"></div>
-<div class="mood-map-axis-label top">High arousal</div>
-<div class="mood-map-axis-label bottom">Low arousal</div>
-<div class="mood-map-axis-label left">Negative</div>
-<div class="mood-map-axis-label right">Positive</div>
-<div class="mood-map-dot" id="moodMapDot" style="left: 65%; top: 42%;"></div>
-</div>
-</div>
-<!-- Timeline -->
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Emotion timeline</div>
-<span class="emo-pill emo-tag-soft">Last 60 seconds</span>
-</div>
-<div class="emotion-timeline"> <div class="emotion-timeline-track">
-<div class="emotion-timeline-progress" id="emotionTimelineProgress" style="transform: scaleX(1);"></div>
-<div class="emotion-timeline-emotion-dot calm" id="timelineDot1" style="left: 
-10%;"></div>
-<div class="emotion-timeline-emotion-dot focus" id="timelineDot2" style="left: 
-35%;"></div>
-<div class="emotion-timeline-emotion-dot stress" id="timelineDot3" style="left: 
-58%;"></div>
-<div class="emotion-timeline-emotion-dot calm" id="timelineDot4" style="left: 
-82%;"></div>
-</div>
-</div>
-</div>
-</div>
-</section>
-<!-- EMOTION RINGS + HEATMAP -->
-<section class="section-block" id="rings-heatmap">
-<h2>Rings &amp; heatmap</h2>
-<div class="emo-grid emo-grid-2">
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Emotion rings</div>
-<span class="emo-pill emo-tag-soft">Calm / Focus / Stress</span>
-</div>
-<div class="emotion-rings animate">
-<div class="emotion-ring calm" id="ringCalm"></div>
-<div class="emotion-ring focus" id="ringFocus"></div>
-<div class="emotion-ring stress" id="ringStress"></div>
-<div class="emotion-ring joy" id="ringJoy"></div>
-</div>
-</div>
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Emotion heatmap</div>
-<span class="emo-pill emo-tag-soft">Intensity over time</span>
-</div>
-<div class="emotion-heatmap" id="emotionHeatmap">
-<!-- fake pattern, vÄÐliau galima generuoti -->
-<div class="emotion-heatmap-cell low"></div>
-<div class="emotion-heatmap-cell low"></div>
-<div class="emotion-heatmap-cell medium"></div>
-<div class="emotion-heatmap-cell high"></div>
-<div class="emotion-heatmap-cell medium"></div>
-<div class="emotion-heatmap-cell low"></div>
-<div class="emotion-heatmap-cell low"></div>
-<div class="emotion-heatmap-cell medium"></div>
-<div class="emotion-heatmap-cell high"></div>
-<div class="emotion-heatmap-cell high"></div>
-<div class="emotion-heatmap-cell medium"></div>
-<div class="emotion-heatmap-cell low"></div>
-</div>
-</div>
-</div>
-</section>
-<!-- EXPERIENCE LAYER: STORY, CHALLENGE, STREAKS, MILESTONES -->
-<section class="section-block" id="experience-layer">
-<h2>Experience layer</h2>
-<div class="emo-grid emo-grid-2">
-<!-- Emotion Story -->
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Emotion story</div>
-</div>
-<div class="emotion-challenge">
-<div class="emotion-challenge-label">Session narrative</div>
-<p id="storyLine1">Your emotional journey today began in calmness.</p>
-<p id="storyLine2">You transitioned into focused clarity.</p>
-<p id="storyLine3">A brief stress spike appeared but resolved quickly.</p>
-</div>
-</div>
-<!-- Emotion Challenge -->
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Emotion challenge</div>
-</div>
-<div class="emotion-challenge">
-<div class="emotion-challenge-label">Challenge</div>
-<p id="challengeText">Hold calmness for 60 seconds.</p>
-<button class="scenario-button" id="challengeButton">Start challenge</button>
-</div>
-</div>
-</div>
-<div class="emo-grid emo-grid-2" style="margin-top: 16px;">
-<!-- Emotion streaks -->
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Emotion streaks</div>
-</div>
-<div class="emotion-streaks">
-<div class="streak-item">
-<span class="streak-label">Calm streak</span>
-<span class="streak-value" id="calmStreak">3 days</span>
-</div>
-<div class="streak-item">
-<span class="streak-label">Focus streak</span>
-<span class="streak-value" id="focusStreak">1 day</span>
-</div>
-</div>
-</div>
-<!-- Emotional milestones -->
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Emotional milestones</div>
-</div>
-<div class="emotion-badges">
-<div class="emotion-badge calm" id="badgeCalm">Calm Master</div>
-<div class="emotion-badge focus" id="badgeFocus">Focus Achiever</div>
-<div class="emotion-badge stress" id="badgeStress">Stress Recovery</div>
-</div> </div>
-</div>
-</section>
-<!-- AI COACH + INSIGHTS -->
-<section class="section-block" id="ai-coach-layer">
-<h2>AI insights &amp; coach</h2>
-<div class="emo-grid emo-grid-2">
-<!-- AI Reflection -->
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">AI reflection</div>
-</div>
-<div class="emotion-challenge">
-<p id="aiReflectionLine1">â€úYour emotional flow today shows resilience.â€ </p>
-<p id="aiReflectionLine2">â€úYou adapted well to stress fluctuations.â€ </p>
-</div>
-</div>
-<!-- AI Mood Coach -->
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">AI mood coach</div>
-</div>
-<p class="hero-subtitle" style="margin-bottom: 12px;">  
-                        Ask: <em>â€úWhat should I do now?â€ </em> and get a short, emotionally precise 
-suggestion.  
-                    </p>
-<button class="ai-coach-button" id="aiCoachButton">
-<div class="ai-coach-pulse"></div>
-<span>What should I do now?</span>
-</button>
-</div>
-</div>
-</section>
-<!-- EMOTIONAL COMPASS & TAGS & MINI REPORT -->
-<section class="section-block" id="compass-tags-report">
-<h2>Compass, tags &amp; mini report</h2>
-<div class="emo-grid emo-grid-3">
-<!-- Compass -->
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Emotional compass</div>
-</div>
-<div class="focus-mode-overlay">
-<div class="session-tags" id="compassTags">
-<span class="session-tag">Calm</span>
-<span class="session-tag">Joy</span>
-<span class="session-tag">Focus</span>
-<span class="session-tag">Stress</span>
-</div>
-<p id="compassHeading" style="margin-top: 10px; font-size: 13px;">  
-                            Current heading: calm + focus, low stress, high stability.  
-                        </p>
-</div>
-</div>
-<!-- Session tags -->
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Session tags</div>
-</div>
-<div class="session-tags" id="sessionTags">
-<span class="session-tag">calm</span>
-<span class="session-tag">focused</span>
-<span class="session-tag">stable</span>
-<span class="session-tag">low stress</span>
-</div>
-</div>
-<!-- Mini report -->
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Mini emotional report</div>
-</div>
-<div class="mini-report">
-<div class="report-item">
-<span class="label">Peak calm</span>
-<span class="value" id="peakCalm">82%</span>
-</div>
-<div class="report-item">
-<span class="label">Focus duration</span>
-<span class="value" id="focusDuration">14 min</span>
-</div>
-<div class="report-item">
-<span class="label">Stress recovery</span>
-<span class="value" id="stressRecovery">Fast</span>
-</div>
-</div>
-</div>
-</div>
-</section>
-<!-- EMOTIONAL AURA / DNA / TRAIL / BREATH -->
-<section class="section-block" id="visual-layer">
-<h2>Visual emotional layer</h2>
-<div class="emo-grid emo-grid-2">
-<!-- Aura + DNA -->
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Emotional aura &amp; DNA</div>
-</div>
-<div class="emo-flex" style="gap: 18px; align-items: center;">
-<div class="emo-aura-wrapper calm" id="emotionalAura">
-<div class="emo-aura-ring"></div>
-<div class="emo-aura-ring"></div>
-<div class="emo-aura-ring"></div>
-<div class="emo-aura-core"></div>
-</div>
-<div class="emotion-dna" id="emotionDna">
-<div class="dna-strand">A â€º Calm</div>
-<div class="dna-strand">T â€º Focus</div>
-<div class="dna-strand">G â€º Stability</div>
-<div class="dna-strand">C â€º Recovery</div>
-</div> </div>
-</div>
-<!-- Trail + Calm Breath -->
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Trail &amp; calm breath</div>
-</div>
-<div class="emotion-trail" id="emotionTrail">
-<div class="trail-step">Calm â²' Focus</div>
-<div class="trail-step">Focus â²' Stress</div>
-<div class="trail-step">Stress â²' Calm</div>
-</div>
-<div class="calm-breath" style="margin-top: 14px;">
-<div class="breath-circle"></div>
-<p class="breath-instruction">Inhaleâ€¦ Exhaleâ€¦</p>
-</div>
-</div>
-</div>
-</section>
-<!-- NATASHA SIGNATURE + HORIZON -->
-<section class="section-block" id="natasha-layer">
-<h2>Natasha layer</h2>
-<div class="emo-grid emo-grid-2">
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Natasha signature</div>
-</div>
-<div class="emotion-challenge">
-<p>Soft intuition. Deep clarity. Emotional precision.</p>
-<p>Your companionâ€™s unique emotional fingerprint.</p>
-</div>
-</div>
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">Emotional horizon</div>
-</div>
-<div class="emotion-challenge">
-<p>Your emotional trajectory is expanding toward clarity.</p>
-<p>Long-term trend: steady growth in calmness and focus.</p>
-</div>
-</div>
-</div>
-</section>
-<!-- ROADMAP -->
-<section class="section-block" id="roadmap">
-<h2>Roadmap</h2>
-<div class="emo-card">
-<div class="emo-card-header">
-<div class="emo-card-title">From demo to platform</div>
-</div>
-<div class="emo-grid">
-<div class="roadmap-phase">
-<div class="roadmap-phase-dot"></div>
-<span>Phase 1: PPG + LLM (done)</span>
-</div> <div class="roadmap-phase">
-<div class="roadmap-phase-dot"></div>
-<span>Phase 2: Face + Voice</span>
-</div>
-<div class="roadmap-phase">
-<div class="roadmap-phase-dot"></div>
-<span>Phase 3: Multimodal fusion</span>
-</div>
-<div class="roadmap-phase">
-<div class="roadmap-phase-dot"></div>
-<span>Phase 4: AI Coach</span>
-</div>
-<div class="roadmap-phase">
-<div class="roadmap-phase-dot"></div>
-<span>Phase 5: Emotional OS platform</span>
-</div>
-</div>
-</div>
-</section>
-<!-- LIVE EMOTION SCAN + RADAR -->
-<section class="section-block emotion-section" id="live-emotion-scan">
-<h2>Live Emotion Scan</h2>
-<!-- Kamera (paslÄÐpta arba stilizuojama vÄÐliau) -->
-<video autoplay="" id="camera" playsinline="" style="display:none;"></video>
-<div class="emotion-layout">
-<!-- KairÄÐ pusÄÐ â€ª pagrindinÄÐ emocija -->
-<div class="emotion-panel">
-<div id="emotionLabel">Waiting for data...</div>
-<div id="emotionIntensity">Intensity: 0%</div>
-<div id="emotionHistoryTitle">Recent emotions:</div>
-<ul id="emotionHistory"></ul>
-</div>
-<!-- DeÅ¡inÄÐ pusÄÐ â€ª radaras -->
-<div class="emotion-radar-wrapper">
-<canvas height="300" id="emotionRadar" width="300"></canvas>
-</div>
-</div>
-<!-- Paprastas tekstinis output, jei norÄÐsi -->
-<div id="emotionOutput" style="margin-top: 12px; font-size: 13px; opacity: 0.8;">  
-                Waiting for data...  
-            </div>
-</section>
-</main>
-<footer class="emo-page-footer">
-<div class="emo-footer-inner">
-<span>Emopulse Â· Emotional AI prototype</span>
-<span>Built around privacy, clarity and emotional resonance.</span>
-</div>
-</footer>
-<!-- Vienintelis script Ä¯kÄÐlimas -->
-<script src="script.js"></script> </body>
-</html>
+* {
+    -moz-box-sizing: border-box;
+}
+
+body {
+  background-color: #ededed;
+  color: #424242;
+  margin: 0;
+  font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-size:14px;
+  line-height:1.428571429;
+}
+
+h1,h2,h3,h4,h5,h6,.h1,.h2,.h3,.h4,.h5,.h6{font-family:"HelveticaNeue-Light","Helvetica Neue Light","Helvetica Neue",Helvetica,Arial,"Lucida Grande",sans-serif;font-weight:normal;line-height:1.1;color:#333}h1 small,h2 small,h3 small,h4 small,h5 small,h6 small,.h1 small,.h2 small,.h3 small,.h4 small,.h5 small,.h6 small{font-weight:normal;line-height:1}
+h1,.h1{font-size:45px;line-height:48px}
+h2,.h2{font-size:36px;line-height:42px}
+h3,.h3{font-size:28px;line-height:36px}
+h4,.h4{font-size:24px;line-height:25px}
+h5,.h5{font-size:20px;line-height:24px}
+h6,.h6{font-size:18px;line-height:24px}
+
+a{color:#3282e6;}
+a:hover,a:focus{color:#165db5;text-decoration:underline}
+
+.text-center{text-align:center}
+
+.wrap {
+  min-height: 100%;
+  .display: table;
+  .height: 100%;
+}
+
+.top-bar {
+  height: 20px;
+  background: #71a100;
+  background: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdmlld0JveD0iMCAwIDEgMSIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSI+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJncmFkLXVjZ2ctZ2VuZXJhdGVkIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjAlIiB5MT0iMCUiIHgyPSIwJSIgeTI9IjEwMCUiPgogICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iIzcxYTEwMCIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiM2ZmExMDAiIHN0b3Atb3BhY2l0eT0iMSIvPgogIDwvbGluZWFyR3JhZGllbnQ+CiAgPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjEiIGhlaWdodD0iMSIgZmlsbD0idXJsKCNncmFkLXVjZ2ctZ2VuZXJhdGVkKSIgLz4KPC9zdmc+);
+  background: -moz-linear-gradient(top,  #71a100 0%, #6fa100 100%);
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#71a100), color-stop(100%,#6fa100));
+  background: -webkit-linear-gradient(top,  #71a100 0%,#6fa100 100%);
+  background: -o-linear-gradient(top,  #71a100 0%,#6fa100 100%);
+  background: -ms-linear-gradient(top,  #71a100 0%,#6fa100 100%);
+  background: linear-gradient(to bottom,  #71a100 0%,#6fa100 100%);
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#71a100', endColorstr='#6fa100',GradientType=0 );
+}
+
+:root .top-bar {
+  filter: none \0/IE9;
+}
+
+.welcome-container {
+  width: 500px;
+  margin: 0 auto;
+  overflow: auto;
+  padding-bottom: 60px;
+}
+
+.coming-soon-wrap {
+  margin-top: 90px;
+}
+
+.frowny-face {
+  text-align: center;
+  font-size: 130px;
+  color: #919191;
+  line-height: 1.1;
+  margin-top: 90px;
+  margin-bottom: 70px;
+}
+
+.welcome-container h1 {
+  margin-bottom: 1em;
+}
+
+.btn-primary {
+    background-color: #7FB141;
+    border-color: #648C33;
+    color: #FFFFFF;
+}
+
+input, button, select, textarea {
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+}
+button, html input[type="button"], input[type="reset"], input[type="submit"] {
+    cursor: pointer;
+}
+button, select {
+    text-transform: none;
+}
+button, input {
+    line-height: normal;
+}
+button, input, select, textarea {
+    font-family: inherit;
+    font-size: 100%;
+    margin: 0;
+}
+
+.btn {
+    -moz-border-bottom-colors: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    border-color: transparent;
+    border-image: none;
+    border-radius: 0 0 0 0;
+    border-style: solid;
+    border-width: 0 0 3px;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 1.42857;
+    margin-bottom: 0;
+    padding: 8px 20px;
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background-color: #7FB141;
+    border-color: #648C33;
+    color: #FFFFFF;
+}
+
+
+.btn-primary:hover, 
+.btn-primary:focus, 
+.btn-primary:active, 
+.btn-primary.active {
+    background-color: #729E3A;
+    border-color: #496626;
+    color: #fff;
+}
+
+.btn:hover, 
+.btn:focus {
+    text-decoration: none;
+}
+
+.login-container {
+  text-align: right;
+  margin: 20px;
+}
+
+.footer {
+  position: relative;
+  margin-top: -60px; /* negative value of footer height */
+  height: 60px;
+  clear:both;
+  text-align: center;
+  font-size: 14px;
+}
