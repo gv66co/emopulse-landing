@@ -5,51 +5,41 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Emopulse — Real-Time Emotion Awareness</title>
-  <link rel="stylesheet" href="styles.css" />
-  <!-- Three.js CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
+  styles.css
+  manifest.json
 </head>
 <body>
   <header class="hero">
-    <div class="hero-bg">
-      <!-- 3D WebGL Canvas -->
-      <canvas id="webgl-canvas"></canvas>
-    </div>
     <div class="hero-inner">
-      <div class="logo-aura">
-        <!-- Neon spiralės logotipas su aura -->
-        <svg viewBox="0 0 200 200" width="120" height="120" class="logo-3d">
-          <defs>
-            <radialGradient id="aura" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stop-color="#00f0ff" stop-opacity="0.7"/>
-              <stop offset="80%" stop-color="#0078FF" stop-opacity="0.2"/>
-              <stop offset="100%" stop-color="#000c2a" stop-opacity="0"/>
-            </radialGradient>
-            <linearGradient id="spiral" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#fff"/>
-              <stop offset="100%" stop-color="#00f0ff"/>
-            </linearGradient>
-          </defs>
-          <circle cx="100" cy="100" r="80" fill="url(#aura)" />
-          <path d="M100,40
-            C140,40 160,100 100,160
-            C40,100 60,40 100,40
-            Z"
-            fill="none" stroke="url(#spiral)" stroke-width="10" />
-          <circle id="pulse" cx="100" cy="100" r="30" fill="#fff" opacity="0.15">
-            <animate attributeName="r" values="30;40;30" dur="1.2s" repeatCount="indefinite"/>
-            <animate attributeName="opacity" values="0.15;0.3;0.15" dur="1.2s" repeatCount="indefinite"/>
-          </circle>
-        </svg>
-      </div>
+      logo.svg
       <div class="hero-copy">
         <h1>Emopulse</h1>
         <p class="lead">Sveiki, aš <strong>Natasha</strong> — tavo Emopulse gidė.<br>Emocijų aiškumas realiu laiku iš kameros.</p>
-        <a class="btn" href="#demo">Išbandyti demo</a>
+        demo.htmlIšbandyti demo</a>
+      </div>
+      <div class="hero-image">
+        images/hero-1.jpg
       </div>
     </div>
   </header>
-  <!-- ...toliau likęs turinys... -->
-  <script src="webgl.js"></script>
+  <main class="container">
+    <section id="about" class="how">
+      <h2>Kaip tai veikia</h2>
+      <p>Emopulse paverčia tavo kamerą emocijų įžvalga. Demo simuliuoja patirtį naršyklėje — duomenys nėra saugomi.</p>
+      <div class="bullets">
+        <div class="card"><h3>Be jokių sensorių</h3><p>Kameros pagrindu veikianti pulso ir mikro-signalų analizė (demo simuliuota).</p></div>
+        <div class="card"><h3>Akimirksniu</h3><p>Vieno paspaudimo sesijos, aiškus grįžtamasis ryšys ir Natasha patarimai.</p></div>
+        <div class="card"><h3>Privatumas</h3><p>Demo apdoroja duomenis tik naršyklėje; niekas nėra saugoma.</p></div>
+      </div>
+    </section>
+    <section class="cta">
+      <h2>Pasiruošęs tyrinėti emocijas?</h2>
+      demo.htmlAtidaryti demo</a>
+    </section>
+  </main>
+  <footer>
+    <p id="footer-text">Guided by Natasha · © Emopulse 2025 · privacy.mdPrivatumo politika</a></p>
+  </footer>
 </body>
 </html>
+``
