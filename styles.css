@@ -1,514 +1,90 @@
-/* ============================================================
-   EMOPULSE — GLOBAL THEME
-   ============================================================ */
 
 :root {
-  --bg: #0b0f1c;
-  --bg-soft: #111624;
-  --bg-card: #141a2b;
-  --bg-card-light: #1b2236;
-
-  --text: #e8ecf7;
-  --text-soft: #b8c0d9;
-  --text-dim: #7a86a5;
-
-  --accent: #68dbff;
-  --accent-strong: #4ac7ff;
-  --accent-soft: rgba(104, 219, 255, 0.2);
-
-  --calm: #4ac7ff;
-  --focus: #8b6bff;
-  --stress: #ff5f6d;
-  --joy: #ffd86b;
-
-  --radius: 14px;
-  --radius-sm: 8px;
-
-  --shadow-soft: 0 0 20px rgba(0, 0, 0, 0.3);
-  --shadow-glow: 0 0 30px rgba(104, 219, 255, 0.4);
+  --bg: #f6fbff;
+  --text: #0b2545;
+  --accent: #0078FF;
+  --accent-2: #7FC8FF;
+  --muted: #6b7a90;
+  --card: #ffffff;
+  --glass: rgba(255,255,255,0.7);
 }
-
 body {
-  margin: 0;
-  padding: 0;
+  font-family: Inter, Arial, sans-serif;
   background: var(--bg);
   color: var(--text);
-  font-family: "Inter", sans-serif;
-  -webkit-font-smoothing: antialiased;
+  margin: 0;
 }
-
-/* ============================================================
-   LAYOUT
-   ============================================================ */
-
-.emo-main {
-  width: 100%;
-  max-width: 1280px;
-  margin: auto;
-  padding: 40px 20px;
+header {
+  text-align: center;
+  padding: 48px 16px;
 }
-
-.section-block {
-  margin-top: 60px;
+.logo {
+  width: 72px;
 }
-
-h1, h2, h3, h4 {
-  margin: 0 0 16px 0;
-  font-weight: 600;
-}
-
-/* ============================================================
-   HEADER
-   ============================================================ */
-
-.emo-page-header {
-  width: 100%;
-  padding: 20px 0;
-  background: rgba(11, 15, 28, 0.7);
-  backdrop-filter: blur(12px);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-.emo-header-inner {
-  max-width: 1280px;
-  margin: auto;
-  padding: 0 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.emo-logo-block {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.emo-logo-mark {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: radial-gradient(circle, var(--accent), #1a2a3f);
-  box-shadow: var(--shadow-glow);
-}
-
-.emo-logo-title {
-  font-size: 20px;
-  font-weight: 600;
-}
-
-.emo-logo-sub {
-  font-size: 12px;
-  color: var(--text-dim);
-}
-
-/* ============================================================
-   BUTTONS
-   ============================================================ */
-
-.ai-coach-button,
-.scenario-button {
-  background: var(--bg-card-light);
-  border: 1px solid rgba(255,255,255,0.08);
-  padding: 10px 18px;
-  border-radius: var(--radius-sm);
-  color: var(--text);
+.btn {
+  padding: 12px 20px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 8px;
+  text-decoration: none;
+  border: none;
   cursor: pointer;
-  transition: 0.2s ease;
-  font-size: 14px;
-}
-
-.ai-coach-button:hover,
-.scenario-button:hover {
-  background: rgba(255,255,255,0.1);
-}
-
-.ai-coach-pulse {
-  width: 8px;
-  height: 8px;
-  background: var(--accent);
-  border-radius: 50%;
-  margin-right: 8px;
-  animation: pulse 1.8s infinite ease-in-out;
-}
-
-@keyframes pulse {
-  0% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.8); opacity: 0.4; }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-/* ============================================================
-   CARDS
-   ============================================================ */
-
-.emo-card {
-  background: var(--bg-card);
-  padding: 20px;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-soft);
-  border: 1px solid rgba(255,255,255,0.05);
-}
-
-.emo-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 14px;
-}
-
-.emo-card-title {
-  font-size: 16px;
   font-weight: 600;
+  margin: 8px 0;
 }
-
-.emo-pill {
-  padding: 4px 10px;
-  border-radius: var(--radius-sm);
-  background: rgba(255,255,255,0.08);
-  font-size: 12px;
-  color: var(--text-soft);
+.btn.secondary {
+  background: var(--accent-2);
+  color: var(--text);
 }
-
-/* ============================================================
-   HERO SECTION
-   ============================================================ */
-
-.hero-section {
-  margin-top: 40px;
-}
-
-.hero-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 28px;
-}
-
-.hero-title {
-  font-size: 32px;
-  line-height: 1.2;
-}
-
-.hero-subtitle {
-  color: var(--text-soft);
-  margin-bottom: 20px;
-}
-
-.hero-cta-row {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-/* ============================================================
-   AURA
-   ============================================================ */
-
-.emo-aura-wrapper {
-  position: relative;
-  width: 120px;
-  height: 120px;
-}
-
-.emo-aura-ring {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  border: 2px solid var(--accent-soft);
-  animation: auraPulse 4s infinite ease-in-out;
-}
-
-.emo-aura-core {
-  position: absolute;
-  inset: 30%;
-  border-radius: 50%;
-  background: var(--accent);
-  box-shadow: var(--shadow-glow);
-}
-
-@keyframes auraPulse {
-  0% { transform: scale(1); opacity: 0.4; }
-  50% { transform: scale(1.2); opacity: 0.2; }
-  100% { transform: scale(1); opacity: 0.4; }
-}
-
-/* ============================================================
-   DRIFT SPIRAL
-   ============================================================ */
-
-.drift-core {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.drift-spiral-shell {
-  position: relative;
-  width: 80px;
-  height: 80px;
-}
-
-.drift-layer {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  border: 1px dashed rgba(255,255,255,0.1);
-}
-
-.drift-spiral {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  border: 3px solid var(--accent);
-  animation: spin 6s linear infinite;
+footer {
+  text-align: center;
+  padding: 20px;
   opacity: 0.7;
 }
-
-.drift-spiral.strong {
-  animation-duration: 3s;
-  opacity: 1;
+.metric {
+  transition: transform .12s;
+  display: inline-block;
+  margin: 8px;
+  padding: 12px 16px;
+  background: var(--card);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
-
-.drift-spiral-dot {
-  position: absolute;
-  top: -4px;
-  left: 50%;
-  width: 8px;
+.metric:hover {
+  transform: translateY(-4px);
+}
+.progress-bar {
   height: 8px;
   background: var(--accent);
-  border-radius: 50%;
+  border-radius: 4px;
+  width: 0;
+  transition: width 0.4s;
 }
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-/* ============================================================
-   MINI DASHBOARD
-   ============================================================ */
-
-.mini-dashboard {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 16px;
-}
-
-.mini-metric-card {
-  background: var(--bg-card-light);
-  padding: 14px;
-  border-radius: var(--radius-sm);
-  border: 1px solid rgba(255,255,255,0.05);
-}
-
-.mini-metric-label {
-  font-size: 12px;
-  color: var(--text-dim);
-}
-
-.mini-metric-value {
-  font-size: 20px;
-  margin: 6px 0;
-}
-
-.mini-metric-pill {
-  font-size: 12px;
-  color: var(--text-soft);
-}
-
-/* ============================================================
-   MOOD MAP
-   ============================================================ */
-
-.mood-map {
-  position: relative;
-  height: 240px;
-  background: var(--bg-card-light);
-  border-radius: var(--radius);
-  border: 1px solid rgba(255,255,255,0.05);
-}
-
-.mood-map-grid {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
-  background-size: 25% 25%;
-}
-
-.mood-map-dot {
-  position: absolute;
-  width: 14px;
-  height: 14px;
-  background: var(--accent);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  box-shadow: var(--shadow-glow);
-}
-
-/* ============================================================
-   TIMELINE
-   ============================================================ */
-
-.emotion-timeline {
-  height: 80px;
-  position: relative;
-}
-
-.emotion-timeline-track {
-  position: absolute;
-  inset: 0;
-  background: rgba(255,255,255,0.05);
-  border-radius: var(--radius-sm);
-}
-
-.emotion-timeline-progress {
-  position: absolute;
-  inset: 0;
-  background: var(--accent-soft);
-  transform-origin: left;
-  transition: 0.3s ease;
-}
-
-.emotion-timeline-emotion-dot {
-  position: absolute;
-  top: 50%;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  transform: translateY(-50%);
-}
-
-.emotion-timeline-emotion-dot.calm { background: var(--calm); }
-.emotion-timeline-emotion-dot.focus { background: var(--focus); }
-.emotion-timeline-emotion-dot.stress { background: var(--stress); }
-
-/* ============================================================
-   EMOTION RINGS
-   ============================================================ */
-
-.emotion-rings {
-  position: relative;
-  height: 200px;
-}
-
-.emotion-ring {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  border: 3px solid rgba(255,255,255,0.1);
-  animation: ringPulse 4s infinite ease-in-out;
-}
-
-.emotion-ring.calm { border-color: var(--calm); }
-.emotion-ring.focus { border-color: var(--focus); }
-.emotion-ring.stress { border-color: var(--stress); }
-.emotion-ring.joy { border-color: var(--joy); }
-
-@keyframes ringPulse {
-  0% { transform: scale(1); opacity: 0.4; }
-  50% { transform: scale(1.15); opacity: 0.2; }
-  100% { transform: scale(1); opacity: 0.4; }
-}
-
-/* ============================================================
-   HEATMAP
-   ============================================================ */
-
-.emotion-heatmap {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 4px;
-}
-
-.emotion-heatmap-cell {
-  width: 100%;
-  padding-bottom: 100%;
-  border-radius: var(--radius-sm);
-}
-
-.emotion-heatmap-cell.low { background: rgba(255,255,255,0.05); }
-.emotion-heatmap-cell.medium { background: rgba(255,255,255,0.15); }
-.emotion-heatmap-cell.high { background: rgba(255,255,255,0.3); }
-
-/* ============================================================
-   LIVE EMOTION SCAN
-   ============================================================ */
-
-.emotion-layout {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-}
-
-.emotion-panel {
-  background: var(--bg-card);
-  padding: 20px;
-  border-radius: var(--radius);
-  border: 1px solid rgba(255,255,255,0.05);
-}
-
-.emotion-radar-wrapper {
-  background: var(--bg-card);
-  padding: 20px;
-  border-radius: var(--radius);
-  border: 1px solid rgba(255,255,255,0.05);
-}
-
-/* ============================================================
-   REVEAL ON SCROLL
-   ============================================================ */
-
-.reveal-on-scroll,
-.section-stagger {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: 0.6s ease;
-}
-
-.revealed {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* ============================================================
-   FOOTER
-   ============================================================ */
-
-.emo-page-footer {
-  margin-top: 80px;
-  padding: 40px 20px;
-  background: #0a0e19;
-  border-top: 1px solid rgba(255,255,255,0.05);
-}
-
-.footer-columns {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 20px;
-}
-
-.footer-bottom {
+.moodmap {
+  margin: 24px auto;
   text-align: center;
-  color: var(--text-dim);
-  font-size: 12px;
 }
-
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
-
-@media (max-width: 900px) {
-  .hero-grid {
-    grid-template-columns: 1fr;
+.timeline {
+  margin: 24px auto;
+  max-width: 400px;
+}
+.hero-image img {
+  max-width: 320px;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+}
+.card {
+  background: var(--glass);
+  border-radius: 8px;
+  padding: 16px;
+  margin: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+@media (max-width: 600px) {
+  .hero-inner, .demo-grid {
+    flex-direction: column;
   }
-  .emotion-layout {
-    grid-template-columns: 1fr;
-  }
-  .mini-dashboard {
-    grid-template-columns: repeat(2, 1fr);
+  .hero-image img {
+    max-width: 100%;
   }
 }
