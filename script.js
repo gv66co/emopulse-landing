@@ -1,576 +1,559 @@
-// =======================
-// Emopulse Frontend Logic
-// =======================
-
-// Helper: clamp number
-function clamp(value, min, max) {
-  return Math.min(Math.max(value, min), max);
-}
-
-// -----------------------
-// DOM references
-// -----------------------
-
-// Hero metrics
-const emopulseScoreValueEl = document.getElementById('emopulseScoreValue');
-const emopulseScoreBarFillEl = document.getElementById('emopulseScoreBarFill');
-const emotionalWeatherMainEl = document.getElementById('emotionalWeatherMain');
-const emotionalWeatherTagEl = document.getElementById('emotionalWeatherTag');
-const emotionalWeatherIconEl = document.getElementById('emotionalWeatherIcon');
-
-// Mini dashboard
-const pulseValueEl = document.getElementById('pulseValue');
-const pulseQualityEl = document.getElementById('pulseQuality');
-const miniEmotionValueEl = document.getElementById('miniEmotionValue');
-const miniValenceEl = document.getElementById('miniValence');
-const confidenceValueEl = document.getElementById('confidenceValue');
-const patternStabilityEl = document.getElementById('patternStability');
-const stressRiskValueEl = document.getElementById('stressRiskValue');
-const stressRiskLabelEl = document.getElementById('stressRiskLabel');
-
-// Mood map + timeline
-const moodMapDotEl = document.getElementById('moodMapDot');
-const emotionTimelineProgressEl = document.getElementById('emotionTimelineProgress');
-const timelineDot1El = document.getElementById('timelineDot1');
-const timelineDot2El = document.getElementById('timelineDot2');
-const timelineDot3El = document.getElementById('timelineDot3');
-const timelineDot4El = document.getElementById('timelineDot4');
-
-// Rings
-const ringCalmEl = document.getElementById('ringCalm');
-const ringFocusEl = document.getElementById('ringFocus');
-const ringStressEl = document.getElementById('ringStress');
-const ringJoyEl = document.getElementById('ringJoy');
-
-// Experience layer
-const storyLine1El = document.getElementById('storyLine1');
-const storyLine2El = document.getElementById('storyLine2');
-const storyLine3El = document.getElementById('storyLine3');
-const challengeTextEl = document.getElementById('challengeText');
-const challengeButtonEl = document.getElementById('challengeButton');
-const calmStreakEl = document.getElementById('calmStreak');
-const focusStreakEl = document.getElementById('focusStreak');
-const badgeCalmEl = document.getElementById('badgeCalm');
-const badgeFocusEl = document.getElementById('badgeFocus');
-const badgeStressEl = document.getElementById('badgeStress');
-
-// AI reflection
-const aiReflectionLine1El = document.getElementById('aiReflectionLine1');
-const aiReflectionLine2El = document.getElementById('aiReflectionLine2');
-const aiCoachButtonEl = document.getElementById('aiCoachButton');
-
-// Compass + tags + report
-const compassTagsEl = document.getElementById('compassTags');
-const compassHeadingEl = document.getElementById('compassHeading');
-const sessionTagsEl = document.getElementById('sessionTags');
-const peakCalmEl = document.getElementById('peakCalm');
-const focusDurationEl = document.getElementById('focusDuration');
-const stressRecoveryEl = document.getElementById('stressRecovery');
-
-// Visual layer
-const emotionalAuraEl = document.getElementById('emotionalAura');
-const emotionDnaEl = document.getElementById('emotionDna');
-const emotionTrailEl = document.getElementById('emotionTrail');
-
-// Live emotion scan
-const cameraEl = document.getElementById('camera');
-const emotionLabelEl = document.getElementById('emotionLabel');
-const emotionIntensityEl = document.getElementById('emotionIntensity');
-const emotionHistoryTitleEl = document.getElementById('emotionHistoryTitle');
-const emotionHistoryEl = document.getElementById('emotionHistory');
-const emotionRadarCanvas = document.getElementById('emotionRadar');
-const emotionOutputEl = document.getElementById('emotionOutput');
-
-// Scenario buttons
-const scenarioButtons = document.querySelectorAll('.scenario-button');
-
-// -----------------------
-// State
-// -----------------------
-
+// ===== GLOBAL STATE =====================================================
 const state = {
-  emotion: 'Calm',
-  valence: 'positive',
-  arousal: 0.4,          // 0–1
+  running: false,
+  currentEmotion: 'Calm',
+  intensity: 0.3,
+  valence: 0.6,  // 0 negative, 1 positive
+  arousal: 0.4,  // 0 low, 1 high
   score: 78,
-  pulse: 74,
-  confidence: 0.91,
-  stressRisk: 18,        // 0–100
-  drift: 12,             // +/-
-  moodDot: { x: 0.65, y: 0.42 }, // 0–1
+  stressRisk: 18,
   history: [],
+  trend: [],
   challengeActive: false,
   challengeStart: null,
-  challengeTargetSeconds: 60,
-  peakCalm: 82,
-  focusMinutes: 14,
-  stressRecovery: 'Fast'
+  speechRecognition: null,
+  recognizing: false
 };
 
-// -----------------------
-// Demo data helpers
-// -----------------------
+function clamp(v, min, max) {
+  return Math.min(max, Math.max(min, v));
+}
 
-function setEmotion(emotionKey) {
-  const presets = {
-    smile: {
-      emotion: 'Joy',
-      valence: 'positive',
-      arousal: 0.6,
-      score: 84,
-      pulse: 78,
-      confidence: 0.94,
-      stressRisk: 12,
-      drift: 15,
-      moodDot: { x: 0.75, y: 0.35 }
-    },
-    neutral: {
-      emotion: 'Calm',
-      valence: 'neutral',
-      arousal: 0.45,
-      score: 76,
-      pulse: 72,
-      confidence: 0.9,
-      stressRisk: 20,
-      drift: 8,
-      moodDot: { x: 0.6, y: 0.5 }
-    },
-    stress: {
-      emotion: 'Stress',
-      valence: 'negative',
-      arousal: 0.8,
-      score: 62,
-      pulse: 92,
-      confidence: 0.82,
-      stressRisk: 58,
-      drift: -18,
-      moodDot: { x: 0.35, y: 0.2 }
-    },
-    highStress: {
-      emotion: 'High stress',
-      valence: 'negative',
-      arousal: 0.9,
-      score: 54,
-      pulse: 102,
-      confidence: 0.78,
-      stressRisk: 78,
-      drift: -32,
-      moodDot: { x: 0.25, y: 0.15 }
-    },
-    calm: {
-      emotion: 'Calm',
-      valence: 'positive',
-      arousal: 0.35,
-      score: 82,
-      pulse: 70,
-      confidence: 0.93,
-      stressRisk: 14,
-      drift: 18,
-      moodDot: { x: 0.7, y: 0.6 }
-    },
-    focus: {
-      emotion: 'Focus',
-      valence: 'positive',
-      arousal: 0.6,
-      score: 86,
-      pulse: 80,
-      confidence: 0.95,
-      stressRisk: 22,
-      drift: 20,
-      moodDot: { x: 0.8, y: 0.4 }
-    }
+// ===== DOM REFERENCES (AFTER LOAD) ======================================
+let emotionLabelEl,
+  emotionIntensityEl,
+  emotionHistoryEl,
+  emotionOutputEl,
+  emotionRadarCanvas,
+  radarCtx,
+  moodMapDot,
+  emopulseScoreValue,
+  emopulseScoreBarFill,
+  stressRiskValue,
+  stressRiskLabel,
+  miniEmotionValue,
+  miniValence,
+  confidenceValue,
+  patternStability,
+  pulseValue,
+  pulseQuality,
+  emotionalWeatherMain,
+  emotionalWeatherTag,
+  emotionalSignatureText,
+  heroAura,
+  emotionalAura,
+  ringCalm,
+  ringFocus,
+  ringStress,
+  ringJoy,
+  storyLine1,
+  storyLine2,
+  storyLine3,
+  peakCalmEl,
+  focusDurationEl,
+  stressRecoveryEl,
+  compassHeading,
+  sessionTags,
+  compassTags,
+  aiReflectionLine1,
+  aiReflectionLine2,
+  aiCoachOutput,
+  driftValueEl,
+  driftCaptionEl,
+  driftSpiralEl,
+  emotionTrendCanvas,
+  trendCtx,
+  startLiveButton,
+  askNatashaButton,
+  aiCoachButton,
+  cameraVideo,
+  challengeButton;
+
+// ===== EMOTION UPDATE / SIMULATION ======================================
+
+function applyScenario(scenario) {
+  if (scenario === 'smile') {
+    state.currentEmotion = 'Joy';
+    state.valence = 0.9;
+    state.arousal = 0.5;
+    state.intensity = 0.7;
+  } else if (scenario === 'neutral') {
+    state.currentEmotion = 'Neutral';
+    state.valence = 0.5;
+    state.arousal = 0.4;
+    state.intensity = 0.3;
+  } else if (scenario === 'stress') {
+    state.currentEmotion = 'Stress';
+    state.valence = 0.3;
+    state.arousal = 0.7;
+    state.intensity = 0.8;
+  } else if (scenario === 'high-stress') {
+    state.currentEmotion = 'Stress';
+    state.valence = 0.2;
+    state.arousal = 0.9;
+    state.intensity = 0.95;
+  } else if (scenario === 'calm') {
+    state.currentEmotion = 'Calm';
+    state.valence = 0.7;
+    state.arousal = 0.3;
+    state.intensity = 0.5;
+  } else if (scenario === 'focus') {
+    state.currentEmotion = 'Focus';
+    state.valence = 0.8;
+    state.arousal = 0.6;
+    state.intensity = 0.6;
+  }
+  pushHistory('scenario:' + scenario);
+  refreshUI();
+}
+
+function pushHistory(source) {
+  const entry = {
+    emotion: state.currentEmotion,
+    intensity: state.intensity,
+    valence: state.valence,
+    arousal: state.arousal,
+    time: new Date(),
+    source
   };
-
-  const preset = presets[emotionKey];
-  if (!preset) return;
-
-  Object.assign(state, preset);
-  pushHistory(state.emotion);
-  renderAll();
+  state.history.unshift(entry);
+  if (state.history.length > 10) state.history.pop();
+  state.trend.push(entry.intensity);
+  if (state.trend.length > 40) state.trend.shift();
 }
 
-function pushHistory(label) {
-  state.history.unshift({
-    label,
-    timestamp: new Date()
-  });
-  state.history = state.history.slice(0, 10);
-}
+function simulateStep() {
+  if (!state.running) return;
 
-// -----------------------
-// Rendering
-// -----------------------
+  const deltaVal = (Math.random() - 0.5) * 0.05;
+  const deltaAro = (Math.random() - 0.5) * 0.05;
+  const deltaInt = (Math.random() - 0.5) * 0.08;
 
-function renderScore() {
-  if (!emopulseScoreValueEl || !emopulseScoreBarFillEl) return;
+  state.valence = clamp(state.valence + deltaVal, 0, 1);
+  state.arousal = clamp(state.arousal + deltaAro, 0, 1);
+  state.intensity = clamp(state.intensity + deltaInt, 0, 1);
 
-  emopulseScoreValueEl.textContent = `${state.score} / 100`;
-  const width = clamp(state.score, 0, 100);
-  emopulseScoreBarFillEl.style.width = `${width}%`;
-}
-
-function renderWeather() {
-  if (!emotionalWeatherMainEl || !emotionalWeatherTagEl || !emotionalWeatherIconEl) return;
-
-  let main = '';
-  let tag = '';
-  let iconClass = 'calm';
-
-  if (state.emotion.toLowerCase().includes('stress')) {
-    main = 'Passing turbulence, strength in progress';
-    tag = 'short-term outlook: elevated stress, resilience rising';
-    iconClass = 'stress';
-  } else if (state.emotion.toLowerCase().includes('focus')) {
-    main = 'Clear with a corridor of focus';
-    tag = 'short-term outlook: high clarity, grounded drive';
-    iconClass = 'focus';
-  } else if (state.emotion.toLowerCase().includes('joy')) {
-    main = 'Warm surge with pockets of joy';
-    tag = 'short-term outlook: light, open, expansive';
-    iconClass = 'joy';
+  if (state.valence > 0.7 && state.arousal < 0.5) {
+    state.currentEmotion = 'Calm';
+  } else if (state.valence > 0.7 && state.arousal >= 0.5) {
+    state.currentEmotion = 'Joy';
+  } else if (state.valence > 0.5 && state.arousal >= 0.5) {
+    state.currentEmotion = 'Focus';
+  } else if (state.valence < 0.4 && state.arousal >= 0.6) {
+    state.currentEmotion = 'Stress';
   } else {
-    main = 'Clear with a chance of focus';
-    tag = 'short-term outlook: low stress, rising clarity';
-    iconClass = 'calm';
+    state.currentEmotion = 'Neutral';
   }
 
-  emotionalWeatherMainEl.textContent = main;
-  emotionalWeatherTagEl.textContent = tag;
-  emotionalWeatherIconEl.className = `emotional-weather-icon ${iconClass}`;
+  const calmFactor = state.currentEmotion === 'Calm' || state.currentEmotion === 'Joy' ? 1 : 0;
+  const stressFactor = state.currentEmotion === 'Stress' ? 1 : 0;
+  state.score = clamp(state.score + (calmFactor * 2 - stressFactor * 3), 40, 98);
+  state.stressRisk = clamp(state.stressRisk + (stressFactor * 4 - calmFactor * 2), 5, 90);
+
+  pushHistory('live');
+  refreshUI();
 }
 
-function renderMiniDashboard() {
-  if (pulseValueEl) pulseValueEl.textContent = `${state.pulse} bpm`;
-  if (pulseQualityEl) pulseQualityEl.textContent = state.pulse > 95 || state.pulse < 55
-    ? 'Signal quality: medium'
-    : 'Signal quality: high';
+// ===== UI BIND ==========================================================
 
-  if (miniEmotionValueEl) miniEmotionValueEl.textContent = state.emotion;
-  if (miniValenceEl) miniValenceEl.textContent = `Valence: ${state.valence}`;
-  if (confidenceValueEl) confidenceValueEl.textContent = `${Math.round(state.confidence * 100)}%`;
-  if (patternStabilityEl) patternStabilityEl.textContent = state.confidence > 0.9
-    ? 'Stable pattern'
-    : 'Shifting pattern';
+function refreshUI() {
+  if (!emotionLabelEl) return; // in case called before init
 
-  if (stressRiskValueEl) stressRiskValueEl.textContent = `${state.stressRisk} / 100`;
-  if (stressRiskLabelEl) {
-    if (state.stressRisk < 25) {
-      stressRiskLabelEl.textContent = 'Low & contained';
-    } else if (state.stressRisk < 60) {
-      stressRiskLabelEl.textContent = 'Moderate – monitor gently';
-    } else {
-      stressRiskLabelEl.textContent = 'High – handle with care';
-    }
-  }
-}
-
-function renderMoodMap() {
-  if (!moodMapDotEl) return;
-  const x = clamp(state.moodDot.x, 0, 1) * 100;
-  const y = clamp(state.moodDot.y, 0, 1) * 100;
-  moodMapDotEl.style.left = `${x}%`;
-  moodMapDotEl.style.top = `${y}%`;
-}
-
-function renderTimeline() {
-  if (!emotionTimelineProgressEl) return;
-
-  emotionTimelineProgressEl.style.transform = 'scaleX(1)';
-
-  const dots = [timelineDot1El, timelineDot2El, timelineDot3El, timelineDot4El];
-  dots.forEach(dot => {
-    if (!dot) return;
-    dot.classList.remove('calm', 'focus', 'stress', 'joy');
-    const e = state.emotion.toLowerCase();
-    if (e.includes('stress')) dot.classList.add('stress');
-    else if (e.includes('focus')) dot.classList.add('focus');
-    else if (e.includes('joy')) dot.classList.add('joy');
-    else dot.classList.add('calm');
-  });
-}
-
-function renderRings() {
-  if (ringCalmEl) ringCalmEl.style.opacity = state.emotion.toLowerCase().includes('calm') ? '1' : '0.4';
-  if (ringFocusEl) ringFocusEl.style.opacity = state.emotion.toLowerCase().includes('focus') ? '1' : '0.4';
-  if (ringStressEl) ringStressEl.style.opacity = state.emotion.toLowerCase().includes('stress') ? '1' : '0.4';
-  if (ringJoyEl) ringJoyEl.style.opacity = state.emotion.toLowerCase().includes('joy') ? '1' : '0.4';
-}
-
-function renderStory() {
-  if (!storyLine1El || !storyLine2El || !storyLine3El) return;
-
-  if (state.emotion.toLowerCase().includes('stress')) {
-    storyLine1El.textContent = 'Your emotional journey moved into turbulence for a moment.';
-    storyLine2El.textContent = 'You noticed the spike instead of ignoring it.';
-    storyLine3El.textContent = 'Recovery has started – you are already moving back to safety.';
-  } else if (state.emotion.toLowerCase().includes('focus')) {
-    storyLine1El.textContent = 'You’ve shifted into a corridor of focus.';
-    storyLine2El.textContent = 'Attention is engaged, but your body stays grounded.';
-    storyLine3El.textContent = 'You are holding a calm edge while doing the work.';
-  } else if (state.emotion.toLowerCase().includes('joy')) {
-    storyLine1El.textContent = 'Lightness and joy are quietly expanding.';
-    storyLine2El.textContent = 'Your system remembers what ease feels like.';
-    storyLine3El.textContent = 'This is a good place to anchor as a reference point.';
-  } else {
-    storyLine1El.textContent = 'Your emotional journey today began in calmness.';
-    storyLine2El.textContent = 'You transitioned into focused clarity.';
-    storyLine3El.textContent = 'A brief stress spike appeared but resolved quickly.';
-  }
-}
-
-function renderChallenge() {
-  if (!challengeTextEl || !challengeButtonEl) return;
-
-  if (!state.challengeActive) {
-    challengeTextEl.textContent = `Hold calmness for ${state.challengeTargetSeconds} seconds.`;
-    challengeButtonEl.textContent = 'Start challenge';
-  } else {
-    const elapsed = Math.floor((Date.now() - state.challengeStart) / 1000);
-    const remaining = clamp(state.challengeTargetSeconds - elapsed, 0, state.challengeTargetSeconds);
-    challengeTextEl.textContent = `Stay in calm / focus for ${remaining}s…`;
-    challengeButtonEl.textContent = remaining <= 0 ? 'Challenge complete' : 'Stop challenge';
-  }
-}
-
-function renderStreaksAndBadges() {
-  if (calmStreakEl) calmStreakEl.textContent = '3 days';
-  if (focusStreakEl) focusStreakEl.textContent = '1 day';
-
-  if (badgeCalmEl) badgeCalmEl.classList.toggle('active', state.emotion.toLowerCase().includes('calm'));
-  if (badgeFocusEl) badgeFocusEl.classList.toggle('active', state.emotion.toLowerCase().includes('focus'));
-  if (badgeStressEl) badgeStressEl.classList.toggle('active', state.emotion.toLowerCase().includes('stress'));
-}
-
-function renderAIReflection() {
-  if (!aiReflectionLine1El || !aiReflectionLine2El) return;
-
-  if (state.emotion.toLowerCase().includes('stress')) {
-    aiReflectionLine1El.textContent = '“Your emotional field is under pressure, but not breaking.”';
-    aiReflectionLine2El.textContent = '“Right now, your awareness is your strongest protection.”';
-  } else if (state.emotion.toLowerCase().includes('focus')) {
-    aiReflectionLine1El.textContent = '“You are riding a focused wave with grounded control.”';
-    aiReflectionLine2El.textContent = '“This is a good window for meaningful work.”';
-  } else if (state.emotion.toLowerCase().includes('joy')) {
-    aiReflectionLine1El.textContent = '“Joy is quietly recharging your system.”';
-    aiReflectionLine2El.textContent = '“Your nervous system remembers that safety can feel warm.”';
-  } else {
-    aiReflectionLine1El.textContent = '“Your emotional flow today shows resilience.”';
-    aiReflectionLine2El.textContent = '“You adapted well to stress fluctuations.”';
-  }
-}
-
-function renderCompassAndReport() {
-  if (compassHeadingEl) {
-    let heading = 'Current heading: calm + focus, low stress, high stability.';
-    if (state.emotion.toLowerCase().includes('stress')) {
-      heading = 'Current heading: turbulence detected, steering back to safety.';
-    } else if (state.emotion.toLowerCase().includes('joy')) {
-      heading = 'Current heading: light, open, gently expanding.';
-    }
-    compassHeadingEl.textContent = heading;
-  }
-
-  if (peakCalmEl) peakCalmEl.textContent = `${state.peakCalm}%`;
-  if (focusDurationEl) focusDurationEl.textContent = `${state.focusMinutes} min`;
-  if (stressRecoveryEl) stressRecoveryEl.textContent = state.stressRecovery;
-}
-
-function renderAuraAndTrail() {
-  if (emotionalAuraEl) {
-    emotionalAuraEl.classList.remove('calm', 'focus', 'stress', 'joy');
-    const e = state.emotion.toLowerCase();
-    if (e.includes('stress')) emotionalAuraEl.classList.add('stress');
-    else if (e.includes('focus')) emotionalAuraEl.classList.add('focus');
-    else if (e.includes('joy')) emotionalAuraEl.classList.add('joy');
-    else emotionalAuraEl.classList.add('calm');
-  }
-
-  if (emotionTrailEl) {
-    // Optionally, we could dynamically add trail steps depending on history
-    // For now we keep static labels in HTML – demo mode.
-  }
-}
-
-function renderHistory() {
-  if (!emotionHistoryEl || !emotionLabelEl || !emotionIntensityEl || !emotionOutputEl) return;
-
-  emotionLabelEl.textContent = state.emotion;
-  emotionIntensityEl.textContent = `Intensity: ${Math.round(state.arousal * 100)}%`;
+  emotionLabelEl.textContent = state.currentEmotion;
+  emotionIntensityEl.textContent = 'Intensity: ' + Math.round(state.intensity * 100) + '%';
+  emotionOutputEl.textContent =
+    'Current: ' + state.currentEmotion +
+    ' · valence ' + state.valence.toFixed(2) +
+    ' · arousal ' + state.arousal.toFixed(2);
 
   emotionHistoryEl.innerHTML = '';
-  state.history.forEach(item => {
+  state.history.forEach((h) => {
     const li = document.createElement('li');
-    li.textContent = `${item.label} · ${item.timestamp.toLocaleTimeString()}`;
+    li.textContent = `${h.emotion} · ${Math.round(h.intensity * 100)}% (${h.source})`;
     emotionHistoryEl.appendChild(li);
   });
 
-  emotionOutputEl.textContent = `Emotion: ${state.emotion} · Valence: ${state.valence} · Drift: ${state.drift > 0 ? '+' : ''}${state.drift}%`;
+  moodMapDot.style.left = (state.valence * 100) + '%';
+  moodMapDot.style.top = ((1 - state.arousal) * 100) + '%';
+
+  emopulseScoreValue.textContent = Math.round(state.score) + ' / 100';
+  emopulseScoreBarFill.style.width = Math.round(state.score) + '%';
+
+  stressRiskValue.textContent = Math.round(state.stressRisk) + ' / 100';
+  if (state.stressRisk < 30) {
+    stressRiskLabel.textContent = 'Low & contained';
+  } else if (state.stressRisk < 60) {
+    stressRiskLabel.textContent = 'Moderate – watch patterns';
+  } else {
+    stressRiskLabel.textContent = 'Elevated – consider recovery';
+  }
+
+  miniEmotionValue.textContent = state.currentEmotion;
+  miniValence.textContent =
+    'Valence: ' + (state.valence > 0.6 ? 'positive' : state.valence < 0.4 ? 'negative' : 'balanced');
+  confidenceValue.textContent = Math.round((0.7 + state.intensity * 0.3) * 100) + '%';
+  patternStability.textContent = state.intensity < 0.5 ? 'Stable pattern' : 'Dynamic but coherent';
+
+  const basePulse = 68;
+  const pulse = basePulse + Math.round((state.arousal - 0.4) * 40);
+  pulseValue.textContent = clamp(pulse, 52, 110) + ' bpm';
+  pulseQuality.textContent = 'Signal quality: high';
+
+  if (state.currentEmotion === 'Calm') {
+    emotionalWeatherMain.textContent = 'Clear with a chance of focus';
+    emotionalWeatherTag.textContent = 'short-term outlook: low stress, rising clarity';
+    emotionalSignatureText.textContent = 'Today’s emotional signature: Calm Focused Energy';
+  } else if (state.currentEmotion === 'Stress') {
+    emotionalWeatherMain.textContent = 'Storm pockets with recovery gaps';
+    emotionalWeatherTag.textContent = 'short-term outlook: elevated stress, prioritize grounding';
+    emotionalSignatureText.textContent = 'Today’s emotional signature: Stress with recovery windows';
+  } else if (state.currentEmotion === 'Focus') {
+    emotionalWeatherMain.textContent = 'Focused skies, low distraction winds';
+    emotionalWeatherTag.textContent = 'short-term outlook: high clarity, moderate tension';
+    emotionalSignatureText.textContent = 'Today’s emotional signature: Deep Focused Flow';
+  } else if (state.currentEmotion === 'Joy') {
+    emotionalWeatherMain.textContent = 'Warm with bursts of joy';
+    emotionalWeatherTag.textContent = 'short-term outlook: high energy, stable mood';
+    emotionalSignatureText.textContent = 'Today’s emotional signature: Uplifted Joyful Presence';
+  } else {
+    emotionalWeatherMain.textContent = 'Mixed patterns, stabilising';
+    emotionalWeatherTag.textContent = 'short-term outlook: evolving, watch for stress/calm swings';
+    emotionalSignatureText.textContent = 'Today’s emotional signature: Transitional Emotional State';
+  }
+
+  [heroAura, emotionalAura].forEach((el) => {
+    if (!el) return;
+    el.classList.remove('calm', 'focus', 'stress', 'joy', 'neutral');
+    const cls = state.currentEmotion.toLowerCase();
+    el.classList.add(
+      cls.includes('focus') ? 'focus' :
+      cls.includes('stress') ? 'stress' :
+      cls.includes('joy') ? 'joy' :
+      cls.includes('calm') ? 'calm' : 'neutral'
+    );
+  });
+
+  ringCalm.style.opacity = state.currentEmotion === 'Calm' ? 1 : 0.4;
+  ringFocus.style.opacity = state.currentEmotion === 'Focus' ? 1 : 0.4;
+  ringStress.style.opacity = state.currentEmotion === 'Stress' ? 1 : 0.4;
+  ringJoy.style.opacity = state.currentEmotion === 'Joy' ? 1 : 0.4;
+
+  const drift = (state.valence - 0.5) * 40 - (state.stressRisk - 20) * 0.15;
+  driftValueEl.textContent = (drift >= 0 ? '+' : '') + drift.toFixed(1) + '%';
+  driftCaptionEl.textContent =
+    drift > 5 ? 'Calmness increasing' :
+    drift < -5 ? 'Stress pressure building' :
+    'Subtle micro-shifts detected';
+  driftSpiralEl.classList.toggle('strong', Math.abs(drift) > 10);
+
+  storyLine1.textContent =
+    state.currentEmotion === 'Stress'
+      ? 'Your emotional journey shows stress pockets emerging.'
+      : 'Your emotional journey is anchored in calmness.';
+  storyLine2.textContent =
+    state.currentEmotion === 'Focus'
+      ? 'You are entering a focused, task-ready state.'
+      : 'You maintain capacity for clarity and adjustment.';
+  storyLine3.textContent =
+    state.stressRisk > 50
+      ? 'Stress spikes are visible – recovery rituals would help now.'
+      : 'Any stress spikes resolve quickly – resilience is present.';
+
+  peakCalmEl.textContent = Math.round(60 + state.valence * 40) + '%';
+  focusDurationEl.textContent = Math.round(5 + state.intensity * 20) + ' min';
+  stressRecoveryEl.textContent =
+    state.stressRisk < 30 ? 'Fast' : state.stressRisk < 60 ? 'Moderate' : 'Slower – needs support';
+
+  compassHeading.textContent =
+    `Current heading: ${state.currentEmotion.toLowerCase()} · valence ${state.valence.toFixed(2)}, arousal ${state.arousal.toFixed(2)}.`;
+
+  aiReflectionLine1.textContent =
+    state.stressRisk < 40
+      ? '“Your system shows solid emotional resilience today.”'
+      : '“Your system is carrying higher stress load than usual.”';
+  aiReflectionLine2.textContent =
+    state.currentEmotion === 'Stress'
+      ? '“Micro-pauses and grounding could shift your curve.”'
+      : '“You’re adapting effectively to fluctuations.”';
+
+  drawRadar();
+  drawTrend();
 }
 
-function renderRadar() {
-  if (!emotionRadarCanvas) return;
-
-  const ctx = emotionRadarCanvas.getContext('2d');
+// ===== RADAR DRAW =======================================================
+function drawRadar() {
+  const ctx = radarCtx;
   const w = emotionRadarCanvas.width;
   const h = emotionRadarCanvas.height;
-  const cx = w / 2;
-  const cy = h / 2;
+  const centerX = w / 2;
+  const centerY = h / 2;
   const maxR = Math.min(w, h) / 2 - 10;
 
   ctx.clearRect(0, 0, w, h);
 
-  // Grid circles
-  ctx.save();
   ctx.strokeStyle = 'rgba(255,255,255,0.1)';
   ctx.lineWidth = 1;
   for (let i = 1; i <= 3; i++) {
     ctx.beginPath();
-    ctx.arc(cx, cy, (maxR * i) / 3, 0, Math.PI * 2);
+    ctx.arc(centerX, centerY, (maxR * i) / 3, 0, Math.PI * 2);
     ctx.stroke();
   }
 
-  // Cross lines
   ctx.beginPath();
-  ctx.moveTo(cx - maxR, cy);
-  ctx.lineTo(cx + maxR, cy);
-  ctx.moveTo(cx, cy - maxR);
-  ctx.lineTo(cx, cy + maxR);
+  ctx.moveTo(centerX - maxR, centerY);
+  ctx.lineTo(centerX + maxR, centerY);
+  ctx.moveTo(centerX, centerY - maxR);
+  ctx.lineTo(centerX, centerY + maxR);
   ctx.stroke();
 
-  // Emotion point
-  const angle = state.arousal * Math.PI * 2 * 0.75; // compress to 270°
-  const radius = (state.stressRisk / 100) * maxR;
-  const px = cx + radius * Math.cos(angle);
-  const py = cy + radius * Math.sin(angle);
+  const angle = (1 - state.arousal) * Math.PI;
+  const radius = state.intensity * maxR;
+  const x = centerX + Math.cos(angle) * radius * (state.valence * 0.8 + 0.2);
+  const y = centerY + Math.sin(angle) * radius;
 
+  ctx.fillStyle = 'rgba(104, 219, 255, 0.9)';
   ctx.beginPath();
-  ctx.fillStyle = 'rgba(102, 179, 255, 0.9)';
-  ctx.arc(px, py, 6, 0, Math.PI * 2);
+  ctx.arc(x, y, 6, 0, Math.PI * 2);
   ctx.fill();
-
-  ctx.restore();
 }
 
-function renderAll() {
-  renderScore();
-  renderWeather();
-  renderMiniDashboard();
-  renderMoodMap();
-  renderTimeline();
-  renderRings();
-  renderStory();
-  renderChallenge();
-  renderStreaksAndBadges();
-  renderAIReflection();
-  renderCompassAndReport();
-  renderAuraAndTrail();
-  renderHistory();
-  renderRadar();
-}
+// ===== TREND DRAW =======================================================
+function drawTrend() {
+  const ctx = trendCtx;
+  const w = emotionTrendCanvas.width;
+  const h = emotionTrendCanvas.height;
+  ctx.clearRect(0, 0, w, h);
 
-// -----------------------
-// Interaction logic
-// -----------------------
+  ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+  ctx.beginPath();
+  ctx.moveTo(0, h / 2);
+  ctx.lineTo(w, h / 2);
+  ctx.stroke();
 
-function handleScenarioButtons() {
-  scenarioButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const text = btn.textContent.toLowerCase().trim();
-      if (text === 'smile') setEmotion('smile');
-      else if (text === 'neutral') setEmotion('neutral');
-      else if (text === 'stress') setEmotion('stress');
-      else if (text === 'high stress') setEmotion('highStress');
-      else if (text === 'calm mode') setEmotion('calm');
-      else if (text === 'focus mode') setEmotion('focus');
-    });
+  if (state.trend.length < 2) return;
+
+  ctx.strokeStyle = 'rgba(120, 200, 255, 0.9)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  const step = w / Math.max(state.trend.length - 1, 1);
+
+  state.trend.forEach((val, i) => {
+    const x = i * step;
+    const y = h - val * h;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
   });
+  ctx.stroke();
 }
 
-function handleChallengeButton() {
-  if (!challengeButtonEl) return;
+// ===== CAMERA SETUP =====================================================
+async function startCamera() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    emotionOutputEl.textContent = 'Camera not supported – live scan in simulation mode.';
+    return;
+  }
 
-  challengeButtonEl.addEventListener('click', () => {
-    if (!state.challengeActive) {
-      state.challengeActive = true;
-      state.challengeStart = Date.now();
-    } else {
-      state.challengeActive = false;
-      state.challengeStart = null;
-    }
-    renderChallenge();
-  });
-
-  // Simple timer tick to update challenge
-  setInterval(() => {
-    if (state.challengeActive && state.challengeStart) {
-      const elapsed = (Date.now() - state.challengeStart) / 1000;
-      if (elapsed >= state.challengeTargetSeconds) {
-        state.challengeActive = false;
-        state.challengeStart = null;
-      }
-      renderChallenge();
-    }
-  }, 500);
-}
-
-function handleAICoachButton() {
-  if (!aiCoachButtonEl) return;
-
-  aiCoachButtonEl.addEventListener('click', async () => {
-    // TODO: Replace this with real backend call, e.g.:
-    // const res = await fetch('/api/coach', { method: 'POST', body: JSON.stringify({...}) });
-    // const data = await res.json();
-    // aiReflectionLine1El.textContent = data.line1;
-    // aiReflectionLine2El.textContent = data.line2;
-
-    if (aiReflectionLine1El && aiReflectionLine2El) {
-      aiReflectionLine1El.textContent = '“Right now, the kindest move is a small one.”';
-      aiReflectionLine2El.textContent = '“Take 3 slow breaths and do the next tiny step only.”';
-    }
-  });
-}
-
-// -----------------------
-// Live camera (optional demo)
-// -----------------------
-
-async function initCamera() {
-  if (!cameraEl) return;
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    cameraEl.srcObject = stream;
-    // TODO: connect camera frames to real PPG / emotion model
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+    cameraVideo.srcObject = stream;
   } catch (err) {
-    console.warn('Camera access denied or unavailable:', err);
+    console.warn('Camera access denied or failed', err);
+    emotionOutputEl.textContent = 'Camera unavailable – live scan running in simulation mode.';
   }
 }
 
-// -----------------------
-// Initialization
-// -----------------------
+// ===== VOICE RECOGNITION ===============================================
+function initSpeechRecognition() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    if (aiCoachOutput) {
+      aiCoachOutput.textContent = 'Voice recognition not supported in this browser.';
+    }
+    return;
+  }
 
-function init() {
-  // Initial state
-  pushHistory(state.emotion);
-  renderAll();
+  const recognition = new SpeechRecognition();
+  recognition.lang = 'en-US';
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
 
-  // Interaction
-  handleScenarioButtons();
-  handleChallengeButton();
-  handleAICoachButton();
-  initCamera();
+  recognition.onstart = () => {
+    state.recognizing = true;
+    if (aiCoachOutput) aiCoachOutput.textContent = 'Listening...';
+  };
 
-  // Demo: gentle drift over time (if no backend)
-  setInterval(() => {
-    // small random walk for score / stress / arousal
-    state.score = clamp(state.score + (Math.random() * 4 - 2), 40, 95);
-    state.stressRisk = clamp(state.stressRisk + (Math.random() * 6 - 3), 5, 85);
-    state.arousal = clamp(state.arousal + (Math.random() * 0.1 - 0.05), 0.2, 0.9);
-    state.pulse = clamp(state.pulse + Math.round(Math.random() * 4 - 2), 60, 100);
-    state.drift = clamp(state.drift + (Math.random() * 6 - 3), -40, 40);
+  recognition.onerror = (e) => {
+    state.recognizing = false;
+    if (aiCoachOutput) aiCoachOutput.textContent = 'Recognition error: ' + e.error;
+  };
 
-    renderAll();
-  }, 4000);
+  recognition.onend = () => {
+    state.recognizing = false;
+    if (aiCoachOutput && aiCoachOutput.textContent === 'Listening...') {
+      aiCoachOutput.textContent = 'No voice captured.';
+    }
+  };
+
+  recognition.onresult = (event) => {
+    state.recognizing = false;
+    const transcript = event.results[0][0].transcript;
+    const lower = transcript.toLowerCase();
+    if (!aiCoachOutput) return;
+
+    aiCoachOutput.textContent = 'You said: "' + transcript + '". ';
+
+    let suggestion = '';
+    if (lower.includes('stress') || lower.includes('overwhelmed')) {
+      suggestion = 'Take 60 seconds for slow breathing and one small, concrete next action.';
+    } else if (lower.includes('tired') || lower.includes('fatigue')) {
+      suggestion = 'Short pause, hydration, and gentle movement will help reset your system.';
+    } else if (lower.includes('focus') || lower.includes('work')) {
+      suggestion = 'Pick one important task, set a 20-minute focus block, and silence all other inputs.';
+    } else {
+      suggestion = 'Name how you feel in one word, then choose one tiny action that supports that state.';
+    }
+    aiCoachOutput.textContent += 'Natasha suggests: ' + suggestion;
+  };
+
+  state.speechRecognition = recognition;
 }
 
-document.addEventListener('DOMContentLoaded', init);
+function startListening() {
+  if (!state.speechRecognition) {
+    initSpeechRecognition();
+  }
+  if (!state.speechRecognition) return;
+  if (state.recognizing) return;
+  state.speechRecognition.start();
+}
+
+// ===== CHALLENGE ========================================================
+function startChallenge() {
+  if (state.challengeActive) return;
+  state.challengeActive = true;
+  state.challengeStart = Date.now();
+  challengeButton.textContent = 'Challenge running...';
+  challengeButton.disabled = true;
+  challengeButton.classList.add('active');
+
+  const duration = 60 * 1000;
+  setTimeout(() => {
+    state.challengeActive = false;
+    const keptCalm = state.currentEmotion === 'Calm' || state.currentEmotion === 'Focus';
+    challengeButton.textContent = keptCalm ? 'Calm maintained ✔' : 'Try again';
+    challengeButton.disabled = false;
+    challengeButton.classList.remove('active');
+  }, duration);
+}
+
+// ===== INTERVALS & INIT ================================================
+function startLive() {
+  if (state.running) return;
+  state.running = true;
+  startCamera();
+  setInterval(simulateStep, 2000);
+  refreshUI();
+}
+
+function handleScrollReveal() {
+  const revealEls = document.querySelectorAll('.reveal-on-scroll, .section-stagger');
+  const triggerBottom = window.innerHeight * 0.9;
+  revealEls.forEach(el => {
+    const rect = el.getBoundingClientRect();
+    if (rect.top < triggerBottom) {
+      el.classList.add('revealed');
+    }
+  });
+}
+
+// ===== DOMContentLoaded =================================================
+window.addEventListener('DOMContentLoaded', () => {
+  // grab DOM elements
+  emotionLabelEl = document.getElementById('emotionLabel');
+  emotionIntensityEl = document.getElementById('emotionIntensity');
+  emotionHistoryEl = document.getElementById('emotionHistory');
+  emotionOutputEl = document.getElementById('emotionOutput');
+  emotionRadarCanvas = document.getElementById('emotionRadar');
+  radarCtx = emotionRadarCanvas.getContext('2d');
+
+  moodMapDot = document.getElementById('moodMapDot');
+  emopulseScoreValue = document.getElementById('emopulseScoreValue');
+  emopulseScoreBarFill = document.getElementById('emopulseScoreBarFill');
+
+  stressRiskValue = document.getElementById('stressRiskValue');
+  stressRiskLabel = document.getElementById('stressRiskLabel');
+
+  miniEmotionValue = document.getElementById('miniEmotionValue');
+  miniValence = document.getElementById('miniValence');
+  confidenceValue = document.getElementById('confidenceValue');
+  patternStability = document.getElementById('patternStability');
+  pulseValue = document.getElementById('pulseValue');
+  pulseQuality = document.getElementById('pulseQuality');
+
+  emotionalWeatherMain = document.getElementById('emotionalWeatherMain');
+  emotionalWeatherTag = document.getElementById('emotionalWeatherTag');
+  emotionalSignatureText = document.getElementById('emotionalSignatureText');
+
+  heroAura = document.getElementById('heroAura');
+  emotionalAura = document.getElementById('emotionalAura');
+  ringCalm = document.getElementById('ringCalm');
+  ringFocus = document.getElementById('ringFocus');
+  ringStress = document.getElementById('ringStress');
+  ringJoy = document.getElementById('ringJoy');
+
+  storyLine1 = document.getElementById('storyLine1');
+  storyLine2 = document.getElementById('storyLine2');
+  storyLine3 = document.getElementById('storyLine3');
+
+  peakCalmEl = document.getElementById('peakCalm');
+  focusDurationEl = document.getElementById('focusDuration');
+  stressRecoveryEl = document.getElementById('stressRecovery');
+
+  compassHeading = document.getElementById('compassHeading');
+  sessionTags = document.getElementById('sessionTags');
+  compassTags = document.getElementById('compassTags');
+
+  aiReflectionLine1 = document.getElementById('aiReflectionLine1');
+  aiReflectionLine2 = document.getElementById('aiReflectionLine2');
+  aiCoachOutput = document.getElementById('aiCoachOutput');
+
+  driftValueEl = document.getElementById('driftValue');
+  driftCaptionEl = document.getElementById('driftCaption');
+  driftSpiralEl = document.getElementById('driftSpiral');
+
+  emotionTrendCanvas = document.getElementById('emotionTrend');
+  trendCtx = emotionTrendCanvas.getContext('2d');
+
+  startLiveButton = document.getElementById('startLiveButton');
+  askNatashaButton = document.getElementById('askNatashaButton');
+  aiCoachButton = document.getElementById('aiCoachButton');
+  cameraVideo = document.getElementById('camera');
+  challengeButton = document.getElementById('challengeButton');
+
+  // bind handlers
+  document
+    .querySelectorAll('.scenario-button[data-scenario]')
+    .forEach(btn => {
+      btn.addEventListener('click', () => {
+        applyScenario(btn.getAttribute('data-scenario'));
+      });
+    });
+
+  if (startLiveButton) {
+    startLiveButton.addEventListener('click', () => {
+      startLive();
+      startLiveButton.textContent = 'Live scan running';
+      startLiveButton.disabled = true;
+    });
+  }
+
+  if (askNatashaButton) askNatashaButton.addEventListener('click', startListening);
+  if (aiCoachButton) aiCoachButton.addEventListener('click', startListening);
+  if (challengeButton) challengeButton.addEventListener('click', startChallenge);
+
+  initSpeechRecognition();
+  refreshUI();
+  handleScrollReveal();
+});
+
+window.addEventListener('scroll', handleScrollReveal);
