@@ -1,90 +1,99 @@
 
 :root {
-  --bg: #f6fbff;
-  --text: #0b2545;
-  --accent: #0078FF;
-  --accent-2: #7FC8FF;
-  --muted: #6b7a90;
-  --card: #ffffff;
-  --glass: rgba(255,255,255,0.7);
+  --bg: #0a1530;
+  --text: #eaf6ff;
+  --accent: #00f0ff;
+  --accent2: #0078FF;
+  --neon: #00f0ff;
+  --neon2: #ff00e0;
+  --card: rgba(20,30,60,0.85);
+  --glass: rgba(255,255,255,0.08);
 }
 body {
-  font-family: Inter, Arial, sans-serif;
-  background: var(--bg);
+  background: radial-gradient(ellipse at 60% 20%, #112255 0%, #0a1530 100%);
   color: var(--text);
+  font-family: 'Inter', Arial, sans-serif;
   margin: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
 }
-header {
-  text-align: center;
-  padding: 48px 16px;
+.hero {
+  position: relative;
+  min-height: 600px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
-.logo {
-  width: 72px;
+.hero-bg {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+#webgl-canvas {
+  width: 100vw;
+  height: 600px;
+  display: block;
+  position: absolute;
+  top: 0; left: 0;
+  z-index: 0;
+}
+.hero-inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+}
+.logo-aura {
+  position: relative;
+  margin-bottom: 12px;
+  filter: drop-shadow(0 0 32px var(--neon));
+  animation: auraPulse 2s infinite alternate;
+}
+@keyframes auraPulse {
+  0% { filter: drop-shadow(0 0 32px var(--neon)); }
+  100% { filter: drop-shadow(0 0 64px var(--neon2)); }
+}
+.logo-3d {
+  display: block;
+  margin: 0 auto;
+}
+h1 {
+  font-family: 'Sora', 'Inter', Arial, sans-serif;
+  font-size: 2.8rem;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  text-shadow: 0 0 12px var(--neon2), 0 0 32px var(--neon);
+}
+.lead {
+  font-size: 1.2rem;
+  color: #eaf6ff;
+  text-shadow: 0 0 8px #0078FF44;
+  margin-bottom: 16px;
 }
 .btn {
-  padding: 12px 20px;
-  background: var(--accent);
+  background: linear-gradient(90deg, var(--neon), var(--accent2));
   color: #fff;
-  border-radius: 8px;
-  text-decoration: none;
   border: none;
+  border-radius: 24px;
+  padding: 14px 32px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  box-shadow: 0 0 16px var(--neon2), 0 0 32px var(--neon);
+  text-shadow: 0 0 8px #fff8;
   cursor: pointer;
-  font-weight: 600;
-  margin: 8px 0;
+  transition: transform 0.15s, box-shadow 0.15s;
 }
-.btn.secondary {
-  background: var(--accent-2);
-  color: var(--text);
-}
-footer {
-  text-align: center;
-  padding: 20px;
-  opacity: 0.7;
-}
-.metric {
-  transition: transform .12s;
-  display: inline-block;
-  margin: 8px;
-  padding: 12px 16px;
-  background: var(--card);
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-}
-.metric:hover {
-  transform: translateY(-4px);
-}
-.progress-bar {
-  height: 8px;
-  background: var(--accent);
-  border-radius: 4px;
-  width: 0;
-  transition: width 0.4s;
-}
-.moodmap {
-  margin: 24px auto;
-  text-align: center;
-}
-.timeline {
-  margin: 24px auto;
-  max-width: 400px;
-}
-.hero-image img {
-  max-width: 320px;
-  border-radius: 16px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-}
-.card {
-  background: var(--glass);
-  border-radius: 8px;
-  padding: 16px;
-  margin: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+.btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 32px var(--neon2), 0 0 64px var(--neon);
 }
 @media (max-width: 600px) {
-  .hero-inner, .demo-grid {
-    flex-direction: column;
-  }
-  .hero-image img {
-    max-width: 100%;
-  }
+  .hero-inner { gap: 16px; }
+  h1 { font-size: 2rem; }
+  #webgl-canvas { height: 320px; }
 }
+``
