@@ -1,5 +1,4 @@
 
-// Demo scenarijų imitacija
 const scenarios = {
   smile: { emotion: "džiaugsmas", confidence: 0.92, pulse: 75, quality: 0.9 },
   neutral: { emotion: "ramybė", confidence: 0.85, pulse: 72, quality: 0.9 },
@@ -10,7 +9,6 @@ const scenarios = {
   energy: { emotion: "energija", confidence: 0.90, pulse: 80, quality: 0.93 },
   conf_drop: { emotion: "abejonė", confidence: 0.60, pulse: 85, quality: 0.85 }
 };
-
 const natashaLines = {
   smile: "Natasha: Matai, kaip džiaugsmas švyti!",
   neutral: "Natasha: Ramybė, kaip jūra.",
@@ -21,14 +19,12 @@ const natashaLines = {
   energy: "Natasha: Energijos banga!",
   conf_drop: "Natasha: Pasitikėjimas sumažėjo — viskas gerai, bandyk dar kartą."
 };
-
 document.querySelectorAll('.buttons button').forEach(btn => {
   btn.addEventListener('click', () => {
     const scenario = btn.getAttribute('data-scenario');
     runDemo(scenario);
   });
 });
-
 function runDemo(scenario) {
   const data = scenarios[scenario] || scenarios['neutral'];
   document.getElementById('natasha-line').textContent = natashaLines[scenario] || "Natasha: Pasiruošusi padėti.";
@@ -42,13 +38,11 @@ function runDemo(scenario) {
     pushTimelinePoint(data.pulse, data.confidence);
   }, 1200);
 }
-
 function animateProgress() {
   const bar = document.getElementById('progress');
   bar.style.width = "0";
   setTimeout(() => { bar.style.width = "100%"; }, 400);
 }
-
 function renderMoodMap(emotion) {
   const colors = { "ramybė": "#7FC8FF", "džiaugsmas": "#FFD54F", "įtampa": "#FF6B6B", "stresas": "#FF3A4E", "susikaupimas": "#3ABEFF", "energija": "#FFD75E", "abejonė": "#6b7a90" };
   const color = colors[emotion] || "#9AA7C7";
@@ -62,7 +56,6 @@ function renderMoodMap(emotion) {
     </svg>
   `;
 }
-
 // Timeline Chart.js
 const ctx = document.getElementById('timelineChart').getContext('2d');
 const chart = new Chart(ctx, {
@@ -92,8 +85,6 @@ function pushTimelinePoint(pulse, conf) {
   }
   chart.update();
 }
-
-// Paaiškinimo mygtukas
 document.getElementById('explain').addEventListener('click', () => {
   document.getElementById('natasha-line').textContent = "Natasha: Ši sesija parodo, kaip emocijos keičiasi realiu laiku. Visi duomenys apdorojami tik naršyklėje.";
 });
