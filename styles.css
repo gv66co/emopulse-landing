@@ -1,65 +1,32 @@
 
 :root {
-  --bg: #0a1530;
+  --bg: #101c2c;
   --text: #eaf6ff;
   --accent: #00f0ff;
   --accent2: #0078FF;
   --neon: #00f0ff;
   --neon2: #ff00e0;
-  --card: rgba(20,30,60,0.85);
+  --card: rgba(20,30,60,0.92);
   --glass: rgba(255,255,255,0.08);
 }
 body {
-  background: radial-gradient(ellipse at 60% 20%, #112255 0%, #0a1530 100%);
+  background: linear-gradient(135deg, #101c2c 0%, #1a2a4d 100%);
   color: var(--text);
   font-family: 'Inter', Arial, sans-serif;
   margin: 0;
   min-height: 100vh;
-  overflow-x: hidden;
 }
-.hero {
-  position: relative;
-  min-height: 600px;
+.hero-inner, .demo-grid {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
-}
-.hero-bg {
-  position: absolute;
-  top: 0; left: 0; width: 100%; height: 100%;
-  z-index: 0;
-  pointer-events: none;
-}
-#webgl-canvas {
-  width: 100vw;
-  height: 600px;
-  display: block;
-  position: absolute;
-  top: 0; left: 0;
-  z-index: 0;
-}
-.hero-inner {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   gap: 32px;
 }
-.logo-aura {
-  position: relative;
-  margin-bottom: 12px;
-  filter: drop-shadow(0 0 32px var(--neon));
-  animation: auraPulse 2s infinite alternate;
-}
-@keyframes auraPulse {
-  0% { filter: drop-shadow(0 0 32px var(--neon)); }
-  100% { filter: drop-shadow(0 0 64px var(--neon2)); }
-}
-.logo-3d {
-  display: block;
-  margin: 0 auto;
+.logo {
+  width: 72px;
+  margin-bottom: 16px;
+  filter: drop-shadow(0 0 16px var(--neon));
 }
 h1 {
   font-family: 'Sora', 'Inter', Arial, sans-serif;
@@ -91,9 +58,41 @@ h1 {
   transform: scale(1.05);
   box-shadow: 0 0 32px var(--neon2), 0 0 64px var(--neon);
 }
-@media (max-width: 600px) {
-  .hero-inner { gap: 16px; }
-  h1 { font-size: 2rem; }
-  #webgl-canvas { height: 320px; }
+.card, .metric {
+  background: var(--card);
+  border-radius: 16px;
+  box-shadow: 0 2px 16px #00f0ff22;
+  color: var(--text);
+  margin: 8px;
+  padding: 16px;
 }
-``
+.metric {
+  border: 1.5px solid var(--neon2);
+  text-align: center;
+  min-width: 120px;
+}
+.progress-bar {
+  height: 8px;
+  background: var(--accent);
+  border-radius: 4px;
+  width: 0;
+  transition: width 0.4s;
+}
+.moodmap {
+  margin: 24px auto;
+  text-align: center;
+}
+.timeline {
+  margin: 24px auto;
+  max-width: 400px;
+}
+.hero-image img {
+  max-width: 320px;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+}
+@media (max-width: 600px) {
+  .hero-inner, .demo-grid { gap: 16px; flex-direction: column; }
+  h1 { font-size: 2rem; }
+  .hero-image img { max-width: 100%; }
+}
