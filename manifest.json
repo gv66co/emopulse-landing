@@ -1,19 +1,1 @@
 
-{
-  "name": "Emopulse",
-  "short_name": "Emopulse",
-  "description": "Real-time emotional clarity from your camera. Guided by Natasha.",
-  "start_url": "./index.html",
-  "display": "standalone",
-  "background_color": "#101c2c",
-  "theme_color": "#0078FF",
-  "icons": [
-    {
-      "src": "logo.svg",
-      "sizes": "72x72",
-      "type": "image/svg+xml"
-    }
-  ],
-  "lang": "lt",
-  "orientation": "portrait"
-}
