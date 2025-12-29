@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Emopulse — Real-Time Emotion Awareness</title>
   <link rel="stylesheet" href="styles.css" />
-  <link rel="manifest" href="manifest.json" />
 </head>
 <body>
   <header class="hero">
@@ -15,30 +14,48 @@
       <div class="hero-copy">
         <h1>Emopulse</h1>
         <p class="lead">Sveiki, aš <strong>Natasha</strong> — tavo Emopulse gidė.<br>Emocijų aiškumas realiu laiku iš kameros.</p>
-        <a class="btn" href="demo.html">Išbandyti demo</a>
+        <a class="btn" href="/demo">Išbandyti demo</a>
       </div>
       <div class="hero-image">
-        <img src="images/hero-1.jpg" alt="Hero vizualas" />
+        <img src="hero-1.jpg" alt="Hero" />
       </div>
     </div>
   </header>
   <main class="container">
-    <section id="about" class="how">
+    <section class="how">
       <h2>Kaip tai veikia</h2>
-      <p>Emopulse paverčia tavo kamerą emocijų įžvalga. Demo simuliuoja patirtį naršyklėje — duomenys nėra saugomi.</p>
+      <p>Emopulse naudoja kamerą, mikro-signalų analizę ir LLM interpretaciją, kad subtilūs fiziologiniai signalai taptų aiškia emocine įžvalga — akimirksniu ir privačiai.</p>
       <div class="bullets">
-        <div class="card"><h3>Be jokių sensorių</h3><p>Kameros pagrindu veikianti pulso ir mikro-signalų analizė (demo simuliuota).</p></div>
-        <div class="card"><h3>Akimirksniu</h3><p>Vieno paspaudimo sesijos, aiškus grįžtamasis ryšys ir Natasha patarimai.</p></div>
-        <div class="card"><h3>Privatumas</h3><p>Demo apdoroja duomenis tik naršyklėje; niekas nėra saugoma.</p></div>
+        <div class="card">
+          <h3>Be sensorių</h3>
+          <p>Kameros pagrindu veikianti pulso ir mikro-signalų analizė — nereikia jokių dėvimų prietaisų.</p>
+        </div>
+        <div class="card">
+          <h3>Akimirksniu</h3>
+          <p>Vieno paspaudimo sesijos, aiškus grįžtamasis ryšys ir Natasha patarimai.</p>
+        </div>
+        <div class="card">
+          <h3>Privatumas</h3>
+          <p>Demo režimas apdoroja duomenis tik realiu laiku, niekas nesaugoma.</p>
+        </div>
       </div>
     </section>
+    <section class="features">
+      <h2>Demo funkcijos</h2>
+      <ul>
+        <li>Mood Map & Aura vizualizacija</li>
+        <li>Real-time timeline & pulso grafikas</li>
+        <li>Natasha balsas & scenarijų mygtukai</li>
+        <li>LLM emocinė santrauka</li>
+      </ul>
+    </section>
     <section class="cta">
-      <h2>Pasiruošęs tyrinėti emocijas?</h2>
-      <a class="btn large" href="demo.html">Atidaryti demo</a>
+      <h2>Pasiruošęs išbandyti?</h2>
+      <a class="btn large" href="/demo">Atidaryti demo</a>
     </section>
   </main>
   <footer>
-    <p id="footer-text">Guided by Natasha · © Emopulse 2025 · <a href="privacy.md">Privatumo politika</a></p>
+    <p>Guided by Natasha · © Emopulse 2025 · <a href="/privacy_policy.md">Privatumo politika</a></p>
   </footer>
 </body>
 </html>
