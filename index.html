@@ -1,209 +1,169 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="en" class="emopulse-theme">
 <head>
-  <meta charset="utf-8">
-  <title>Emopulse – Real-Time Emotion Awareness</title>
+  <meta charset="UTF-8">
+  <title>Emopulse – Emotional AI Demo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="/styles.css">
+  <!-- CSS: update path if filename differs -->
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="favicon.png">
+  <meta name="theme-color" content="#0b0f1c">
 </head>
-<body>
-  <div class="page">
-    <header class="hero">
-      <nav class="nav">
-        <div class="nav-left">
-          <div class="logo-circle" aria-hidden="true"></div>
-          <span class="logo-text">Emopulse</span>
-        </div>
-        <div class="nav-right">
-          <a href="#product" class="nav-link">Product</a>
-          <a href="#demo" class="nav-link">Demo</a>
-          <a href="#about" class="nav-link">About</a>
-          <a href="#contact" class="nav-link nav-link-primary">Contact</a>
-        </div>
-      </nav>
 
-      <div class="hero-grid">
-        <div class="hero-copy">
-          <p class="eyebrow">Real-Time Emotion Awareness for Modern Humans</p>
-          <h1>Understand emotions in real time</h1>
-          <p class="hero-subtitle">
-            Emopulse turns your camera into real-time emotional insight — blending pulse detection,
-            micro-signals, and AI to reveal what’s happening beneath the surface.
-          </p>
-          <div class="hero-actions">
-            <a class="btn-primary" id="start-demo-btn" href="#demo">Experience Emopulse</a>
-            <a class="btn-ghost" id="scroll-to-problem-btn" href="#problem">View pitch story</a>
-          </div>
-          <div class="hero-meta">
-            <span>Camera-based emotional insight</span>
-            <span>Sensor-free • Frictionless • Science-backed</span>
-          </div>
+<body class="emopulse-theme">
+
+<header class="emo-page-header">
+  <div class="emo-header-inner">
+    <div class="emo-logo-block">
+      <div class="emo-logo-mark"></div>
+      <div class="emo-logo-text">
+        <span class="emo-logo-title">Emopulse</span>
+        <span class="emo-logo-sub">Emotional AI that sees, feels, understands</span>
+      </div>
+    </div>
+    <button class="ai-coach-button">
+      <div class="ai-coach-pulse"></div>
+      <span>Ask Natasha</span>
+    </button>
+  </div>
+</header>
+
+<main class="emo-main">
+
+<!-- HERO / LIVE DEMO BAND -->
+<section class="hero-section">
+  <div class="hero-grid">
+
+    <!-- Left: Aura + Drift -->
+    <div class="hero-visual">
+      <div class="emo-card">
+        <div class="emo-card-header">
+          <div class="emo-card-title">Live emotional radar</div>
+          <span class="emo-pill emo-tag-soft">Demo mode</span>
         </div>
 
-        <div class="hero-visual">
-          <div class="aura-card" role="region" aria-label="Live emotion aura preview">
-            <div class="aura-header">
-              <span class="aura-title">Live Emotion Aura</span>
-              <span class="aura-tag">Natasha AI</span>
-            </div>
-            <canvas id="aura-canvas" width="420" height="420" aria-hidden="true"></canvas>
-            <div class="aura-status">
-              <div>
-                <p class="aura-label">Current emotion</p>
-                <p class="aura-value" id="aura-emotion-label">Neutral</p>
+        <div class="emo-hero-visual-row">
+
+          <!-- Aura -->
+          <div class="emo-aura-wrapper calm">
+            <div class="emo-aura-ring"></div>
+            <div class="emo-aura-ring"></div>
+            <div class="emo-aura-ring"></div>
+            <div class="emo-aura-core"></div>
+          </div>
+
+          <!-- Drift spiral -->
+          <div class="drift-core">
+            <div class="drift-spiral-shell">
+              <div class="drift-layer"></div>
+              <div class="drift-layer"></div>
+              <div class="drift-layer"></div>
+              <div class="drift-spiral calm strong"></div>
+              <div class="drift-spiral-orbit">
+                <div class="drift-spiral-dot"></div>
               </div>
-              <div>
-                <p class="aura-label">Pulse BPM</p>
-                <p class="aura-value" id="aura-pulse-label">72</p>
-              </div>
             </div>
-            <div class="aura-natasha" id="hero-natasha-text">
-              Natasha: I’m monitoring your signals and translating them into clear, actionable insight.
+
+            <div>
+              <div class="drift-label">Emotional drift</div>
+              <div class="drift-value positive">+12%</div>
+              <div class="drift-caption">Calmness increasing</div>
             </div>
+          </div>
+
+        </div>
+
+        <div class="scenario-buttons">
+          <button class="scenario-button">Smile</button>
+          <button class="scenario-button">Neutral</button>
+          <button class="scenario-button">Stress</button>
+          <button class="scenario-button">High stress</button>
+          <button class="scenario-button">Calm mode</button>
+          <button class="scenario-button">Focus mode</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Right: Copy + Score + Weather -->
+    <div class="hero-copy">
+      <div class="emo-card">
+        <div class="emo-card-header">
+          <div class="emo-card-title">Emotional AI demo</div>
+          <span class="emo-pill emo-tag-soft">Prototype ● LLM + signals</span>
+        </div>
+
+        <h1 class="hero-title">
+          Real-time emotional intelligence<br>
+          from your camera & micro-signals
+        </h1>
+
+        <p class="hero-subtitle">
+          Emopulse transforms pulse, micro-signals, and context into a living emotional dashboard:
+          drift, stability, risk, and narrative – in seconds.
+        </p>
+
+        <div class="hero-cta-row">
+          <button class="ai-coach-button">
+            <div class="ai-coach-pulse"></div>
+            <span>Try live demo</span>
+          </button>
+
+          <div class="emotional-signature-pill">
+            <div class="emotional-signature-dot"></div>
+            <span>Today’s emotional signature: Calm Focused Energy</span>
           </div>
         </div>
       </div>
-    </header>
 
-    <main>
-      <section class="section two-column" id="problem">
-        <div>
-          <h2>Problem</h2>
-          <h3 class="section-subtitle">The gap between body data and emotional truth</h3>
-          <p>
-            Current solutions measure the body but fail to understand emotions. Emopulse closes that gap by combining physiological signals with AI interpretation.
-          </p>
-        </div>
-        <div>
-          <h2>Solution</h2>
-          <h3 class="section-subtitle">Real-time emotional insight from a single camera</h3>
-          <p>
-            One-tap experience: camera input, signal analysis, and an interpreted emotional insight — no wearables, no friction.
-          </p>
-        </div>
-      </section>
-
-      <section class="section" id="product">
-        <div class="section-header">
-          <h2>Product overview</h2>
-          <p class="section-subtitle">A camera-based emotional intelligence system that turns invisible signals into clear, actionable understanding.</p>
-        </div>
-
-        <div class="product-grid">
-          <div class="product-card">
-            <h3>Unique</h3>
-            <p>Pulse analytics, micro-signals, and AI fused into one continuous emotional insight.</p>
-          </div>
-          <div class="product-card">
-            <h3>First to market</h3>
-            <p>Real-time emotional clarity without sensors or wearables.</p>
-          </div>
-          <div class="product-card">
-            <h3>Tested</h3>
-            <p>Built on physiological signal analysis and validated across diverse users.</p>
+      <div class="hero-metrics-row">
+        <div class="emopulse-score-card">
+          <div class="emopulse-score-label">Emopulse Score</div>
+          <div class="emopulse-score-value">78 / 100</div>
+          <div class="emopulse-score-bar">
+            <div class="emopulse-score-bar-fill"></div>
           </div>
         </div>
 
-        <div class="quote-block">
-          <p>Emopulse turns your inner world into something you can finally see — clearly, instantly, and truthfully.</p>
-        </div>
-      </section>
+        <div class="emotional-weather-card">
+          <div class="emo-card-header">
+            <div class="emo-card-title">Emotional weather</div>
+          </div>
 
-      <section class="section" id="demo">
-        <div class="section-header">
-          <h2>Live demo</h2>
-          <p class="section-subtitle">Natasha guides three scenarios — watch the aura react in real time.</p>
-        </div>
-
-        <div class="demo-layout">
-          <div class="demo-controls">
-            <h3>Try Natasha’s scenarios</h3>
-            <p class="demo-intro">Choose a state and see how Emopulse interprets the signal. This demo can run offline or call /api/analyze.</p>
-
-            <div class="demo-buttons">
-              <button class="demo-btn" data-scenario="smile">Smile</button>
-              <button class="demo-btn" data-scenario="neutral">Neutral</button>
-              <button class="demo-btn" data-scenario="stress">Stress</button>
+          <div class="emo-flex emo-flex-between">
+            <div>
+              <div class="emotional-weather-main">Clear with a chance of focus</div>
+              <div class="emotional-weather-tag">short-term outlook: low stress, rising clarity</div>
             </div>
-
-            <div class="demo-status">
-              <p class="demo-label">Natasha is analyzing</p>
-              <div class="progress-bar"><div class="progress-fill" id="demo-progress"></div></div>
-              <p class="demo-step" id="demo-step-label">Waiting for input</p>
-            </div>
-
-            <div class="natasha-bubble" id="natasha-text">Natasha: Choose how you feel and I’ll read the signal with you.</div>
-
-            <div class="demo-json">
-              <div class="demo-json-header"><span>API response preview</span><span class="demo-json-tag">POST /api/analyze</span></div>
-              <pre><code id="demo-json-output">{
-  "emotion": "neutral",
-  "confidence": 0.85,
-  "pulse_bpm": 72
-}</code></pre>
-            </div>
-          </div>
-
-          <div class="demo-visual">
-            <div class="demo-aura-wrapper">
-              <canvas id="demo-aura-canvas" width="400" height="400" aria-hidden="true"></canvas>
-              <div class="demo-aura-overlay">
-                <p class="demo-aura-label">3D Emotion Aura</p>
-                <p class="demo-aura-emotion" id="demo-aura-emotion">Neutral</p>
-              </div>
-            </div>
-
-            <div class="demo-metrics">
-              <div class="metric"><span class="metric-label">Emotion</span><span class="metric-value" id="metric-emotion">neutral</span></div>
-              <div class="metric"><span class="metric-label">Confidence</span><span class="metric-value" id="metric-confidence">0.85</span></div>
-              <div class="metric"><span class="metric-label">Pulse BPM</span><span class="metric-value" id="metric-pulse">72</span></div>
-              <div class="metric"><span class="metric-label">Latency</span><span class="metric-value" id="metric-latency">120 ms</span></div>
-            </div>
+            <div class="emotional-weather-icon calm"></div>
           </div>
         </div>
-      </section>
+      </div>
 
-      <section class="section two-column" id="about">
-        <div>
-          <h2>About Emopulse</h2>
-          <p>Emopulse is the first camera-based emotional insight platform that transforms real-time facial signals into actionable emotional understanding — without sensors or wearables.</p>
-        </div>
-        <div>
-          <h2>How we build</h2>
-          <ul class="bullet-list">
-            <li><strong>Research</strong> physiological signals and emotional modeling</li>
-            <li><strong>Design</strong> human-first UX and instant feedback</li>
-            <li><strong>Privacy</strong> consent-first demo mode</li>
-          </ul>
-        </div>
-      </section>
+      <div class="privacy-banner">
+        We never store your data. All processing is real-time. You stay in control.
+      </div>
 
-      <section class="section" id="team">
-        <div class="section-header"><h2>Meet the team</h2><p class="section-subtitle">Built by humans, guided by Natasha AI.</p></div>
-        <div class="team-grid">
-          <div class="team-card"><div class="avatar-circle avatar-arvid"></div><h3>Arvydas Pakalniškis</h3><p class="team-role">Founder & Product Strategy</p></div>
-          <div class="team-card"><div class="avatar-circle avatar-natasha"></div><h3>Natasha AI</h3><p class="team-role">Chief Operations Operator</p></div>
-        </div>
-      </section>
-
-      <section class="section section-cta" id="contact">
-        <div class="cta-inner">
-          <h2>Ready to explore emotional clarity?</h2>
-          <p class="section-subtitle">Show investors a live, camera-based emotional insight demo — powered by Natasha and Emopulse.</p>
-          <div class="cta-actions">
-            <a href="mailto:gv66co@gmail.com" class="btn-primary">Contact for demo</a>
-            <a href="https://www.emopulse.app" class="btn-ghost" target="_blank" rel="noopener noreferrer">Visit emopulse.app</a>
-          </div>
-        </div>
-      </section>
-    </main>
-
-    <footer class="footer">
-      <div class="footer-left"><span>© Emopulse 2025</span><span>Guided by Natasha AI</span></div>
-      <div class="footer-right"><a href="/privacy_policy.md" class="footer-link">Privacy</a><a href="#" class="footer-link">Terms</a></div>
-    </footer>
+    </div>
   </div>
+</section>
 
-  <script src="/app.js"></script>
-</body>
-</html>
+<!-- MINI DASHBOARD -->
+<section class="section-block" id="mini-dashboard">
+  <h2>Mini dashboard</h2>
+  <div class="mini-dashboard">
+    <div class="mini-metric-card">
+      <div class="mini-metric-label">Pulse</div>
+      <div class="mini-metric-value">74 bpm</div>
+      <div class="mini-metric-pill">Signal quality: high</div>
+    </div>
+
+    <div class="mini-metric-card">
+      <div class="mini-metric-label">Emotion</div>
+      <div class="mini-metric-value">Calm</div>
+      <div class="mini-metric-pill">Valence: positive</div>
+    </div>
+
+    <div class="mini-metric-card">
+      <div class="mini-metric-label">Confidence</div>
