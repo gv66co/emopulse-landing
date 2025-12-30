@@ -1,0 +1,19 @@
+{
+  "name": "emo1",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --host"
+  },
+  "dependencies": {
+    "@mediapipe/tasks-vision": "^0.10.20",
+    "face-api.js": "^0.22.2",
+    "three": "^0.160.0"
+  },
+  "devDependencies": {
+    "vite": "^5.4.10"
+  }
+}
