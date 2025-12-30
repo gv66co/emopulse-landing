@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="lt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Emopulse — Investors</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body class="bg">
+    <header class="topbar">
+      <div class="brand">
+        <div class="mark">S</div>
+        <div class="brandText">
+          <div class="brandName">Emopulse</div>
+        </div>
+      </div>
+
+      <div class="hero">
+        <div class="heroTitle">Pitch deck</div>
+        <div class="heroSub">3D carousel — slides only. Team slide: only Arvid Pak.</div>
+      </div>
+
+      <nav class="nav">
+        <a class="navLink" href="/index.html">Live model</a>
+        <a class="navLink navLinkActive" href="/investors.html">Investors</a>
+      </nav>
+    </header>
+
+    <main class="gridInvestors">
+      <section class="panel panelWide">
+        <div class="panelTitle">Investors</div>
+
+        <div class="carouselWrap">
+          <canvas id="deck3d" class="deck3d"></canvas>
+
+          <div class="carouselHud">
+            <button id="prev" class="btn btnGhost">Prev</button>
+            <button id="next" class="btn btnGhost">Next</button>
+            <button id="pause" class="btn btnGhost" aria-pressed="false">Pause</button>
+          </div>
+
+          <div class="carouselMeta">
+            <div id="slideLabel" class="carouselLabel">—</div>
+            <div class="carouselHint">Hover pauses. Drag rotates. Wheel zooms.</div>
+          </div>
+        </div>
+
+        <div class="row mt12">
+          <a class="btn btnPrimary" href="/index.html">Try it live</a>
+          <a class="btn btnGhost" href="/EMOPULSE.APP%20(1).pdf" download>Download Pitchdeck</a>
+        </div>
+      </section>
+
+      <aside class="panel">
+        <div class="panelTitle">Deck rules</div>
+        <div class="bullets">
+          <div class="bullet">Uses your slide images from <code>/public/slides/</code></div>
+          <div class="bullet">Team slide must be the single image where it already says “Arvid Pak”</div>
+          <div class="bullet">No overlays added, no extra people</div>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="footer footerCompact">
+      <div>© 2026 emo1 (Emopulse). All rights reserved.</div>
+    </footer>
+
+    <script type="module" src="/src/investors.js"></script>
+  </body>
+</html>
