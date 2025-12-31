@@ -26,8 +26,6 @@ const pulseCanvas = document.getElementById('pulse');
 // ---------- CAMERA ----------
 
 async function initCamera() {
-  if (!camEl || !camStatus) return;
-
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
       video: { width: 520, height: 360 },
@@ -37,7 +35,6 @@ async function initCamera() {
     camStatus.textContent = 'Camera active — reading your field…';
   } catch (err) {
     camStatus.textContent = 'Camera blocked — enable camera to see full model';
-    console.error('Camera error:', err);
   }
 }
 
