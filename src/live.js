@@ -1,8 +1,4 @@
-// /src/live.js
-
 import { initCompass, updateCompass3D } from './compass3d.js';
-
-// ---------- DOM ELEMENTAI ----------
 
 const camEl = document.getElementById('cam');
 const camStatus = document.getElementById('camStatus');
@@ -23,9 +19,9 @@ const intensityEl = document.getElementById('intensity');
 const timelineCanvas = document.getElementById('timeline');
 const pulseCanvas = document.getElementById('pulse');
 
-// ---------- CAMERA ----------
-
 async function initCamera() {
+  if (!camEl || !camStatus) return;
+
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
       video: { width: 520, height: 360 },
@@ -41,8 +37,6 @@ async function initCamera() {
 function hasCamera() {
   return camEl && camEl.srcObject != null;
 }
-
-// ---------- EMOTION ENGINE ----------
 
 function analyzeEmotion(text, cameraActive) {
   const t = (text || '').toLowerCase();
@@ -108,8 +102,6 @@ function analyzeEmotion(text, cameraActive) {
   };
 }
 
-// ---------- TIMELINE & PULSE ----------
-
 const timelineCtx = timelineCanvas?.getContext('2d');
 const pulseCtx = pulseCanvas?.getContext('2d');
 const history = [];
@@ -133,7 +125,6 @@ function drawTimeline() {
 
   timelineCtx.lineWidth = 2;
 
-  // Score
   timelineCtx.beginPath();
   history.forEach((p, i) => {
     const x = (i / (history.length - 1)) * (w - 20) + 10;
@@ -144,7 +135,6 @@ function drawTimeline() {
   timelineCtx.strokeStyle = '#ffffff';
   timelineCtx.stroke();
 
-  // Energy
   timelineCtx.beginPath();
   history.forEach((p, i) => {
     const x = (i / (history.length - 1)) * (w - 20) + 10;
@@ -155,7 +145,6 @@ function drawTimeline() {
   timelineCtx.strokeStyle = '#22d3ee';
   timelineCtx.stroke();
 
-  // Stress
   timelineCtx.beginPath();
   history.forEach((p, i) => {
     const x = (i / (history.length - 1)) * (w - 20) + 10;
@@ -189,46 +178,42 @@ function drawPulse(m) {
   pulseCtx.stroke();
 }
 
-// ---------- UI UPDATE ----------
-
 function updateUI(m) {
-  scoreEl.textContent = m.score;
-  score2El.textContent = m.score;
-  energyEl.textContent = Math.round(m.energy * 100) + '%';
-  stressEl.textContent = Math.round(m.stress * 100) + '%';
+  if (scoreEl) scoreEl.textContent = m.score;
+  if (score2El) score2El.textContent = m.score;
+  if (energyEl) energyEl.textContent = Math.round(m.energy * 100) + '%';
+  if (stressEl) stressEl.textContent = Math.round(m.stress * 100) + '%';
+  if (stabilityEl) stabilityEl.textContent = Math.round(m.stability * 100) + '%';
+  if (intensityEl) intensityEl.textContent = Math.round(m.intensity * 100) + '%';
 
-  stabilityEl.textContent = Math.round(m.stability * 100) + '%';
-  intensityEl.textContent = Math.round(m.intensity * 100) + '%';
+  if (aiTextEl) aiTextEl.textContent = m.interpretation;
 
-  aiTextEl.textContent = m.interpretation;
-
-  aiTagsEl.innerHTML = '';
-  m.tags.forEach((tag) => {
-    const span = document.createElement('span');
-    span.className = 'aiTag';
-    span.textContent = tag;
-    aiTagsEl.appendChild(span);
-  });
+  if (aiTagsEl) {
+    aiTagsEl.innerHTML = '';
+    m.tags.forEach((tag) => {
+      const span = document.createElement('span');
+      span.className = 'cosmic-ai-tag';
+      span.textContent = tag;
+      aiTagsEl.appendChild(span);
+    });
+  }
 
   updateCompass3D(m);
-
   pushHistory(m);
   drawTimeline();
   drawPulse(m);
 }
 
-// ---------- ANALYZE BUTTON ----------
-
-analyzeBtn.addEventListener('click', () => {
-  const text = userText.value;
-  const metrics = analyzeEmotion(text, hasCamera());
-  updateUI(metrics);
-});
-
-// ---------- INIT ----------
+if (analyzeBtn) {
+  analyzeBtn.addEventListener('click', () => {
+    const text = userText ? userText.value : '';
+    const metrics = analyzeEmotion(text, hasCamera());
+    updateUI(metrics);
+  });
+}
 
 initCamera();
-initCompass(); // ← LABAI SVARBU
+initCompass();
 drawTimeline();
 drawPulse({
   score: 50,
