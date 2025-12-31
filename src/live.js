@@ -409,3 +409,67 @@ drawPulse({
   stability: 0.7,
   intensity: 0.4
 });
+
+// ===============================
+// 3D COMPASS — BLOCK 5.1
+// SCENE + CAMERA + RENDERER SETUP
+// ===============================
+
+import * as THREE from 'three';
+
+let scene, camera, renderer;
+let canvas;
+
+export function initCompass3D() {
+  canvas = document.getElementById('compass3d');
+
+  if (!canvas) {
+    console.error("Canvas #compass3d not found");
+    return;
+  }
+
+  // Scene
+  scene = new THREE.Scene();
+  scene.background = null;
+
+  // Camera
+  camera = new THREE.PerspectiveCamera(
+    45,
+    canvas.clientWidth / canvas.clientHeight,
+    0.1,
+    1000
+  );
+  camera.position.set(0, 0, 3.2);
+
+  // Renderer
+  renderer = new THREE.WebGLRenderer({
+    canvas: canvas,
+    alpha: true,
+    antialias: true
+  });
+
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
+
+  window.addEventListener('resize', resizeCompass3D);
+
+  animateCompass3D();
+}
+
+function resizeCompass3D() {
+  if (!canvas) return;
+
+  camera.aspect = canvas.clientWidth / canvas.clientHeight;
+  camera.updateProjectionMatrix();
+
+  renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
+}
+
+function animateCompass3D() {
+  requestAnimationFrame(animateCompass3D);
+
+  // čia vėliau įdėsime orbitų, sferos ir taškų animacijas
+
+  renderer.render(scene, camera);
+}
+
