@@ -6,6 +6,7 @@
     <title>Emopulse — Live model</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
+
   <body class="bg">
     <header class="topbar">
       <div class="brand">
@@ -81,6 +82,31 @@
             </div>
           </div>
         </div>
+
+        <!-- 🔥🔥🔥 PRIDĖTA: 3D EMOTIONAL COMPASS + AURA DRIFT + EMOTIONAL FIELD BOX -->
+        <div class="emopulse3D">
+          <!-- Aura Drift Background -->
+          <canvas id="auraDrift" width="800" height="600" class="auraDriftCanvas"></canvas>
+
+          <!-- 3D Compass Container -->
+          <div id="compassContainer">
+            <canvas id="compass3D"></canvas>
+
+            <!-- Compass Labels -->
+            <div class="compassLabel compassLabel-ca">Ca</div>
+            <div class="compassLabel compassLabel-joy">Joy</div>
+            <div class="compassLabel compassLabel-stress">Stress</div>
+          </div>
+
+          <!-- Emotional Field Output -->
+          <div class="emotionalFieldBox">
+            <div class="efTitle">Emotional Aura</div>
+            <div class="efLine">Stability: <span id="efStability">—</span></div>
+            <div class="efLine">Intensity: <span id="efIntensity">—</span></div>
+            <div class="efLine">Score: <span id="efScore">—</span></div>
+          </div>
+        </div>
+        <!-- 🔥🔥🔥 PRIDĖTA PABAIGA -->
 
         <div class="metrics mt14">
           <div class="metric">
