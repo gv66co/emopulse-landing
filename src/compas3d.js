@@ -246,7 +246,9 @@ function animateCompass3D() {
   requestAnimationFrame(animateCompass3D);
 
   // Smooth auto-rotation
-  scene.rotation.y += 0.002;
+  // Auto rotation + emotional direction blend
+scene.rotation.y += (targetRotation - scene.rotation.y) * 0.05;
+
 
   // Animate core sphere (breathing)
   if (coreSphere) animateCoreSphere();
@@ -304,4 +306,18 @@ export function updateCompassGlow(metrics) {
   }
 
   glowMesh.material.uniforms.glowColor.value = color;
+}
+
+// ===============================
+// EMOTION → COMPASS ROTATION
+// ===============================
+
+let targetRotation = 0;
+
+export function updateCompassDirection({ energy, stress }) {
+  // Emocijos krypties kampas
+  const angle = Math.atan2(stress, energy);
+
+  // Tikslinė rotacija
+  targetRotation = angle;
 }
