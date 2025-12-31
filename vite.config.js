@@ -1,13 +1,9 @@
 import { defineConfig } from "vite";
-import { resolve } from "node:path";
 
 export default defineConfig({
+  root: ".",
   build: {
-    rollupOptions: {
-      input: {
-        live: resolve(__dirname, "index.html"),
-        investors: resolve(__dirname, "investors.html")
-      }
-    }
+    outDir: "dist",
+    emptyOutDir: true
   }
 });
