@@ -1,16 +1,14 @@
 /**
- * Emopulse Landing → Cloud Run API Premium Client
+ * Emopulse Landing – Premium API Integration Block
  * Author: arvydelis + Copilot
  * Version: 1.0 (premium)
  */
 
 const API_BASE = "https://emopulse-api-1009590211108.europe-west4.run.app";
-
-// Debug overlay (įjunk jei nori matyti API būseną ekrane)
 const DEBUG_OVERLAY = false;
 
 /* -------------------------------------------------------
-   Utility: Debug overlay
+   Debug overlay
 ------------------------------------------------------- */
 function createDebugOverlay() {
   if (!DEBUG_OVERLAY) return;
@@ -39,7 +37,7 @@ function updateDebugOverlay(text) {
 }
 
 /* -------------------------------------------------------
-   Utility: Fetch wrapper with retry + exponential backoff
+   Fetch wrapper with retry + exponential backoff
 ------------------------------------------------------- */
 async function fetchWithRetry(url, options = {}, retries = 3) {
   let attempt = 0;
@@ -80,7 +78,6 @@ export const EmopulseAPI = {
       console.warn("Emopulse API offline:", err);
     }
 
-    // Auto‑recheck kas 10 sekundžių
     setInterval(() => this.recheck(), 10000);
   },
 
@@ -96,16 +93,10 @@ export const EmopulseAPI = {
     }
   },
 
-  /* --------------------------
-     API: /api/health
-  -------------------------- */
   async health() {
     return fetchWithRetry(`${API_BASE}/api/health`);
   },
 
-  /* --------------------------
-     API: /api/rotate
-  -------------------------- */
   async rotate(text) {
     if (!text || typeof text !== "string") {
       throw new Error("rotate(text) requires a string");
@@ -124,4 +115,9 @@ export const EmopulseAPI = {
 ------------------------------------------------------- */
 window.addEventListener("DOMContentLoaded", () => {
   EmopulseAPI.init();
+
+  // DEMO: premium UI-less test
+  EmopulseAPI.rotate("arvydas")
+    .then(r => console.log("Rotated:", r))
+    .catch(e => console.error("Rotate error:", e));
 });
