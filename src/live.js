@@ -1,6 +1,6 @@
 // /src/live.js
 
-import { updateCompass3D } from './compass3d.js';
+import { initCompass, updateCompass3D } from './compass3d.js';
 
 // ---------- DOM ELEMENTAI ----------
 
@@ -8,8 +8,6 @@ const camEl = document.getElementById('cam');
 const camStatus = document.getElementById('camStatus');
 const userText = document.getElementById('userText');
 const analyzeBtn = document.getElementById('analyzeBtn');
-const soundBtn = document.getElementById('soundBtn');
-const tryLiveBtn = document.getElementById('tryLive');
 
 const aiTextEl = document.getElementById('aiText');
 const aiTagsEl = document.getElementById('aiTags');
@@ -37,10 +35,8 @@ async function initCamera() {
     });
     camEl.srcObject = stream;
     camStatus.textContent = 'Camera active — reading your field…';
-    camStatus.classList.add('camStatusActive');
   } catch (err) {
     camStatus.textContent = 'Camera blocked — enable camera to see full model';
-    camStatus.classList.add('camStatusError');
     console.error('Camera error:', err);
   }
 }
@@ -117,8 +113,8 @@ function analyzeEmotion(text, cameraActive) {
 
 // ---------- TIMELINE & PULSE ----------
 
-const timelineCtx = timelineCanvas ? timelineCanvas.getContext('2d') : null;
-const pulseCtx = pulseCanvas ? pulseCanvas.getContext('2d') : null;
+const timelineCtx = timelineCanvas?.getContext('2d');
+const pulseCtx = pulseCanvas?.getContext('2d');
 const history = [];
 
 function pushHistory(m) {
@@ -132,7 +128,7 @@ function pushHistory(m) {
 }
 
 function drawTimeline() {
-  if (!timelineCanvas || !timelineCtx) return;
+  if (!timelineCtx) return;
   const w = timelineCanvas.width;
   const h = timelineCanvas.height;
   timelineCtx.clearRect(0, 0, w, h);
@@ -175,7 +171,7 @@ function drawTimeline() {
 }
 
 function drawPulse(m) {
-  if (!pulseCanvas || !pulseCtx) return;
+  if (!pulseCtx) return;
   const w = pulseCanvas.width;
   const h = pulseCanvas.height;
   pulseCtx.clearRect(0, 0, w, h);
@@ -196,82 +192,46 @@ function drawPulse(m) {
   pulseCtx.stroke();
 }
 
-// ---------- SOUND ----------
-
-let soundOn = true;
-
-if (soundBtn) {
-  soundBtn.addEventListener('click', () => {
-    soundOn = !soundOn;
-    soundBtn.setAttribute('aria-pressed', soundOn ? 'true' : 'false');
-    soundBtn.textContent = soundOn ? 'Sound: On' : 'Sound: Off';
-  });
-}
-
-function speak(text) {
-  if (!soundOn) return;
-  if (!('speechSynthesis' in window)) return;
-  const u = new SpeechSynthesisUtterance(text);
-  u.rate = 1;
-  u.pitch = 1;
-  window.speechSynthesis.cancel();
-  window.speechSynthesis.speak(u);
-}
-
-// ---------- TRY LIVE BUTTON ----------
-
-if (tryLiveBtn) {
-  tryLiveBtn.addEventListener('click', () => {
-    if (userText) userText.focus();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-}
-
 // ---------- UI UPDATE ----------
 
 function updateUI(m) {
-  if (scoreEl) scoreEl.textContent = m.score;
-  if (score2El) score2El.textContent = m.score;
-  if (energyEl) energyEl.textContent = Math.round(m.energy * 100) + '%';
-  if (stressEl) stressEl.textContent = Math.round(m.stress * 100) + '%';
+  scoreEl.textContent = m.score;
+  score2El.textContent = m.score;
+  energyEl.textContent = Math.round(m.energy * 100) + '%';
+  stressEl.textContent = Math.round(m.stress * 100) + '%';
 
-  if (stabilityEl) stabilityEl.textContent = Math.round(m.stability * 100) + '%';
-  if (intensityEl) intensityEl.textContent = Math.round(m.intensity * 100) + '%';
+  stabilityEl.textContent = Math.round(m.stability * 100) + '%';
+  intensityEl.textContent = Math.round(m.intensity * 100) + '%';
 
-  if (aiTextEl) aiTextEl.textContent = m.interpretation;
+  aiTextEl.textContent = m.interpretation;
 
-  if (aiTagsEl) {
-    aiTagsEl.innerHTML = '';
-    m.tags.forEach((tag) => {
-      const span = document.createElement('span');
-      span.className = 'aiTag';
-      span.textContent = tag;
-      aiTagsEl.appendChild(span);
-    });
-  }
+  aiTagsEl.innerHTML = '';
+  m.tags.forEach((tag) => {
+    const span = document.createElement('span');
+    span.className = 'aiTag';
+    span.textContent = tag;
+    aiTagsEl.appendChild(span);
+  });
 
   updateCompass3D(m);
 
   pushHistory(m);
   drawTimeline();
   drawPulse(m);
-
-  speak(m.interpretation);
 }
 
 // ---------- ANALYZE BUTTON ----------
 
-if (analyzeBtn) {
-  analyzeBtn.addEventListener('click', () => {
-    const text = userText ? userText.value : '';
-    const metrics = analyzeEmotion(text, hasCamera());
-    updateUI(metrics);
-  });
-}
+analyzeBtn.addEventListener('click', () => {
+  const text = userText.value;
+  const metrics = analyzeEmotion(text, hasCamera());
+  updateUI(metrics);
+});
 
 // ---------- INIT ----------
 
 initCamera();
+initCompass(); // ← LABAI SVARBU
 drawTimeline();
 drawPulse({
   score: 50,
