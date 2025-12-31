@@ -1,579 +1,411 @@
-import { FaceLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
-import * as faceapi from "face-api.js";
+// /src/live.js
 
-/* DOM */
-const video = document.getElementById("cam");
-const overlay = document.getElementById("overlay");
-const octx = overlay.getContext("2d");
+import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
 
-const auraCanvas = document.getElementById("auraCanvas");
-const actx = auraCanvas.getContext("2d");
+const camEl = document.getElementById('cam');
+const camStatus = document.getElementById('camStatus');
+const userText = document.getElementById('userText');
+const analyzeBtn = document.getElementById('analyzeBtn');
+const soundBtn = document.getElementById('soundBtn');
+const tryLiveBtn = document.getElementById('tryLive');
 
-const camStatus = document.getElementById("camStatus");
+const aiTextEl = document.getElementById('aiText');
+const aiTagsEl = document.getElementById('aiTags');
 
-const analyzeBtn = document.getElementById("analyzeBtn");
-const soundBtn = document.getElementById("soundBtn");
+const scoreEl = document.getElementById('score');
+const score2El = document.getElementById('score2');
+const energyEl = document.getElementById('energy');
+const stressEl = document.getElementById('stress');
 
-const aiText = document.getElementById("aiText");
-const aiTags = document.getElementById("aiTags");
+const stabilityEl = document.getElementById('stability');
+const intensityEl = document.getElementById('intensity');
 
-const scoreEl = document.getElementById("score");
-const score2El = document.getElementById("score2");
-const energyEl = document.getElementById("energy");
-const stressEl = document.getElementById("stress");
-const stabilityEl = document.getElementById("stability");
-const intensityEl = document.getElementById("intensity");
+const timelineCanvas = document.getElementById('timeline');
+const pulseCanvas = document.getElementById('pulse');
 
-const timeline = document.getElementById("timeline");
-const tctx = timeline.getContext("2d");
+// ---------- CAMERA ----------
 
-const pulse = document.getElementById("pulse");
-const pctx = pulse.getContext("2d");
-
-document.getElementById("downloadPitchLeft").addEventListener("click", downloadPitch);
-document.getElementById("downloadPitchRight").addEventListener("click", downloadPitch);
-document.getElementById("tryLive").addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
-
-document.getElementById("send").addEventListener("click", () => {
-  const name = document.getElementById("name").value.trim();
-  const email = document.getElementById("email").value.trim();
-  const msg = document.getElementById("message").value.trim();
-  if (!name || !email || !msg) return alert("Fill all contact fields.");
-  alert("Message sent.");
-});
-
-/* Audio */
-let soundOn = true;
-soundBtn.addEventListener("click", () => {
-  soundOn = !soundOn;
-  soundBtn.textContent = soundOn ? "Sound: On" : "Sound: Off";
-  soundBtn.setAttribute("aria-pressed", String(soundOn));
-});
-
-function beep(freq = 440, ms = 120) {
-  if (!soundOn) return;
-  const AC = window.AudioContext || window.webkitAudioContext;
-  if (!AC) return;
-  const ctx = new AC();
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-  osc.type = "sine";
-  osc.frequency.value = freq;
-  gain.gain.value = 0.02;
-  osc.connect(gain);
-  gain.connect(ctx.destination);
-  osc.start();
-  setTimeout(() => {
-    osc.stop();
-    ctx.close();
-  }, ms);
+async function initCamera() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { width: 520, height: 360 },
+      audio: false
+    });
+    camEl.srcObject = stream;
+    camStatus.textContent = 'Camera active — reading your field…';
+    camStatus.classList.add('camStatusActive');
+  } catch (err) {
+    camStatus.textContent = 'Camera blocked — enable camera to see full model';
+    camStatus.classList.add('camStatusError');
+    console.error('Camera error:', err);
+  }
 }
 
-function downloadPitch() {
-  const a = document.createElement("a");
-  a.href = "/EMOPULSE.APP%20(1).pdf";
-  a.download = "EMOPULSE.APP.pdf";
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-}
+// ---------- 3D COSMIC COMPASS ----------
 
-/* State */
-let landmarker = null;
-let modelsReady = false;
+function initCosmicCompass() {
+  const canvas = document.getElementById('auraCanvas');
+  const width = canvas.width;
+  const height = canvas.height;
 
-let lastFrameTs = 0;
-let timelineData = [];
-let pulseSignal = [];
-let bpm = null;
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x020617); // deep space
 
-let lastEmotion = { joy: 0, stress: 0, calm: 0, raw: null };
-let lastFaceBox = null;
+  const camera = new THREE.PerspectiveCamera(35, width / height, 0.1, 100);
+  camera.position.z = 7;
 
-/* POS rPPG buffers */
-let rgbWindow = [];
-const POS_WIN = 150;
-
-init().catch((e) => {
-  console.error(e);
-  camStatus.textContent = "Init failed. Check console.";
-});
-
-async function init() {
-  camStatus.textContent = "Loading models…";
-  await Promise.all([initMediaPipe(), initFaceApi()]);
-  camStatus.textContent = "Starting camera…";
-  await startCamera();
-  camStatus.textContent = "Running (on-device).";
-  drawAuraLoop();
-  requestAnimationFrame(loop);
-}
-
-async function initMediaPipe() {
-  const vision = await FilesetResolver.forVisionTasks(
-    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.20/wasm"
-  );
-
-  landmarker = await FaceLandmarker.createFromOptions(vision, {
-    baseOptions: {
-      modelAssetPath:
-        "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task"
-    },
-    outputFaceBlendshapes: false,
-    outputFacialTransformationMatrixes: false,
-    runningMode: "VIDEO",
-    numFaces: 1
+  const renderer = new THREE.WebGLRenderer({
+    canvas,
+    alpha: true,
+    antialias: true
   });
-}
+  renderer.setSize(width, height);
+  renderer.setPixelRatio(window.devicePixelRatio || 1);
 
-async function initFaceApi() {
-  await faceapi.nets.tinyFaceDetector.loadFromUri("/models");
-  await faceapi.nets.faceExpressionNet.loadFromUri("/models");
-  modelsReady = true;
-}
+  const light = new THREE.PointLight(0xffffff, 1.3);
+  light.position.set(4, 6, 8);
+  scene.add(light);
 
-async function startCamera() {
-  const stream = await navigator.mediaDevices.getUserMedia({
-    video: { facingMode: "user", width: { ideal: 960 }, height: { ideal: 540 } },
-    audio: false
+  const ambient = new THREE.AmbientLight(0xffffff, 0.35);
+  scene.add(ambient);
+
+  // Stars
+  const starGeo = new THREE.BufferGeometry();
+  const starCount = 400;
+  const positions = new Float32Array(starCount * 3);
+  for (let i = 0; i < starCount; i++) {
+    positions[i * 3 + 0] = (Math.random() - 0.5) * 20;
+    positions[i * 3 + 1] = (Math.random() - 0.5) * 20;
+    positions[i * 3 + 2] = (Math.random() - 0.5) * 20;
+  }
+  starGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  const starMat = new THREE.PointsMaterial({
+    color: 0xffffff,
+    size: 0.04,
+    transparent: true,
+    opacity: 0.8
   });
-  video.srcObject = stream;
-  await video.play();
+  const stars = new THREE.Points(starGeo, starMat);
+  scene.add(stars);
 
-  overlay.width = 520;
-  overlay.height = 360;
-}
+  // Compass core
+  const coreGeo = new THREE.SphereGeometry(1.1, 48, 48);
+  const coreMat = new THREE.MeshStandardMaterial({
+    color: 0x4f46e5,
+    emissive: 0x4f46e5,
+    emissiveIntensity: 0.6,
+    metalness: 0.5,
+    roughness: 0.2
+  });
+  const core = new THREE.Mesh(coreGeo, coreMat);
+  scene.add(core);
 
-/* Loop */
-async function loop(ts) {
-  requestAnimationFrame(loop);
-  if (!video.videoWidth) return;
+  // Needle (emotional direction)
+  const needleGeo = new THREE.ConeGeometry(0.18, 1.6, 32);
+  const needleMat = new THREE.MeshStandardMaterial({
+    color: 0xff4b8b,
+    emissive: 0xff4b8b,
+    emissiveIntensity: 0.7,
+    metalness: 0.4,
+    roughness: 0.3
+  });
+  const needle = new THREE.Mesh(needleGeo, needleMat);
+  needle.position.y = 1.2;
+  needle.rotation.x = Math.PI;
+  scene.add(needle);
 
-  if (ts - lastFrameTs < 33) return;
-  lastFrameTs = ts;
-
-  const mp = landmarker.detectForVideo(video, ts);
-  const face = mp.faceLandmarks?.[0] || null;
-
-  octx.clearRect(0, 0, overlay.width, overlay.height);
-
-  if (face) {
-    const pts = face.map((p) => ({ x: p.x * overlay.width, y: p.y * overlay.height }));
-    const bb = bbox(pts);
-    lastFaceBox = bb;
-
-    drawFaceHUD(pts, bb);
-
-    const roi = foreheadROI(pts);
-    const rgb = sampleROI(video, roi, video.videoWidth, video.videoHeight);
-    if (rgb) {
-      rgbWindow.push(rgb);
-      if (rgbWindow.length > POS_WIN) rgbWindow.shift();
-
-      const s = posPulse(rgbWindow);
-      if (s != null) {
-        pulseSignal.push(s);
-        if (pulseSignal.length > 420) pulseSignal.shift();
-        bpm = estimateBPM(pulseSignal, 30);
-      }
-    }
-
-    if (modelsReady && (timelineData.length % 6 === 0)) {
-      await inferEmotions();
-    }
-
-    updateMetrics();
-  } else {
-    camStatus.textContent = "No face detected — look at the camera.";
-    lastEmotion.joy *= 0.97;
-    lastEmotion.stress *= 0.97;
-    lastEmotion.calm *= 0.97;
-    updateMetrics();
+  // Rings
+  function makeRing(inner, outer, tiltX, tiltY, color) {
+    const geo = new THREE.RingGeometry(inner, outer, 96);
+    const mat = new THREE.MeshBasicMaterial({
+      color,
+      transparent: true,
+      opacity: 0.45,
+      side: THREE.DoubleSide
+    });
+    const ring = new THREE.Mesh(geo, mat);
+    ring.rotation.x = tiltX;
+    ring.rotation.y = tiltY;
+    scene.add(ring);
+    return ring;
   }
 
-  const score = computeScore();
-  timelineData.push(score);
-  if (timelineData.length > 240) timelineData.shift();
-  drawTimeline(timelineData);
+  const ringOuter = makeRing(2.2, 2.8, Math.PI / 3, 0.2, 0x22d3ee);
+  const ringInner = makeRing(1.6, 2.0, -Math.PI / 4, -0.3, 0xa855f7);
 
-  drawPulse(pulseSignal, bpm);
-}
+  let lastMetrics = {
+    energy: 0.5,
+    stress: 0.3,
+    score: 50
+  };
 
-/* Emotions */
-async function inferEmotions() {
-  const det = await faceapi
-    .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.4 }))
-    .withFaceExpressions();
+  function updateFromMetrics(m) {
+    lastMetrics = m;
 
-  if (!det?.expressions) return;
+    // Color blend based on emotion
+    const calm = new THREE.Color(0x22d3ee);
+    const active = new THREE.Color(0x22c55e);
+    const stressed = new THREE.Color(0xef4444);
 
-  const ex = det.expressions;
+    const energyMix = calm.clone().lerp(active, m.energy);
+    const stressMix = energyMix.clone().lerp(stressed, m.stress);
 
-  const joy = clamp01(ex.happy + 0.25 * ex.surprised);
-  const stress = clamp01(0.35 * ex.angry + 0.35 * ex.fearful + 0.15 * ex.disgusted + 0.25 * ex.sad);
-  const calm = clamp01(ex.neutral * 0.9 + (1 - stress) * 0.1);
+    core.material.color.copy(stressMix);
+    core.material.emissive.copy(stressMix.clone().multiplyScalar(0.7));
 
-  lastEmotion.joy = lerp(lastEmotion.joy, joy, 0.25);
-  lastEmotion.stress = lerp(lastEmotion.stress, stress, 0.25);
-  lastEmotion.calm = lerp(lastEmotion.calm, calm, 0.25);
-  lastEmotion.raw = ex;
-}
+    ringOuter.material.color.copy(energyMix);
+    ringInner.material.color.copy(stressMix);
 
-/* Metrics */
-function computeScore() {
-  const base = 100 * (0.55 * lastEmotion.calm + 0.55 * lastEmotion.joy - 0.65 * lastEmotion.stress);
-  const pulsePenalty = bpm ? clamp(0, 18, Math.abs(bpm - 72) * 0.28) : 0;
-  return Math.round(clamp(0, 100, base + 55 - pulsePenalty));
-}
-
-function updateMetrics() {
-  const score = computeScore();
-  scoreEl.textContent = `${score} / 100`;
-  score2El.textContent = `${score}/100`;
-
-  const e = bpm ? clamp01((bpm - 55) / 70) : 0.5;
-  const energy = clamp01(0.55 * e + 0.45 * lastEmotion.joy);
-  energyEl.textContent = `${energy.toFixed(2).replace(".", ",")} rising`;
-
-  const hr = bpm ? clamp01((bpm - 75) / 55) : 0.2;
-  const stressRisk = clamp01(0.70 * lastEmotion.stress + 0.30 * hr);
-  stressEl.textContent = `${stressRisk.toFixed(2).replace(".", ",")} ${
-    stressRisk < 0.33 ? "low" : stressRisk < 0.66 ? "medium" : "high"
-  }`;
-
-  const stabilityDeg = Math.round((lastEmotion.joy - lastEmotion.stress) * 18);
-  stabilityEl.textContent = `${Math.abs(stabilityDeg)}° toward ${stabilityDeg >= 0 ? "Joy" : "Stress"}`;
-
-  const intensity = Math.max(lastEmotion.joy, lastEmotion.stress, lastEmotion.calm);
-  intensityEl.textContent = intensity < 0.33 ? "Low" : intensity < 0.66 ? "Medium" : "High";
-
-  const insight = buildInsight(score, stressRisk, energy);
-  aiText.textContent = insight.text;
-  aiTags.textContent = insight.tags.join(" ");
-}
-
-/* Analyze button */
-analyzeBtn.addEventListener("click", () => {
-  const score = computeScore();
-  beep(score > 75 ? 660 : 440, 120);
-  camStatus.textContent = "Analysis refreshed.";
-});
-
-function buildInsight(score, stressRisk, energy) {
-  if (stressRisk > 0.66) {
-    return {
-      text: "Your stress signal is elevated. Slow your breathing for 60 seconds and soften your jaw.",
-      tags: ["#stabilize", "#breath", "#reset"]
-    };
+    // Needle tilt: more stress → labiau pakrypęs
+    const tilt = (m.stress - 0.5) * 0.8;
+    needle.rotation.z = tilt;
   }
-  if (energy < 0.35) {
-    return {
-      text: "Low energy detected. Take a short movement break and hydrate, then re-check in 2 minutes.",
-      tags: ["#energy", "#recover", "#clarity"]
-    };
+
+  let t = 0;
+  function animate() {
+    requestAnimationFrame(animate);
+    t += 0.016;
+
+    stars.rotation.y += 0.0008;
+    stars.rotation.x += 0.0003;
+
+    core.rotation.y += 0.004 + lastMetrics.energy * 0.01;
+    core.rotation.x += 0.002;
+
+    ringOuter.rotation.z += 0.002 + lastMetrics.energy * 0.004;
+    ringInner.rotation.z -= 0.0015 + lastMetrics.stress * 0.003;
+
+    needle.rotation.y += 0.003;
+
+    renderer.render(scene, camera);
   }
-  if (score > 78) {
-    return {
-      text: "Your field looks coherent. Stay with one task and avoid context switching for the next 10 minutes.",
-      tags: ["#focus", "#calm", "#momentum"]
-    };
+
+  animate();
+
+  return updateFromMetrics;
+}
+
+const updateCompassFromMetrics = initCosmicCompass();
+
+// ---------- EMOTION ENGINE (pseudo) ----------
+
+function analyzeEmotion(text, hasCamera) {
+  const t = (text || '').toLowerCase();
+
+  let baseScore = 60;
+  let energy = 0.5;
+  let stress = 0.3;
+
+  if (t.includes('tired') || t.includes('pavarg')) {
+    energy -= 0.2;
+    stress += 0.1;
+    baseScore -= 5;
   }
+  if (t.includes('anxious') || t.includes('nerim') || t.includes('stress')) {
+    stress += 0.3;
+    baseScore -= 10;
+  }
+  if (t.includes('happy') || t.includes('good') || t.includes('grateful') || t.includes('dėking')) {
+    energy += 0.2;
+    baseScore += 10;
+  }
+  if (t.includes('angry') || t.includes('supyk') || t.includes('frustrated')) {
+    stress += 0.25;
+    baseScore -= 8;
+  }
+
+  if (hasCamera) {
+    baseScore += 3;
+    energy += 0.05;
+  }
+
+  energy = Math.min(Math.max(energy, 0), 1);
+  stress = Math.min(Math.max(stress, 0), 1);
+  baseScore = Math.min(Math.max(Math.round(baseScore), 0), 100);
+
+  const stability = 1 - Math.abs(energy - stress);
+  const intensity = (energy + stress) / 2;
+
+  let interpretation = 'Your emotional field is in a balanced, focused state.';
+  if (energy < 0.35 && stress < 0.4) {
+    interpretation = 'You seem low on energy but relatively calm. Good moment to rest and recharge.';
+  } else if (energy > 0.65 && stress < 0.4) {
+    interpretation = 'You feel energized and relatively stable. A good window for deep work or creativity.';
+  } else if (stress > 0.6) {
+    interpretation = 'Your field shows elevated stress. It might help to slow down and ground yourself.';
+  }
+
+  const tags = [];
+  if (energy < 0.4) tags.push('Low energy');
+  if (energy > 0.6) tags.push('High energy');
+  if (stress > 0.6) tags.push('High stress');
+  if (stability > 0.6) tags.push('Stable field');
+  if (hasCamera) tags.push('Camera signal active');
+
   return {
-    text: "Balanced but fluctuating. Reduce stimulation and choose a single next action.",
-    tags: ["#grounded", "#clarity", "#steady"]
+    score: baseScore,
+    energy,
+    stress,
+    stability,
+    intensity,
+    interpretation,
+    tags
   };
 }
 
-/* Aura */
-function drawAuraLoop() {
-  requestAnimationFrame(drawAuraLoop);
+// ---------- TIMELINE & PULSE ----------
 
-  const w = auraCanvas.width;
-  const h = auraCanvas.height;
-  actx.clearRect(0, 0, w, h);
+const timelineCtx = timelineCanvas.getContext('2d');
+const pulseCtx = pulseCanvas.getContext('2d');
+const history = [];
 
-  const cx = w / 2;
-  const cy = h / 2;
-  const r = Math.min(cx, cy) - 18;
-
-  const grad = actx.createRadialGradient(cx, cy, r * 0.15, cx, cy, r);
-  grad.addColorStop(0, "rgba(107,140,255,0.95)");
-  grad.addColorStop(0.58, "rgba(0,209,255,0.55)");
-  grad.addColorStop(1, "rgba(255,154,107,0.40)");
-
-  actx.fillStyle = grad;
-  actx.beginPath();
-  actx.arc(cx, cy, r, 0, Math.PI * 2);
-  actx.fill();
-
-  const t = performance.now() * 0.001;
-  drawDot(cx + Math.cos(t) * r * 0.75, cy + Math.sin(t) * r * 0.35, 2.4);
-  drawDot(cx + Math.cos(t + 2.1) * r * 0.62, cy + Math.sin(t + 2.1) * r * 0.62, 2.2);
-  drawDot(cx + Math.cos(t + 4.2) * r * 0.42, cy + Math.sin(t + 4.2) * r * 0.78, 2.0);
-
-  actx.fillStyle = "rgba(255,255,255,0.95)";
-  actx.font = "700 14px Inter, system-ui, Arial";
-  actx.fillText("Ca", cx - r * 0.78, cy - 8);
-  actx.fillText("Joy", cx + r * 0.60, cy - 18);
-  actx.fillText("Stress", cx - 18, cy + r * 0.80);
-
-  const vx = (lastEmotion.joy - lastEmotion.stress) * 0.9;
-  const vy = (lastEmotion.calm - 0.5) * -0.8;
-  drawDot(cx + vx * r * 0.55, cy + vy * r * 0.55, 4.0, "rgba(255,255,255,0.95)");
+function pushHistory(m) {
+  history.push({
+    ts: Date.now(),
+    score: m.score,
+    energy: m.energy,
+    stress: m.stress
+  });
+  if (history.length > 40) history.shift();
 }
 
-function drawDot(x, y, rr, col = "rgba(0,209,255,0.9)") {
-  actx.fillStyle = col;
-  actx.beginPath();
-  actx.arc(x, y, rr, 0, Math.PI * 2);
-  actx.fill();
+function drawTimeline() {
+  const w = timelineCanvas.width;
+  const h = timelineCanvas.height;
+  timelineCtx.clearRect(0, 0, w, h);
+  if (history.length < 2) return;
+
+  timelineCtx.lineWidth = 2;
+
+  // Score
+  timelineCtx.beginPath();
+  history.forEach((p, i) => {
+    const x = (i / (history.length - 1)) * (w - 20) + 10;
+    const y = h - 10 - (p.score / 100) * (h - 20);
+    if (i === 0) timelineCtx.moveTo(x, y);
+    else timelineCtx.lineTo(x, y);
+  });
+  timelineCtx.strokeStyle = '#ffffff';
+  timelineCtx.stroke();
+
+  // Energy
+  timelineCtx.beginPath();
+  history.forEach((p, i) => {
+    const x = (i / (history.length - 1)) * (w - 20) + 10;
+    const y = h - 10 - p.energy * (h - 20);
+    if (i === 0) timelineCtx.moveTo(x, y);
+    else timelineCtx.lineTo(x, y);
+  });
+  timelineCtx.strokeStyle = '#22d3ee';
+  timelineCtx.stroke();
+
+  // Stress
+  timelineCtx.beginPath();
+  history.forEach((p, i) => {
+    const x = (i / (history.length - 1)) * (w - 20) + 10;
+    const y = h - 10 - p.stress * (h - 20);
+    if (i === 0) timelineCtx.moveTo(x, y);
+    else timelineCtx.lineTo(x, y);
+  });
+  timelineCtx.strokeStyle = '#ef4444';
+  timelineCtx.stroke();
 }
 
-/* Overlay HUD */
-function drawFaceHUD(pts, bb) {
-  camStatus.textContent = "Face detected — on-device processing.";
+function drawPulse(m) {
+  const w = pulseCanvas.width;
+  const h = pulseCanvas.height;
+  pulseCtx.clearRect(0, 0, w, h);
 
-  octx.strokeStyle = "rgba(0,209,255,0.55)";
-  octx.lineWidth = 2;
-  octx.strokeRect(bb.x, bb.y, bb.w, bb.h);
+  const centerY = h / 2;
+  const amp = 18 + m.intensity * 18;
+  const freq = 0.04 + m.stress * 0.04;
 
-  octx.fillStyle = "rgba(255,255,255,0.65)";
-  for (let i = 0; i < pts.length; i += 18) {
-    const p = pts[i];
-    octx.fillRect(p.x - 1, p.y - 1, 2, 2);
+  pulseCtx.beginPath();
+  for (let x = 0; x < w; x++) {
+    const t = x * freq;
+    const y = centerY + Math.sin(t) * amp;
+    if (x === 0) pulseCtx.moveTo(x, y);
+    else pulseCtx.lineTo(x, y);
   }
-
-  const roi = foreheadROI(pts);
-  octx.strokeStyle = "rgba(107,140,255,0.55)";
-  octx.strokeRect(roi.x, roi.y, roi.w, roi.h);
+  pulseCtx.strokeStyle = '#4f46e5';
+  pulseCtx.lineWidth = 2;
+  pulseCtx.stroke();
 }
 
-function bbox(pts) {
-  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-  for (const p of pts) {
-    minX = Math.min(minX, p.x);
-    minY = Math.min(minY, p.y);
-    maxX = Math.max(maxX, p.x);
-    maxY = Math.max(maxY, p.y);
-  }
-  return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
+// ---------- UI & SOUND ----------
+
+let soundOn = true;
+
+soundBtn.addEventListener('click', () => {
+  soundOn = !soundOn;
+  soundBtn.setAttribute('aria-pressed', soundOn ? 'true' : 'false');
+  soundBtn.textContent = soundOn ? 'Sound: On' : 'Sound: Off';
+});
+
+tryLiveBtn.addEventListener('click', () => {
+  userText.focus();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+function speak(text) {
+  if (!soundOn) return;
+  if (!('speechSynthesis' in window)) return;
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = 1;
+  u.pitch = 1;
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(u);
 }
 
-function foreheadROI(pts) {
-  const p10 = pts[10];
-  const p151 = pts[151];
-  const p109 = pts[109];
-  const p338 = pts[338];
-
-  const left = Math.min(p109.x, p338.x);
-  const right = Math.max(p109.x, p338.x);
-
-  const top = Math.min(p10.y, p151.y) - 6;
-  const bottom = Math.min(p151.y + 10, top + 44);
-
-  const x = clamp(0, overlay.width - 1, left + (right - left) * 0.18);
-  const w = clamp(24, overlay.width, (right - left) * 0.64);
-  const y = clamp(0, overlay.height - 1, top + 8);
-  const h = clamp(18, overlay.height, bottom - y);
-
-  return { x, y, w, h };
+function hasCamera() {
+  return camEl && camEl.srcObject != null;
 }
 
-/* ROI sampling */
-let OFF = null;
-function getOffscreen(w, h) {
-  if (!OFF) OFF = document.createElement("canvas");
-  OFF.width = w;
-  OFF.height = h;
-  return OFF;
+function updateUI(m) {
+  scoreEl.textContent = m.score;
+  score2El.textContent = m.score;
+  energyEl.textContent = Math.round(m.energy * 100) + '%';
+  stressEl.textContent = Math.round(m.stress * 100) + '%';
+
+  stabilityEl.textContent = Math.round(m.stability * 100) + '%';
+  intensityEl.textContent = Math.round(m.intensity * 100) + '%';
+
+  aiTextEl.textContent = m.interpretation;
+  aiTagsEl.innerHTML = '';
+  m.tags.forEach((tag) => {
+    const span = document.createElement('span');
+    span.className = 'aiTag';
+    span.textContent = tag;
+    aiTagsEl.appendChild(span);
+  });
+
+  updateCompassFromMetrics({
+    score: m.score,
+    energy: m.energy,
+    stress: m.stress
+  });
+
+  pushHistory(m);
+  drawTimeline();
+  drawPulse(m);
+
+  speak(m.interpretation);
 }
 
-function sampleROI(videoEl, roiOverlay, vw, vh) {
-  const scaleX = vw / overlay.width;
-  const scaleY = vh / overlay.height;
+analyzeBtn.addEventListener('click', () => {
+  const text = userText.value || '';
+  const metrics = analyzeEmotion(text, hasCamera());
+  updateUI(metrics);
+});
 
-  const rx = Math.floor(roiOverlay.x * scaleX);
-  const ry = Math.floor(roiOverlay.y * scaleY);
-  const rw = Math.floor(roiOverlay.w * scaleX);
-  const rh = Math.floor(roiOverlay.h * scaleY);
+// ---------- INIT ----------
 
-  if (rw < 8 || rh < 8) return null;
-
-  const off = getOffscreen(rw, rh);
-  const ctx = off.getContext("2d", { willReadFrequently: true });
-  ctx.drawImage(videoEl, rx, ry, rw, rh, 0, 0, rw, rh);
-
-  const img = ctx.getImageData(0, 0, rw, rh).data;
-
-  let r = 0, g = 0, b = 0;
-  const step = 4 * 3;
-  for (let i = 0; i < img.length; i += step) {
-    r += img[i];
-    g += img[i + 1];
-    b += img[i + 2];
-  }
-  const n = img.length / step;
-  return { r: r / n, g: g / n, b: b / n };
-}
-
-/* POS rPPG */
-function posPulse(rgbArr) {
-  if (rgbArr.length < 12) return null;
-
-  const mean = rgbArr.reduce(
-    (a, c) => ({ r: a.r + c.r, g: a.g + c.g, b: a.b + c.b }),
-    { r: 0, g: 0, b: 0 }
-  );
-  mean.r /= rgbArr.length;
-  mean.g /= rgbArr.length;
-  mean.b /= rgbArr.length;
-
-  const X = rgbArr.map((c) => ({
-    r: (c.r - mean.r) / mean.r,
-    g: (c.g - mean.g) / mean.g,
-    b: (c.b - mean.b) / mean.b
-  }));
-
-  const S1 = X.map((c) => c.g - c.b);
-  const S2 = X.map((c) => -2 * c.r + c.g + c.b);
-
-  const std1 = std(S1);
-  const std2 = std(S2) || 1e-9;
-  const alpha = std1 / std2;
-
-  const H = S1.map((v, i) => v - alpha * S2[i]);
-  return H[H.length - 1];
-}
-
-function estimateBPM(sig, fps) {
-  if (sig.length < 180) return null;
-
-  const hp = highpass(sig, Math.round(fps * 0.6));
-  const bp = lowpass(hp, Math.round(fps * 0.25));
-
-  const window = bp.slice(-Math.min(bp.length, fps * 8));
-  const peaks = findPeaks(window, 0.35);
-
-  if (peaks.length < 2) return null;
-
-  const intervals = [];
-  for (let i = 1; i < peaks.length; i++) intervals.push(peaks[i] - peaks[i - 1]);
-
-  const med = median(intervals);
-  if (!med) return null;
-
-  const out = (60 * fps) / med;
-  if (out < 42 || out > 190) return null;
-  return Math.round(out);
-}
-
-function highpass(x, win) {
-  const ma = movingAverage(x, win);
-  return x.map((v, i) => v - ma[i]);
-}
-
-function lowpass(x, win) {
-  return movingAverage(x, win);
-}
-
-function movingAverage(x, win) {
-  const out = new Array(x.length);
-  let s = 0;
-  for (let i = 0; i < x.length; i++) {
-    s += x[i];
-    if (i >= win) s -= x[i - win];
-    out[i] = s / Math.min(i + 1, win);
-  }
-  return out;
-}
-
-function findPeaks(x, z = 0.35) {
-  const m = mean(x);
-  const sd = std(x) || 1e-9;
-  const thr = m + z * sd;
-
-  const peaks = [];
-  for (let i = 1; i < x.length - 1; i++) {
-    if (x[i] > thr && x[i] > x[i - 1] && x[i] > x[i + 1]) peaks.push(i);
-  }
-
-  const minDist = 8;
-  const filtered = [];
-  for (const p of peaks) {
-    if (!filtered.length || p - filtered[filtered.length - 1] >= minDist) filtered.push(p);
-  }
-  return filtered;
-}
-
-/* Charts */
-function drawTimeline(arr) {
-  const w = timeline.width;
-  const h = timeline.height;
-  tctx.clearRect(0, 0, w, h);
-
-  tctx.strokeStyle = "rgba(255,255,255,0.08)";
-  tctx.lineWidth = 1;
-  for (let i = 1; i <= 4; i++) {
-    const y = (h * i) / 5;
-    tctx.beginPath();
-    tctx.moveTo(0, y);
-    tctx.lineTo(w, y);
-    tctx.stroke();
-  }
-
-  tctx.strokeStyle = "rgba(107,140,255,0.95)";
-  tctx.lineWidth = 2;
-  tctx.beginPath();
-  for (let i = 0; i < arr.length; i++) {
-    const x = (i / (arr.length - 1)) * w;
-    const y = h - (arr[i] / 100) * h;
-    if (i === 0) tctx.moveTo(x, y);
-    else tctx.lineTo(x, y);
-  }
-  tctx.stroke();
-}
-
-function drawPulse(sig, bpmNow) {
-  const w = pulse.width;
-  const h = pulse.height;
-  pctx.clearRect(0, 0, w, h);
-
-  pctx.strokeStyle = "rgba(0,209,255,0.95)";
-  pctx.lineWidth = 2;
-
-  const window = sig.slice(-Math.min(sig.length, 240));
-  if (window.length > 8) {
-    const mn = Math.min(...window);
-    const mx = Math.max(...window);
-    pctx.beginPath();
-    for (let i = 0; i < window.length; i++) {
-      const x = (i / (window.length - 1)) * w;
-      const v = (window[i] - mn) / (mx - mn + 1e-9);
-      const y = h - v * h;
-      if (i === 0) pctx.moveTo(x, y);
-      else pctx.lineTo(x, y);
-    }
-    pctx.stroke();
-  }
-
-  pctx.fillStyle = "rgba(255,255,255,0.9)";
-  pctx.font = "800 12px Inter, system-ui, Arial";
-  pctx.fillText(`BPM: ${bpmNow ?? "—"}`, 10, 16);
-}
-
-/* Utils */
-function mean(a) { return a.reduce((s, v) => s + v, 0) / a.length; }
-function std(a) {
-  const m = mean(a);
-  const v = a.reduce((s, x) => s + (x - m) * (x - m), 0) / a.length;
-  return Math.sqrt(v);
-}
-function median(a) {
-  if (!a.length) return null;
-  const b = [...a].sort((x, y) => x - y);
-  const i = Math.floor(b.length / 2);
-  return b.length % 2 ? b[i] : (b[i - 1] + b[i]) / 2;
-}
-function clamp(a, b, v) { return Math.max(a, Math.min(b, v)); }
-function clamp01(v) { return clamp(0, 1, v); }
-function lerp(a, b, t) { return a + (b - a) * t; }
+initCamera();
+drawTimeline();
+drawPulse({
+  score: 50,
+  energy: 0.5,
+  stress: 0.3,
+  stability: 0.7,
+  intensity: 0.4
+});
