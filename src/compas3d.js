@@ -267,3 +267,41 @@ document.addEventListener("DOMContentLoaded", () => {
     initCompass();
   }
 });
+
+// ===============================
+// LIVE EMOTION → NODE ORBITS
+// ===============================
+
+export function updateCompassNodes({ energy, stress }) {
+  emotionalNodes.forEach((node) => {
+    if (node.userData.name === "Ca") {
+      node.userData.radius = 1.0 + energy * 0.4; // daugiau energijos → toliau
+    }
+    if (node.userData.name === "Joy") {
+      node.userData.radius = 1.2 + energy * 0.3;
+    }
+    if (node.userData.name === "Stress") {
+      node.userData.radius = 1.4 + stress * 0.6; // daugiau streso → išsiplečia
+    }
+  });
+}
+
+// ===============================
+// LIVE EMOTION → GLOW COLOR
+// ===============================
+
+export function updateCompassGlow(metrics) {
+  if (!glowMesh) return;
+
+  let color = new THREE.Color(0x3abff8); // default calm
+
+  if (metrics.stress > 0.6) {
+    color = new THREE.Color(0xf87171); // raudona — stresas
+  } else if (metrics.energy > 0.7) {
+    color = new THREE.Color(0xfbbf24); // geltona — energija
+  } else if (metrics.energy < 0.3) {
+    color = new THREE.Color(0x64748b); // pilka — low energy
+  }
+
+  glowMesh.material.uniforms.glowColor.value = color;
+}
