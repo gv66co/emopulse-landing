@@ -229,6 +229,67 @@ export function animateEmotionalNodes() {
 }
 
 // ===============================
+// EMOTION DIRECTION ARROW (3D)
+// ===============================
+
+let arrowMesh;
+
+export function createEmotionArrow() {
+  const arrowGroup = new THREE.Group();
+
+  // Arrow shaft
+  const shaftGeo = new THREE.CylinderGeometry(0.03, 0.03, 0.9, 16);
+  const shaftMat = new THREE.MeshStandardMaterial({
+    color: 0x38bdf8,
+    emissive: 0x38bdf8,
+    emissiveIntensity: 0.4,
+    metalness: 0.6,
+    roughness: 0.3
+  });
+  const shaft = new THREE.Mesh(shaftGeo, shaftMat);
+  shaft.position.y = 0.45;
+
+  // Arrow head
+  const headGeo = new THREE.ConeGeometry(0.09, 0.25, 16);
+  const headMat = new THREE.MeshStandardMaterial({
+    color: 0x38bdf8,
+    emissive: 0x38bdf8,
+    emissiveIntensity: 0.6,
+    metalness: 0.7,
+    roughness: 0.25
+  });
+  const head = new THREE.Mesh(headGeo, headMat);
+  head.position.y = 0.95;
+
+  arrowGroup.add(shaft);
+  arrowGroup.add(head);
+
+  arrowGroup.position.set(0, 0, 0);
+  arrowGroup.rotation.x = Math.PI / 2; // point outward
+
+  arrowMesh = arrowGroup;
+  scene.add(arrowMesh);
+}
+
+export function updateArrowColor(metrics) {
+  if (!arrowMesh) return;
+
+  let color = new THREE.Color(0x38bdf8); // calm
+
+  if (metrics.stress > 0.6) {
+    color = new THREE.Color(0xf87171); // red
+  } else if (metrics.energy > 0.7) {
+    color = new THREE.Color(0xfbbf24); // yellow
+  }
+
+  arrowMesh.children.forEach((part) => {
+    part.material.color = color;
+    part.material.emissive = color;
+  });
+}
+
+
+// ===============================
 // 3D COMPASS — BLOCK 5.5
 // FINAL INIT + ANIMATION LOOP
 // ===============================
@@ -239,6 +300,10 @@ export function initCompass() {
   createOrbitRings();       // From Block 5.3
   createParticles();        // From Block 5.3
   createEmotionalNodes();   // From Block 5.4
+  createEmotionArrow();
+  initTrajectory();
+
+
 }
 
 // MAIN ANIMATION LOOP
@@ -248,6 +313,9 @@ function animateCompass3D() {
   // Smooth auto-rotation
   // Auto rotation + emotional direction blend
 scene.rotation.y += (targetRotation - scene.rotation.y) * 0.05;
+if (arrowMesh) {
+  arrowMesh.rotation.z += (arrowTargetRotation - arrowMesh.rotation.z) * 0.08;
+}
 
 
   // Animate core sphere (breathing)
@@ -321,3 +389,92 @@ export function updateCompassDirection({ energy, stress }) {
   // Tikslinė rotacija
   targetRotation = angle;
 }
+
+let arrowTargetRotation = 0;
+
+export function updateArrowDirection({ energy, stress }) {
+  const angle = Math.atan2(stress, energy);
+  arrowTargetRotation = angle;
+}
+
+import { updateArrowColor, updateArrowDirection } from './compass3d.js';
+
+updateArrowColor(metrics);
+updateArrowDirection({
+  energy: metrics.energy,
+  stress: metrics.stress
+});
+
+// ===============================
+// EMOTION TRAJECTORY (3D PATH)
+// ===============================
+
+let trajectoryPoints = [];
+let trajectoryLine;
+
+export function initTrajectory() {
+  const geometry = new THREE.BufferGeometry();
+  const positions = new Float32Array(120 * 3); // 120 points max
+  geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+
+  const material = new THREE.LineBasicMaterial({
+    color: 0x38bdf8,
+    transparent: true,
+    opacity: 0.8,
+    linewidth: 2
+  });
+
+  trajectoryLine = new THREE.Line(geometry, material);
+  scene.add(trajectoryLine);
+}
+
+export function addTrajectoryPoint({ energy, stress }) {
+  const angle = Math.atan2(stress, energy);
+
+  const radius = 1.6; // trajektorijos apskritimo spindulys
+
+  const x = Math.cos(angle) * radius;
+  const y = Math.sin(performance.now() * 0.001) * 0.15; // švelnus vertikalus judesys
+  const z = Math.sin(angle) * radius;
+
+  trajectoryPoints.push(new THREE.Vector3(x, y, z));
+
+  // limit history
+  if (trajectoryPoints.length > 120) {
+    trajectoryPoints.shift();
+  }
+}
+
+function updateTrajectoryLine() {
+  if (!trajectoryLine) return;
+
+  const positions = trajectoryLine.geometry.attributes.position.array;
+
+  for (let i = 0; i < 120; i++) {
+    const p = trajectoryPoints[i];
+
+    if (p) {
+      positions[i * 3] = p.x;
+      positions[i * 3 + 1] = p.y;
+      positions[i * 3 + 2] = p.z;
+    } else {
+      positions[i * 3] = 0;
+      positions[i * 3 + 1] = 0;
+      positions[i * 3 + 2] = 0;
+    }
+  }
+
+  trajectoryLine.geometry.attributes.position.needsUpdate = true;
+
+  // fade opacity based on history length
+  const opacity = Math.min(1, trajectoryPoints.length / 120);
+  trajectoryLine.material.opacity = opacity;
+}
+
+import { addTrajectoryPoint } from './compass3d.js';
+
+addTrajectoryPoint({
+  energy: metrics.energy,
+  stress: metrics.stress
+});
+
