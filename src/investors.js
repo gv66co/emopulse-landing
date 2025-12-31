@@ -1,4 +1,5 @@
-import * as THREE from "three";
+const THREE = window.THREE;
+
 
 const canvas = document.getElementById("deck3d");
 const label = document.getElementById("slideLabel");
