@@ -473,3 +473,21 @@ function animateCompass3D() {
   renderer.render(scene, camera);
 }
 
+// ===============================
+// CONNECT LIVE.JS → 3D COMPASS
+// ===============================
+
+import { updateCompassNodes, updateCompassGlow } from './compass3d.js';
+
+function updateCompass3D(metrics) {
+  if (!metrics) return;
+
+  // Mazgų orbitos pagal energiją / stresą
+  updateCompassNodes({
+    energy: metrics.energy,
+    stress: metrics.stress
+  });
+
+  // Glow spalva pagal emocinį toną
+  updateCompassGlow(metrics);
+}
