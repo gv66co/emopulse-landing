@@ -1,4 +1,4 @@
-// API base URL (Cloud Run)
+// Cloud Run API base URL
 const API_BASE = "https://emopulse-api-1009590211108.europe-west4.run.app";
 
 // Health check
