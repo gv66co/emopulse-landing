@@ -1,152 +1,88 @@
 <!doctype html>
 <html lang="lt">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Emopulse — Live model</title>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Emopulse — Live Emotional Field</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
 
-    <!-- FIXED: correct CSS path -->
-    <link rel="stylesheet" href="/styles.css" />
-  </head>
+<body>
+  <header class="header">
+    <div class="logo">Emopulse</div>
+    <nav class="nav">
+      <a href="#" class="active">Live model</a>
+      <a href="#">Investors</a>
+    </nav>
+  </header>
 
-  <body class="bg">
-    <header class="topbar">
-      <div class="brand">
-        <div class="mark">S</div>
-        <div class="brandText">
-          <div class="brandName">Emopulse</div>
-        </div>
+  <section class="hero">
+    <div class="hero-text">
+      <h1>Understand your emotional field in real time</h1>
+      <p>Camera + AI emotional engine</p>
+      <button class="btnPrimary">Start Live Scan</button>
+    </div>
+
+    <div class="camera-panel">
+      <video id="cam" autoplay muted playsinline></video>
+      <div class="camStatus">Camera active — reading your field…</div>
+    </div>
+  </section>
+
+  <div class="compass" id="auraCanvas"></div>
+
+  <div class="metrics">
+    <div class="metric">
+      <div class="metricLabel">Energy</div>
+      <div id="energy" class="metricValue">66</div>
+    </div>
+    <div class="metric">
+      <div class="metricLabel">Stress</div>
+      <div id="stress" class="metricValue">12</div>
+    </div>
+    <div class="metric">
+      <div class="metricLabel">Stability</div>
+      <div id="stability" class="metricValue">low</div>
+    </div>
+  </div>
+
+  <section class="input-panel">
+    <input id="userText" class="input" placeholder="How are you feeling today?" />
+    <button id="analyzeBtn" class="btnAnalyze">Analyze</button>
+
+    <div class="aiBox">
+      <div id="aiText" class="aiText">Calm focused energy</div>
+      <div id="aiTags" class="aiTags">
+        <span class="aiTag">#calm</span>
+        <span class="aiTag">#focused energy</span>
+        <span class="aiTag">#Sunshine with tranquility</span>
       </div>
+    </div>
+  </section>
 
-      <div class="hero">
-        <div class="heroTitle">Understand your emotional field in real time</div>
-        <div class="heroSub">
-          Type anything you're feeling or thinking. Using our camera and AI analyzes.
-        </div>
-      </div>
+  <div class="section-row">
+    <div class="section-card">
+      <h3>Mood Map</h3>
+      <p>Positive • Euphoric • Intense</p>
+      <p>Score: <strong>76 / 100</strong></p>
+    </div>
 
-      <nav class="nav">
-        <a class="navLink navLinkActive" href="/index.html">Live model</a>
-        <a class="navLink" href="/investors.html">Investors</a>
-      </nav>
-    </header>
+    <div class="section-card">
+      <h3>Emotional Timeline</h3>
+      <p>Energy: <strong>0.66 rising</strong></p>
+    </div>
 
-    <main class="grid">
-      <aside class="panel">
-        <div class="panelTitle">Emotional Aura</div>
-        <canvas id="auraCanvas" width="340" height="340" class="aura"></canvas>
+    <div class="section-card">
+      <h3>Stress Risk</h3>
+      <p>Sunshine with tranquility</p>
+      <p>Risk: <strong>0.21 low</strong></p>
+    </div>
+  </div>
 
-        <div class="row mt12">
-          <button id="downloadPitchLeft" class="btn btnPrimary">Download Pitchdeck</button>
-        </div>
+  <footer class="footer">
+    © 2026 Emopulse. Real-time emotional awareness for real people.
+  </footer>
 
-        <div class="infoBlocks mt14">
-          <div class="infoBlock">
-            <div class="infoTitle">HOW IT WORKS</div>
-            <div class="infoText">Opanilite app<br />Camrart</div>
-          </div>
-          <div class="infoBlock">
-            <div class="infoTitle">ROADMAP</div>
-            <div class="infoText">Emotion Examinerator<br />Enabled Meditor<br />Emotion Mirror</div>
-          </div>
-          <div class="infoBlock">
-            <div class="infoTitle">PRIVACY FIRST</div>
-            <div class="infoText">No data stored<br />All processing on-device</div>
-          </div>
-        </div>
-      </aside>
-
-      <section class="panel panelCenter">
-        <div class="centerTop">
-          <div class="videoWrap">
-            <video id="cam" autoplay playsinline muted></video>
-            <canvas id="overlay" width="520" height="360"></canvas>
-            <div id="camStatus" class="camStatus">Initializing camera…</div>
-          </div>
-
-          <div class="forecast">
-            <div class="forecastTitle">Emotional Forecast</div>
-
-            <input
-              id="userText"
-              class="input"
-              placeholder="Type anything you're feeling or thinking ..."
-              value="i am getting a lot done but feeling a bit tired"
-            />
-
-            <div class="row mt10">
-              <button id="analyzeBtn" class="btn btnPrimary">Analyze my emotional field</button>
-              <button id="soundBtn" class="btn btnGhost" aria-pressed="true">Sound: On</button>
-            </div>
-
-            <div class="aiBox mt12">
-              <div class="aiTitle">AI Interpretation</div>
-              <div id="aiText" class="aiText">—</div>
-              <div id="aiTags" class="aiTags"></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="metrics mt14">
-          <div class="metric">
-            <div class="metricLabel">Emopulse Score</div>
-            <div id="score" class="metricValue">—</div>
-          </div>
-          <div class="metric">
-            <div class="metricLabel">Energy</div>
-            <div id="energy" class="metricValueSmall">—</div>
-          </div>
-          <div class="metric">
-            <div class="metricLabel">Stress Risk</div>
-            <div id="stress" class="metricValueSmall">—</div>
-          </div>
-        </div>
-
-        <div class="charts mt12">
-          <canvas id="timeline" width="760" height="140" class="chart"></canvas>
-          <canvas id="pulse" width="260" height="140" class="chart"></canvas>
-        </div>
-      </section>
-
-      <aside class="panel">
-        <div class="panelTitle">WHY EMOPULSE</div>
-        <div class="bullets">
-          <div class="bullet">Real-time emotion awareness using only your camera</div>
-          <div class="bullet">Privacy-first architecture: no data stored, all processing on-device</div>
-        </div>
-
-        <div class="miniTitle mt12">Emotional Aura</div>
-        <div class="miniLine">Stability: <span id="stability" class="miniStrong">—</span></div>
-        <div class="miniLine">Intensity: <span id="intensity" class="miniStrong">—</span></div>
-        <div class="miniLine">Score: <span id="score2" class="miniStrong">—</span></div>
-
-        <div class="row mt12">
-          <button id="tryLive" class="btn btnPrimary">Try it live</button>
-          <button id="downloadPitchRight" class="btn btnGhost">Download Pitchdeck</button>
-        </div>
-
-        <div class="footerMini mt12">
-          <div>Emo1 2024</div>
-        </div>
-      </aside>
-    </main>
-
-    <footer class="footer">
-      <div class="contact">
-        <div class="contactTitle">Contact</div>
-        <input id="name" class="input" placeholder="Your Name" />
-        <input id="email" class="input mt8" placeholder="Your Email" />
-        <textarea id="message" class="input mt8" rows="2" placeholder="Your Message"></textarea>
-        <button id="send" class="btn btnPrimary mt10">Send message</button>
-      </div>
-
-      <div class="legal">
-        <div>© 2026 emo1 (Emopulse). All rights reserved.</div>
-        <div class="legalSub">Real-time emotion awareness for real people.</div>
-      </div>
-    </footer>
-
-    <!-- FIXED: correct Vite module script -->
-    <script type="module" src="/src/live.js"></script>
-  </body>
+  <script type="module" src="/src/live.js"></script>
+</body>
 </html>
