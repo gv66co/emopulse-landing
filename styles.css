@@ -1,398 +1,208 @@
-// /src/live.js
-
-import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
-
-const camEl = document.getElementById('cam');
-const overlay = document.getElementById('overlay');
-const camStatus = document.getElementById('camStatus');
-const userText = document.getElementById('userText');
-const analyzeBtn = document.getElementById('analyzeBtn');
-const soundBtn = document.getElementById('soundBtn');
-const tryLiveBtn = document.getElementById('tryLive');
-
-const aiTextEl = document.getElementById('aiText');
-const aiTagsEl = document.getElementById('aiTags');
-
-const scoreEl = document.getElementById('score');
-const score2El = document.getElementById('score2');
-const energyEl = document.getElementById('energy');
-const stressEl = document.getElementById('stress');
-
-const stabilityEl = document.getElementById('stability');
-const intensityEl = document.getElementById('intensity');
-
-const timelineCanvas = document.getElementById('timeline');
-const pulseCanvas = document.getElementById('pulse');
-
-// ---------- CAMERA SETUP ----------
-
-async function initCamera() {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: { width: 520, height: 360 },
-      audio: false
-    });
-    camEl.srcObject = stream;
-    camStatus.textContent = 'Camera active — reading your field…';
-    camStatus.classList.add('camStatusActive');
-  } catch (err) {
-    camStatus.textContent = 'Camera blocked — enable camera to see full model';
-    camStatus.classList.add('camStatusError');
-    console.error('Camera error:', err);
-  }
+/* === BASE === */
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background: radial-gradient(ellipse at top, #0a0f1c 0%, #020617 100%);
+  color: #e5e7eb;
 }
 
-// ---------- 3D AURA (Three.js) ----------
-
-function initAuraScene() {
-  const canvas = document.getElementById('auraCanvas');
-  const width = canvas.width;
-  const height = canvas.height;
-
-  const scene = new THREE.Scene();
-  scene.background = null;
-
-  const camera = new THREE.PerspectiveCamera(35, width / height, 0.1, 100);
-  camera.position.z = 6;
-
-  const renderer = new THREE.WebGLRenderer({
-    canvas,
-    alpha: true,
-    antialias: true
-  });
-  renderer.setSize(width, height);
-  renderer.setPixelRatio(window.devicePixelRatio || 1);
-
-  const mainColor = new THREE.Color(0x6c5ce7);
-  const auraColor = new THREE.Color(0x00cec9);
-  const stressColor = new THREE.Color(0xd63031);
-
-  const light = new THREE.PointLight(0xffffff, 1.2);
-  light.position.set(3, 4, 5);
-  scene.add(light);
-
-  const ambient = new THREE.AmbientLight(0xffffff, 0.4);
-  scene.add(ambient);
-
-  // Central sphere (core)
-  const coreGeo = new THREE.SphereGeometry(1.2, 48, 48);
-  const coreMat = new THREE.MeshStandardMaterial({
-    color: mainColor,
-    emissive: mainColor.clone().multiplyScalar(0.4),
-    metalness: 0.4,
-    roughness: 0.2
-  });
-  const core = new THREE.Mesh(coreGeo, coreMat);
-  scene.add(core);
-
-  // Orbiting orbs (emotional fragments)
-  const orbs = [];
-  for (let i = 0; i < 6; i++) {
-    const g = new THREE.SphereGeometry(0.25, 32, 32);
-    const m = new THREE.MeshStandardMaterial({
-      color: auraColor,
-      emissive: auraColor.clone().multiplyScalar(0.3),
-      metalness: 0.3,
-      roughness: 0.4
-    });
-    const orb = new THREE.Mesh(g, m);
-    orb.userData = {
-      radius: 2.2 + Math.random() * 0.6,
-      speed: 0.4 + Math.random() * 0.6,
-      offset: Math.random() * Math.PI * 2
-    };
-    orbs.push(orb);
-    scene.add(orb);
-  }
-
-  // Subtle field plane
-  const planeGeo = new THREE.RingGeometry(1.8, 2.8, 64);
-  const planeMat = new THREE.MeshBasicMaterial({
-    color: 0xffffff,
-    opacity: 0.12,
-    transparent: true,
-    side: THREE.DoubleSide
-  });
-  const ring = new THREE.Mesh(planeGeo, planeMat);
-  ring.rotation.x = Math.PI / 2;
-  scene.add(ring);
-
-  let lastMetrics = {
-    score: 50,
-    energy: 0.5,
-    stress: 0.3
-  };
-
-  function updateFromMetrics(metrics) {
-    lastMetrics = metrics;
-
-    const energy = metrics.energy; // 0–1
-    const stress = metrics.stress; // 0–1
-
-    const colorMix = mainColor.clone().lerp(auraColor, energy);
-    core.material.color.copy(colorMix);
-    core.material.emissive.copy(colorMix.clone().multiplyScalar(0.4 + energy * 0.4));
-
-    const stressMix = auraColor.clone().lerp(stressColor, stress);
-    orbs.forEach((orb) => {
-      orb.material.color.copy(stressMix);
-      orb.material.emissive.copy(stressMix.clone().multiplyScalar(0.3 + stress * 0.4));
-    });
-  }
-
-  let t = 0;
-  function animate() {
-    requestAnimationFrame(animate);
-    t += 0.016;
-
-    core.rotation.y += 0.004 + lastMetrics.energy * 0.01;
-    core.rotation.x += 0.002;
-
-    orbs.forEach((orb, i) => {
-      const { radius, speed, offset } = orb.userData;
-      const angle = t * speed + offset;
-      orb.position.set(
-        Math.cos(angle) * radius,
-        Math.sin(angle * 1.3) * 0.8,
-        Math.sin(angle) * radius * 0.4
-      );
-    });
-
-    ring.rotation.z += 0.001 + lastMetrics.stress * 0.004;
-
-    renderer.render(scene, camera);
-  }
-
-  animate();
-
-  return updateFromMetrics;
+/* === HEADER === */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 40px;
+  background: rgba(255,255,255,0.02);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.logo {
+  font-size: 20px;
+  font-weight: 700;
+  color: #22d3ee;
+}
+.nav a {
+  margin-left: 24px;
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: 14px;
+}
+.nav a.active {
+  color: #22d3ee;
 }
 
-const updateAuraFromMetrics = initAuraScene();
-
-// ---------- EMOTION "ENGINE" (pseudo, on-device) ----------
-
-function analyzeEmotion(text, hasCamera) {
-  const t = (text || '').toLowerCase();
-
-  let baseScore = 60;
-  let energy = 0.5;
-  let stress = 0.3;
-
-  if (t.includes('tired') || t.includes('pavarg')) {
-    energy -= 0.2;
-    stress += 0.1;
-    baseScore -= 5;
-  }
-  if (t.includes('anxious') || t.includes('nerimas') || t.includes('stress')) {
-    stress += 0.3;
-    baseScore -= 10;
-  }
-  if (t.includes('happy') || t.includes('good') || t.includes('grateful') || t.includes('dėking')) {
-    energy += 0.2;
-    baseScore += 10;
-  }
-  if (t.includes('angry') || t.includes('supyk') || t.includes('frustrated')) {
-    stress += 0.25;
-    baseScore -= 8;
-  }
-
-  if (hasCamera) {
-    baseScore += 3;
-    energy += 0.05;
-  }
-
-  energy = Math.min(Math.max(energy, 0), 1);
-  stress = Math.min(Math.max(stress, 0), 1);
-  baseScore = Math.min(Math.max(Math.round(baseScore), 0), 100);
-
-  const stability = 1 - Math.abs(energy - stress);
-  const intensity = (energy + stress) / 2;
-
-  let interpretation = 'Your emotional field is in a balanced, focused state.';
-  if (energy < 0.35 && stress < 0.4) {
-    interpretation = 'You seem low on energy but relatively calm. Good moment to rest and recharge.';
-  } else if (energy > 0.65 && stress < 0.4) {
-    interpretation = 'You feel energized and relatively stable. A good window for deep work or creativity.';
-  } else if (stress > 0.6) {
-    interpretation = 'Your field shows elevated stress. It might help to slow down and ground yourself.';
-  }
-
-  const tags = [];
-  if (energy < 0.4) tags.push('Low energy');
-  if (energy > 0.6) tags.push('High energy');
-  if (stress > 0.6) tags.push('High stress');
-  if (stability > 0.6) tags.push('Stable field');
-  if (hasCamera) tags.push('Camera signal active');
-
-  return {
-    score: baseScore,
-    energy,
-    stress,
-    stability,
-    intensity,
-    interpretation,
-    tags
-  };
+/* === HERO === */
+.hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 60px 40px;
+}
+.hero-text {
+  max-width: 480px;
+}
+.hero-text h1 {
+  font-size: 36px;
+  margin-bottom: 12px;
+}
+.hero-text p {
+  font-size: 16px;
+  color: #94a3b8;
+  margin-bottom: 24px;
+}
+.btnPrimary {
+  background: #4f46e5;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+}
+.btnPrimary:hover {
+  background: #4338ca;
 }
 
-// ---------- TIMELINE & PULSE DRAWING ----------
-
-const timelineCtx = timelineCanvas.getContext('2d');
-const pulseCtx = pulseCanvas.getContext('2d');
-
-const history = [];
-
-function pushHistory(metrics) {
-  history.push({
-    ts: Date.now(),
-    score: metrics.score,
-    energy: metrics.energy,
-    stress: metrics.stress
-  });
-  if (history.length > 40) history.shift();
+/* === CAMERA PANEL === */
+.camera-panel {
+  position: relative;
+  width: 320px;
+  height: 220px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 0 24px rgba(0,0,0,0.4);
+}
+.camera-panel video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.camStatus {
+  position: absolute;
+  bottom: 8px;
+  left: 12px;
+  font-size: 13px;
+  color: #22d3ee;
+  background: rgba(0,0,0,0.5);
+  padding: 4px 8px;
+  border-radius: 6px;
 }
 
-function drawTimeline() {
-  const w = timelineCanvas.width;
-  const h = timelineCanvas.height;
-  timelineCtx.clearRect(0, 0, w, h);
-
-  if (history.length < 2) return;
-
-  const maxScore = 100;
-  const minScore = 0;
-
-  timelineCtx.lineWidth = 2;
-
-  // Score line
-  timelineCtx.beginPath();
-  history.forEach((p, i) => {
-    const x = (i / (history.length - 1)) * (w - 20) + 10;
-    const y = h - 10 - ((p.score - minScore) / (maxScore - minScore)) * (h - 20);
-    if (i === 0) timelineCtx.moveTo(x, y);
-    else timelineCtx.lineTo(x, y);
-  });
-  timelineCtx.strokeStyle = '#ffffff';
-  timelineCtx.stroke();
-
-  // Energy line
-  timelineCtx.beginPath();
-  history.forEach((p, i) => {
-    const x = (i / (history.length - 1)) * (w - 20) + 10;
-    const y = h - 10 - p.energy * (h - 20);
-    if (i === 0) timelineCtx.moveTo(x, y);
-    else timelineCtx.lineTo(x, y);
-  });
-  timelineCtx.strokeStyle = '#00cec9';
-  timelineCtx.stroke();
-
-  // Stress line
-  timelineCtx.beginPath();
-  history.forEach((p, i) => {
-    const x = (i / (history.length - 1)) * (w - 20) + 10;
-    const y = h - 10 - p.stress * (h - 20);
-    if (i === 0) timelineCtx.moveTo(x, y);
-    else timelineCtx.lineTo(x, y);
-  });
-  timelineCtx.strokeStyle = '#d63031';
-  timelineCtx.stroke();
+/* === EMOTIONAL COMPASS === */
+.compass {
+  position: relative;
+  width: 260px;
+  height: 260px;
+  margin: 40px auto;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+  box-shadow: 0 0 60px rgba(58,141,255,0.3);
+}
+.compass::before {
+  content: "";
+  position: absolute;
+  inset: -40px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(58,141,255,0.3), transparent 70%);
+  filter: blur(60px);
+  z-index: -1;
 }
 
-function drawPulse(metrics) {
-  const w = pulseCanvas.width;
-  const h = pulseCanvas.height;
-  pulseCtx.clearRect(0, 0, w, h);
-
-  const centerY = h / 2;
-  const baseAmp = 18 + metrics.intensity * 18;
-  const freq = 0.04 + metrics.stress * 0.04;
-
-  pulseCtx.beginPath();
-  for (let x = 0; x < w; x++) {
-    const t = x * freq;
-    const y = centerY + Math.sin(t) * baseAmp;
-    if (x === 0) pulseCtx.moveTo(x, y);
-    else pulseCtx.lineTo(x, y);
-  }
-  pulseCtx.strokeStyle = '#6c5ce7';
-  pulseCtx.lineWidth = 2;
-  pulseCtx.stroke();
+/* === METRICS === */
+.metrics {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin: 20px 0;
+}
+.metric {
+  text-align: center;
+}
+.metricLabel {
+  font-size: 13px;
+  color: #94a3b8;
+}
+.metricValue {
+  font-size: 20px;
+  font-weight: 700;
+  color: #22d3ee;
 }
 
-// ---------- UI WIRING ----------
-
-let soundOn = true;
-soundBtn.addEventListener('click', () => {
-  soundOn = !soundOn;
-  soundBtn.setAttribute('aria-pressed', soundOn ? 'true' : 'false');
-  soundBtn.textContent = soundOn ? 'Sound: On' : 'Sound: Off';
-});
-
-tryLiveBtn.addEventListener('click', () => {
-  userText.focus();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-});
-
-function speak(text) {
-  if (!soundOn) return;
-  if (!('speechSynthesis' in window)) return;
-  const u = new SpeechSynthesisUtterance(text);
-  u.rate = 1;
-  u.pitch = 1;
-  window.speechSynthesis.cancel();
-  window.speechSynthesis.speak(u);
+/* === INPUT PANEL === */
+.input-panel {
+  max-width: 500px;
+  margin: 40px auto;
+  text-align: center;
+}
+.input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(255,255,255,0.05);
+  color: white;
+  font-size: 15px;
+}
+.btnAnalyze {
+  margin-top: 12px;
+  background: #4f46e5;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
 }
 
-function getHasCamera() {
-  return camEl && camEl.srcObject != null;
+/* === AI INTERPRETATION === */
+.aiBox {
+  margin-top: 24px;
+  background: rgba(255,255,255,0.03);
+  padding: 20px;
+  border-radius: 12px;
+}
+.aiText {
+  font-size: 15px;
+  color: #e5e7eb;
+}
+.aiTags {
+  margin-top: 8px;
+}
+.aiTag {
+  display: inline-block;
+  background: #22d3ee;
+  color: #0f172a;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-right: 6px;
 }
 
-function updateUIFromMetrics(m) {
-  scoreEl.textContent = m.score;
-  score2El.textContent = m.score;
-  energyEl.textContent = Math.round(m.energy * 100) + '%';
-  stressEl.textContent = Math.round(m.stress * 100) + '%';
-
-  stabilityEl.textContent = Math.round(m.stability * 100) + '%';
-  intensityEl.textContent = Math.round(m.intensity * 100) + '%';
-
-  aiTextEl.textContent = m.interpretation;
-  aiTagsEl.innerHTML = '';
-  m.tags.forEach((tag) => {
-    const span = document.createElement('span');
-    span.className = 'aiTag';
-    span.textContent = tag;
-    aiTagsEl.appendChild(span);
-  });
-
-  updateAuraFromMetrics({
-    score: m.score,
-    energy: m.energy,
-    stress: m.stress
-  });
-
-  pushHistory(m);
-  drawTimeline();
-  drawPulse(m);
-
-  speak(m.interpretation);
+/* === MOOD MAP / TIMELINE / STRESS === */
+.section-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 40px;
+  gap: 24px;
+}
+.section-card {
+  flex: 1;
+  background: rgba(255,255,255,0.03);
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 0 24px rgba(0,0,0,0.1);
+}
+.section-card h3 {
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+.section-card p {
+  font-size: 14px;
+  color: #94a3b8;
 }
 
-analyzeBtn.addEventListener('click', () => {
-  const text = userText.value || '';
-  const metrics = analyzeEmotion(text, getHasCamera());
-  updateUIFromMetrics(metrics);
-});
-
-// ---------- INITIALIZE ----------
-
-initCamera();
-drawTimeline();
-drawPulse({
-  score: 50,
-  energy: 0.5,
-  stress: 0.3,
-  stability: 0.7,
-  intensity: 0.4
-});
+/* === FOOTER === */
+.footer {
+  text-align: center;
+  padding: 40px;
+  font-size: 13px;
+  color: #64748b;
+}
