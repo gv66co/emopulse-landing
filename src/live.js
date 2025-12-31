@@ -493,3 +493,21 @@ function updateCompass3D(metrics) {
   // Glow spalva pagal emocinį toną
   updateCompassGlow(metrics);
 }
+
+import { updateCompassDirection } from './compass3d.js';
+
+function updateCompass3D(metrics) {
+  if (!metrics) return;
+
+  updateCompassNodes({
+    energy: metrics.energy,
+    stress: metrics.stress
+  });
+
+  updateCompassGlow(metrics);
+
+  updateCompassDirection({
+    energy: metrics.energy,
+    stress: metrics.stress
+  });
+}
