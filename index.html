@@ -86,3 +86,138 @@
   <script type="module" src="/src/live.js"></script>
 </body>
 </html>
+
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Emopulse — Live Emotional Field</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body class="emopulse-cosmic">
+
+  <!-- FONINĖS DALĖLĖS -->
+  <div class="cosmic-bg-stars"></div>
+
+  <!-- HEADER -->
+  <header class="cosmic-header">
+    <div class="cosmic-logo">
+      <div class="cosmic-logo-mark"></div>
+      Emopulse
+    </div>
+
+    <nav class="cosmic-nav">
+      <a href="#" class="active">Live model</a>
+      <a href="#">Investors</a>
+    </nav>
+  </header>
+
+  <!-- HERO -->
+  <section class="cosmic-hero">
+    <div class="cosmic-hero-text">
+      <h1>Understand your emotional field in real time</h1>
+      <p>Camera + AI emotional engine</p>
+      <button class="cosmic-cta">Start Live Scan</button>
+    </div>
+
+    <!-- CAMERA PANEL -->
+    <div class="cosmic-camera-panel">
+      <video id="cam" class="cosmic-camera-video" autoplay muted playsinline></video>
+      <div class="cosmic-camera-status">Camera active — reading your field…</div>
+    </div>
+  </section>
+
+  <!-- CENTRINIS BLOKAS -->
+  <div class="cosmic-center">
+
+    <canvas id="compass3d"></canvas>
+
+    <!-- KOMPASAS -->
+    <div class="cosmic-compass">
+
+      <div class="cosmic-core"></div>
+
+      <div class="cosmic-ring cosmic-ring-outer"></div>
+      <div class="cosmic-ring"></div>
+      <div class="cosmic-ring cosmic-ring-inner"></div>
+
+      <!-- ŽVAIGŽDYNAS -->
+      <div class="cosmic-node ca"></div>
+      <div class="cosmic-node joy"></div>
+      <div class="cosmic-node stress"></div>
+
+      <div class="cosmic-label ca">Ca</div>
+      <div class="cosmic-label joy">Joy</div>
+      <div class="cosmic-label stress">Stress</div>
+
+    </div>
+
+    <!-- METRIKOS -->
+    <div class="cosmic-metrics">
+      <div class="cosmic-metric">
+        <div class="cosmic-metric-label">Energy</div>
+        <div id="energy" class="cosmic-metric-value">66</div>
+      </div>
+
+      <div class="cosmic-metric">
+        <div class="cosmic-metric-label">Stress</div>
+        <div id="stress" class="cosmic-metric-value">12</div>
+      </div>
+
+      <div class="cosmic-metric">
+        <div class="cosmic-metric-label">Stability</div>
+        <div id="stability" class="cosmic-metric-value">low</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- INPUT + AI INTERPRETACIJA -->
+  <section class="cosmic-input-area">
+    <input id="userText" class="cosmic-input" placeholder="How are you feeling today?" />
+    <button id="analyzeBtn" class="cosmic-analyze-btn">Analyze</button>
+
+    <div class="cosmic-ai-box">
+      <div class="cosmic-ai-title">AI Interpretation</div>
+      <div id="aiText" class="cosmic-ai-text">Calm focused energy</div>
+
+      <div id="aiTags" class="cosmic-ai-tags">
+        <span class="cosmic-ai-tag">#calm</span>
+        <span class="cosmic-ai-tag">#focused energy</span>
+        <span class="cosmic-ai-tag">#Sunshine with tranquility</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- MINI BANERIAI -->
+  <section class="cosmic-banners">
+
+    <div class="cosmic-banner mood">
+      <div class="cosmic-banner-title">Mood Map</div>
+      <div class="cosmic-banner-main">Positive • Euphoric • Intense</div>
+      <div class="cosmic-banner-sub">Score: 76 / 100</div>
+    </div>
+
+    <div class="cosmic-banner timeline">
+      <div class="cosmic-banner-title">Emotional Timeline</div>
+      <div class="cosmic-banner-main">Energy: 0.66 rising</div>
+      <div class="cosmic-banner-sub">Last 60 seconds</div>
+    </div>
+
+    <div class="cosmic-banner stress">
+      <div class="cosmic-banner-title">Stress Risk</div>
+      <div class="cosmic-banner-main">Sunshine with tranquility</div>
+      <div class="cosmic-banner-sub">Risk: 0.21 low</div>
+    </div>
+
+  </section>
+
+  <!-- JS FAILAS -->
+  <script type="module" src="/src/live.js"></script>
+
+</body>
+</html>
+
+
