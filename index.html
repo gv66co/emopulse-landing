@@ -5,16 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Emopulse — Live Emotional Field</title>
 
-  <!-- LABAI SVARBU: /styles.css (su / priekyje) -->
   <link rel="stylesheet" href="/styles.css" />
 </head>
 
 <body class="emopulse-cosmic">
 
-  <!-- FONINĖS DALĖLĖS -->
   <div class="cosmic-bg-stars"></div>
 
-  <!-- HEADER -->
   <header class="cosmic-header">
     <div class="cosmic-logo">
       <div class="cosmic-logo-mark"></div>
@@ -27,7 +24,6 @@
     </nav>
   </header>
 
-  <!-- HERO -->
   <section class="cosmic-hero">
     <div class="cosmic-hero-text">
       <h1>Understand your emotional field in real time</h1>
@@ -35,21 +31,16 @@
       <button class="cosmic-cta">Start Live Scan</button>
     </div>
 
-    <!-- CAMERA PANEL -->
     <div class="cosmic-camera-panel">
       <video id="cam" class="cosmic-camera-video" autoplay muted playsinline></video>
       <div id="camStatus" class="cosmic-camera-status">Camera active — reading your field…</div>
     </div>
   </section>
 
-  <!-- CENTRINIS BLOKAS -->
   <div class="cosmic-center">
 
-    <!-- 3D EMOTIONAL COMPASS -->
-    <!-- LABAI SVARBU: PRIDĖTAS DYDIS -->
     <canvas id="compass3d" width="600" height="600"></canvas>
 
-    <!-- METRIKOS -->
     <div class="cosmic-metrics">
       <div class="cosmic-metric">
         <div class="cosmic-metric-label">Energy</div>
@@ -69,7 +60,6 @@
 
   </div>
 
-  <!-- INPUT + AI INTERPRETACIJA -->
   <section class="cosmic-input-area">
     <input id="userText" class="cosmic-input" placeholder="How are you feeling today?" />
     <button id="analyzeBtn" class="cosmic-analyze-btn">Analyze</button>
@@ -82,7 +72,6 @@
     </div>
   </section>
 
-  <!-- TIMELINE + PULSE -->
   <section class="cosmic-graphs">
     <div class="cosmic-graph-block">
       <h3>Emotional Timeline</h3>
@@ -95,7 +84,6 @@
     </div>
   </section>
 
-  <!-- MINI BANERIAI -->
   <section class="cosmic-banners">
 
     <div class="cosmic-banner mood">
@@ -118,7 +106,6 @@
 
   </section>
 
-  <!-- JS FAILAS -->
   <script type="module" src="/src/live.js"></script>
 
 </body>
