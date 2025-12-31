@@ -1,255 +1,146 @@
 <!doctype html>
 <html lang="lt">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Emopulse — Live model (sutvarkyta)</title>
-
-  <style>
-    :root{
-      --bg:#071028; --muted:#9fb3c8; --text:#e6f7ff; --accent:#00d1ff; --accent2:#6b8cff;
-    }
-    *{box-sizing:border-box} html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(180deg,#041025,#071028);color:var(--text)}
-    .wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:28px}
-    .card{width:980px;max-width:96vw;border-radius:14px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);box-shadow:0 20px 50px rgba(0,0,0,0.6);padding:18px;display:grid;grid-template-columns:1fr 340px;gap:18px}
-    .leftTop{display:flex;flex-direction:column;gap:10px}
-    .title{font-weight:800;font-size:18px}
-    .subtitle{color:var(--muted);font-size:13px}
-    .inputRow{display:flex;gap:10px;margin-top:8px}
-    .textInput{flex:1;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:rgba(0,0,0,0.12);color:var(--text)}
-    .btn{padding:10px 12px;border-radius:10px;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#001;border:none;font-weight:800;cursor:pointer}
-
-    /* visual area */
-    .visualWrap{grid-column:1 / span 2;display:flex;justify-content:center;margin-top:8px}
-    .visual{width:560px;height:520px;border-radius:14px;background:rgba(0,0,0,0.12);position:relative;overflow:hidden;border:1px solid rgba(255,255,255,0.03)}
-    #auraCanvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
-    #camVideo{position:absolute;left:12px;top:12px;width:220px;height:140px;border-radius:10px;object-fit:cover;transform:scaleX(-1);z-index:3;border:1px solid rgba(255,255,255,0.04)}
-    #compassCanvas{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:320px;height:320px;border-radius:999px;z-index:4}
-
-    /* right column */
-    .right{display:flex;flex-direction:column;gap:12px}
-    .cardSmall{padding:12px;border-radius:10px;background:rgba(0,0,0,0.12);border:1px solid rgba(255,255,255,0.03)}
-    .metricTitle{font-weight:900;color:var(--accent);font-size:12px;text-transform:uppercase}
-    .metricValue{font-weight:900;font-size:20px;margin-top:8px}
-    .signature{color:var(--muted);margin-top:6px}
-    .hashtags{color:var(--accent);margin-top:8px;font-size:12px}
-    .moodMap{display:flex;gap:8px;margin-top:8px}
-    .moodItem{padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.02);font-weight:800;color:var(--muted);font-size:13px}
-    #timelineSmall{width:100%;height:70px;border-radius:8px;background:rgba(0,0,0,0.08);display:block}
-
-    @media (max-width:980px){
-      .card{grid-template-columns:1fr; padding:12px}
-      .visual{width:100%;height:420px}
-      #camVideo{display:none}
-    }
-  </style>
-
-  <!-- Three.js -->
-  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
-</head>
-<body>
-  <div class="wrap">
-    <div class="card" role="main">
-      <div class="leftTop">
-        <div class="title">Understand your emotional field in real time</div>
-        <div class="subtitle">Type anything you're feeling or thinking. Using our camera and AI analyzes.</div>
-
-        <div class="inputRow">
-          <input id="userText" class="textInput" placeholder="Type anything you're feeling or thinking ..." value="i am getting a lot done but feeling a bit tired" />
-          <button id="analyzeBtn" class="btn">Analyze</button>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Emopulse — Live model</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="bg">
+    <header class="topbar">
+      <div class="brand">
+        <div class="mark">S</div>
+        <div class="brandText">
+          <div class="brandName">Emopulse</div>
         </div>
       </div>
 
-      <div class="right">
-        <div class="cardSmall">
-          <div class="metricTitle">Emopulse Score</div>
-          <div id="scoreVal" class="metricValue">—</div>
-          <div style="display:flex;justify-content:space-between;margin-top:8px;color:var(--muted);font-size:13px">
-            <div>Energy: <strong id="energyVal">—</strong></div>
-            <div>Stress: <strong id="stressVal">—</strong></div>
+      <div class="hero">
+        <div class="heroTitle">Understand your emotional field in real time</div>
+        <div class="heroSub">Type anything you're feeling or thinking. Using our camera and AI analyzes.</div>
+      </div>
+
+      <nav class="nav">
+        <a class="navLink navLinkActive" href="/index.html">Live model</a>
+        <a class="navLink" href="/investors.html">Investors</a>
+      </nav>
+    </header>
+
+    <main class="grid">
+      <aside class="panel">
+        <div class="panelTitle">Emotional Aura</div>
+        <canvas id="auraCanvas" width="340" height="340" class="aura"></canvas>
+
+        <div class="row mt12">
+          <button id="downloadPitchLeft" class="btn btnPrimary">Download Pitchdeck</button>
+        </div>
+
+        <div class="infoBlocks mt14">
+          <div class="infoBlock">
+            <div class="infoTitle">HOW IT WORKS</div>
+            <div class="infoText">Opanilite app<br />Camrart</div>
+          </div>
+          <div class="infoBlock">
+            <div class="infoTitle">ROADMAP</div>
+            <div class="infoText">Emotion Examinerator<br />Enabled Meditor<br />Emotion Mirror</div>
+          </div>
+          <div class="infoBlock">
+            <div class="infoTitle">PRIVACY FIRST</div>
+            <div class="infoText">No data stored<br />All processing on-device</div>
+          </div>
+        </div>
+      </aside>
+
+      <section class="panel panelCenter">
+        <div class="centerTop">
+          <div class="videoWrap">
+            <video id="cam" autoplay playsinline muted></video>
+            <canvas id="overlay" width="520" height="360"></canvas>
+            <div id="camStatus" class="camStatus">Initializing camera…</div>
+          </div>
+
+          <div class="forecast">
+            <div class="forecastTitle">Emotional Forecast</div>
+
+            <input
+              id="userText"
+              class="input"
+              placeholder="Type anything you're feeling or thinking ..."
+              value="i am getting a lot done but feeling a bit tired"
+            />
+
+            <div class="row mt10">
+              <button id="analyzeBtn" class="btn btnPrimary">Analyze my emotional field</button>
+              <button id="soundBtn" class="btn btnGhost" aria-pressed="true">Sound: On</button>
+            </div>
+
+            <div class="aiBox mt12">
+              <div class="aiTitle">AI Interpretation</div>
+              <div id="aiText" class="aiText">—</div>
+              <div id="aiTags" class="aiTags"></div>
+            </div>
           </div>
         </div>
 
-        <div class="cardSmall">
-          <div class="metricTitle">Emotional signature</div>
-          <div id="signatureText" class="signature">—</div>
-          <div id="hashtags" class="hashtags">—</div>
-        </div>
-
-        <div class="cardSmall">
-          <div class="metricTitle">Mood map</div>
-          <div class="moodMap">
-            <div class="moodItem">Positive</div>
-            <div class="moodItem">Euphoric</div>
-            <div class="moodItem">Intense</div>
+        <div class="metrics mt14">
+          <div class="metric">
+            <div class="metricLabel">Emopulse Score</div>
+            <div id="score" class="metricValue">—</div>
+          </div>
+          <div class="metric">
+            <div class="metricLabel">Energy</div>
+            <div id="energy" class="metricValueSmall">—</div>
+          </div>
+          <div class="metric">
+            <div class="metricLabel">Stress Risk</div>
+            <div id="stress" class="metricValueSmall">—</div>
           </div>
         </div>
 
-        <div class="cardSmall">
-          <div class="metricTitle">Emotional timeline</div>
-          <canvas id="timelineSmall"></canvas>
+        <div class="charts mt12">
+          <canvas id="timeline" width="760" height="140" class="chart"></canvas>
+          <canvas id="pulse" width="260" height="140" class="chart"></canvas>
         </div>
+      </section>
+
+      <aside class="panel">
+        <div class="panelTitle">WHY EMOPULSE</div>
+        <div class="bullets">
+          <div class="bullet">Real-time emotion awareness using only your camera</div>
+          <div class="bullet">Privacy-first architecture: no data stored, all processing on-device</div>
+        </div>
+
+        <div class="miniTitle mt12">Emotional Aura</div>
+        <div class="miniLine">Stability: <span id="stability" class="miniStrong">—</span></div>
+        <div class="miniLine">Intensity: <span id="intensity" class="miniStrong">—</span></div>
+        <div class="miniLine">Score: <span id="score2" class="miniStrong">—</span></div>
+
+        <div class="row mt12">
+          <button id="tryLive" class="btn btnPrimary">Try it live</button>
+          <button id="downloadPitchRight" class="btn btnGhost">Download Pitchdeck</button>
+        </div>
+
+        <div class="footerMini mt12">
+          <div>Emo1 2024</div>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="footer">
+      <div class="contact">
+        <div class="contactTitle">Contact</div>
+        <input id="name" class="input" placeholder="Your Name" />
+        <input id="email" class="input mt8" placeholder="Your Email" />
+        <textarea id="message" class="input mt8" rows="2" placeholder="Your Message"></textarea>
+        <button id="send" class="btn btnPrimary mt10">Send message</button>
       </div>
 
-      <div class="visualWrap">
-        <div class="visual" aria-hidden="false">
-          <canvas id="auraCanvas"></canvas>
-          <video id="camVideo" autoplay playsinline muted></video>
-          <canvas id="compassCanvas" width="320" height="320"></canvas>
-        </div>
+      <div class="legal">
+        <div>© 2026 emo1 (Emopulse). All rights reserved.</div>
+        <div class="legalSub">Real-time emotion awareness for real people.</div>
       </div>
-    </div>
-  </div>
+    </footer>
 
-  <script>
-    // --- Camera preview (visible small video) ---
-    const camVideo = document.getElementById('camVideo');
-    const camStatusLog = (m)=>console.log('[cam]',m);
-
-    async function startCamera(){
-      try{
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
-        camVideo.srcObject = stream;
-        camStatusLog('camera active');
-      }catch(e){
-        camStatusLog('camera blocked or unavailable');
-      }
-    }
-    startCamera();
-
-    // --- Aura background (subtle particles) ---
-    (function(){
-      const canvas = document.getElementById('auraCanvas');
-      const ctx = canvas.getContext('2d');
-      let particles = [];
-      function resize(){
-        canvas.width = canvas.clientWidth;
-        canvas.height = canvas.clientHeight;
-        particles = [];
-        for(let i=0;i<50;i++){
-          particles.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:2+Math.random()*4, vx:(Math.random()-0.5)*0.3, vy:(Math.random()-0.5)*0.3, hue:190+Math.random()*60});
-        }
-      }
-      window.addEventListener('resize', resize);
-      resize();
-      function draw(){
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        // soft radial
-        const g = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 10, canvas.width/2, canvas.height/2, Math.max(canvas.width,canvas.height)/1.2);
-        g.addColorStop(0,'rgba(0,209,255,0.06)');
-        g.addColorStop(0.6,'rgba(107,140,255,0.03)');
-        g.addColorStop(1,'rgba(0,0,0,0)');
-        ctx.fillStyle = g; ctx.fillRect(0,0,canvas.width,canvas.height);
-
-        for(let p of particles){
-          p.x += p.vx + Math.sin(Date.now()/2000 + p.r)*0.2;
-          p.y += p.vy + Math.cos(Date.now()/1800 + p.r)*0.15;
-          if(p.x < -10) p.x = canvas.width + 10;
-          if(p.x > canvas.width + 10) p.x = -10;
-          if(p.y < -10) p.y = canvas.height + 10;
-          if(p.y > canvas.height + 10) p.y = -10;
-          ctx.beginPath();
-          ctx.fillStyle = `hsla(${p.hue},80%,60%,0.12)`;
-          ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
-        }
-        requestAnimationFrame(draw);
-      }
-      draw();
-    })();
-
-    // --- Three.js compass in the center ---
-    (function(){
-      const canvas = document.getElementById('compassCanvas');
-      const renderer = new THREE.WebGLRenderer({ canvas, alpha:true, antialias:true });
-      function resizeRenderer(){
-        const w = canvas.clientWidth; const h = canvas.clientHeight;
-        renderer.setSize(w,h); renderer.setPixelRatio(window.devicePixelRatio || 1);
-      }
-      resizeRenderer();
-      window.addEventListener('resize', resizeRenderer);
-
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(40, canvas.clientWidth/canvas.clientHeight, 0.1, 100);
-      camera.position.set(0,1.6,3);
-
-      const pl = new THREE.PointLight(0xffffff,1.1); pl.position.set(2,3,4); scene.add(pl);
-      scene.add(new THREE.AmbientLight(0x88aaff,0.6));
-
-      const base = new THREE.Mesh(new THREE.CylinderGeometry(1.1,1.1,0.12,64), new THREE.MeshStandardMaterial({color:0x071827,metalness:0.6,roughness:0.4,emissive:0x001022,emissiveIntensity:0.6}));
-      base.rotation.x = -Math.PI/2; scene.add(base);
-
-      const ring = new THREE.Mesh(new THREE.RingGeometry(0.9,1.05,128), new THREE.MeshBasicMaterial({color:0x6b8cff,transparent:true,opacity:0.45,side:THREE.DoubleSide}));
-      ring.rotation.x = -Math.PI/2; scene.add(ring);
-
-      const arrow = new THREE.Mesh(new THREE.ConeGeometry(0.12,0.7,32), new THREE.MeshStandardMaterial({color:0x00d1ff,emissive:0x00d1ff,metalness:0.3,roughness:0.2}));
-      arrow.position.set(0,0.35,0); scene.add(arrow);
-
-      function animate(){
-        requestAnimationFrame(animate);
-        const t = Date.now()/1000;
-        base.rotation.z = t * 0.06;
-        arrow.rotation.y = Math.sin(t*0.9)*0.6;
-        arrow.rotation.x = -Math.PI/2 + Math.cos(t*0.4)*0.08;
-        renderer.render(scene, camera);
-      }
-      animate();
-    })();
-
-    // --- Timeline small ---
-    (function(){
-      const canvas = document.getElementById('timelineSmall'); const ctx = canvas.getContext('2d');
-      function resize(){ canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight; }
-      window.addEventListener('resize', resize); resize();
-      function draw(){
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        ctx.fillStyle = 'rgba(0,0,0,0.08)'; ctx.fillRect(0,0,canvas.width,canvas.height);
-        ctx.beginPath();
-        const pts = 60;
-        for(let i=0;i<=pts;i++){
-          const x = (i/pts)*canvas.width;
-          const y = canvas.height/2 + Math.sin(i*0.35 + Date.now()/800)*canvas.height*0.18;
-          if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-        }
-        ctx.strokeStyle = 'rgba(0,209,255,0.95)'; ctx.lineWidth = 2; ctx.stroke();
-        requestAnimationFrame(draw);
-      }
-      draw();
-    })();
-
-    // --- Demo metrics (live-like) ---
-    (function(){
-      const scoreEl = document.getElementById('scoreVal'), energyEl = document.getElementById('energyVal'), stressEl = document.getElementById('stressVal');
-      const sigEl = document.getElementById('signatureText'), tagsEl = document.getElementById('hashtags');
-      const sigs = [
-        {s:'Calm focused energy', t:'#calm #focused #Sunshine with tranquility'},
-        {s:'Soft tension under the surface', t:'#tension #self-awareness'},
-        {s:'High cognitive load, low turbulence', t:'#deepwork #stable'}
-      ];
-      function update(){
-        const t = Date.now()/1500;
-        const base = 70 + Math.sin(t)*6 + Math.cos(t/1.7)*3;
-        const energy = Math.max(0, Math.min(1, 0.5 + Math.sin(Date.now()/1000)*0.25));
-        const stress = Math.max(0, Math.min(1, 0.2 + Math.cos(Date.now()/1300)*0.12));
-        scoreEl.textContent = Math.round(base) + '/100';
-        energyEl.textContent = energy.toFixed(2) + ' rising';
-        stressEl.textContent = stress.toFixed(2) + ' low';
-        if(Math.random() < 0.008){ const p = sigs[Math.floor(Math.random()*sigs.length)]; sigEl.textContent = p.s; tagsEl.textContent = p.t; }
-        requestAnimationFrame(update);
-      }
-      update();
-    })();
-
-    // --- Analyze button quick demo ---
-    (function(){
-      const btn = document.getElementById('analyzeBtn'), input = document.getElementById('userText');
-      btn.addEventListener('click', ()=>{
-        const text = (input.value||'').toLowerCase();
-        const sig = document.getElementById('signatureText'), tags = document.getElementById('hashtags');
-        if(text.includes('tired')){ sig.textContent='Soft tension under the surface'; tags.textContent='#tired #rest'; }
-        else if(text.includes('work')){ sig.textContent='High cognitive load, low turbulence'; tags.textContent='#deepwork #focus'; }
-        else { sig.textContent='Calm focused energy'; tags.textContent='#calm #focused'; }
-      });
-    })();
-  </script>
-</body>
+    <script type="module" src="/src/live.js"></script>
+  </body>
 </html>
