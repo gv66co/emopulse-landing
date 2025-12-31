@@ -1,39 +1,20 @@
-// ===============================
-// Emopulse 3D Compass — Full Script
-// Vite / ESM compatible
-// ===============================
-
 import * as THREE from 'three';
 
 let scene, camera, renderer;
 let canvas;
 
-// Core
 let coreSphere, glowMesh;
-
-// Orbits + particles
 let orbitRings = [];
 let particles = [];
-
-// Emotional nodes
 let emotionalNodes = [];
-
-// Arrow
 let arrowMesh;
 let targetRotation = 0;
 let arrowTargetRotation = 0;
-
-// Trajectory
 let trajectoryPoints = [];
 let trajectoryLine;
 
-// ===============================
-// INIT SCENE + CAMERA + RENDERER
-// ===============================
-
 export function initCompass3D() {
   canvas = document.getElementById('compass3d');
-
   if (!canvas) {
     console.error("Canvas #compass3d not found");
     return;
@@ -66,16 +47,10 @@ export function initCompass3D() {
 
 function resizeCompass3D() {
   if (!canvas) return;
-
   camera.aspect = canvas.clientWidth / canvas.clientHeight;
   camera.updateProjectionMatrix();
-
   renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
 }
-
-// ===============================
-// GLOW SHADER + CORE SPHERE
-// ===============================
 
 const GlowShader = {
   uniforms: {
@@ -140,17 +115,12 @@ export function createCoreSphere() {
 
 export function animateCoreSphere() {
   const t = performance.now() * 0.001;
-
   const scale = 1 + Math.sin(t * 2.0) * 0.04;
   coreSphere.scale.set(scale, scale, scale);
 
   const glowScale = 1.15 + Math.sin(t * 1.5) * 0.05;
   glowMesh.scale.set(glowScale, glowScale, glowScale);
 }
-
-// ===============================
-// ORBIT RINGS + PARTICLES
-// ===============================
 
 export function createOrbitRings() {
   const ringMaterial = new THREE.MeshBasicMaterial({
@@ -210,15 +180,10 @@ export function animateRingsAndParticles() {
 
   particles.forEach((p) => {
     p.userData.angle += p.userData.speed;
-
     p.position.x = Math.cos(p.userData.angle) * p.userData.radius;
     p.position.z = Math.sin(p.userData.angle) * p.userData.radius;
   });
 }
-
-// ===============================
-// EMOTIONAL NODES (Ca / Joy / Stress)
-// ===============================
 
 export function createEmotionalNodes() {
   const nodeGeo = new THREE.SphereGeometry(0.08, 16, 16);
@@ -261,17 +226,11 @@ export function createEmotionalNodes() {
 export function animateEmotionalNodes() {
   emotionalNodes.forEach((node) => {
     node.userData.angle += node.userData.speed;
-
     node.position.x = Math.cos(node.userData.angle) * node.userData.radius;
     node.position.z = Math.sin(node.userData.angle) * node.userData.radius;
-
     node.position.y = Math.sin(performance.now() * 0.001 + node.userData.angle) * 0.12;
   });
 }
-
-// ===============================
-// EMOTION DIRECTION ARROW (3D)
-// ===============================
 
 export function createEmotionArrow() {
   const arrowGroup = new THREE.Group();
@@ -325,10 +284,6 @@ export function updateArrowColor(metrics) {
   });
 }
 
-// ===============================
-// EMOTION TRAJECTORY (3D PATH)
-// ===============================
-
 export function initTrajectory() {
   const geometry = new THREE.BufferGeometry();
   const positions = new Float32Array(120 * 3);
@@ -347,7 +302,6 @@ export function initTrajectory() {
 
 export function addTrajectoryPoint({ energy, stress }) {
   const angle = Math.atan2(stress, energy);
-
   const radius = 1.6;
 
   const x = Math.cos(angle) * radius;
@@ -355,7 +309,6 @@ export function addTrajectoryPoint({ energy, stress }) {
   const z = Math.sin(angle) * radius;
 
   trajectoryPoints.push(new THREE.Vector3(x, y, z));
-
   if (trajectoryPoints.length > 120) {
     trajectoryPoints.shift();
   }
@@ -385,10 +338,6 @@ function updateTrajectoryLine() {
   const opacity = Math.min(1, trajectoryPoints.length / 120);
   trajectoryLine.material.opacity = opacity;
 }
-
-// ===============================
-// LIVE EMOTION → COMPASS STATE
-// ===============================
 
 export function updateCompassNodes({ energy, stress }) {
   emotionalNodes.forEach((node) => {
@@ -457,10 +406,6 @@ export function updateCompass3D(metrics) {
     stress: metrics.stress
   });
 }
-
-// ===============================
-// FINAL INIT + ANIMATION LOOP
-// ===============================
 
 export function initCompass() {
   initCompass3D();
