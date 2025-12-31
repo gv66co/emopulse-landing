@@ -1,335 +1,146 @@
-:root{
-  --bg0:#041025;
-  --bg1:#071028;
-  --panel:#0f1724;
-  --glass:rgba(255,255,255,0.04);
-  --stroke:rgba(255,255,255,0.08);
-  --muted:#9fb3c8;
-  --text:#e6f7ff;
-  --accent:#00d1ff;
-  --accent2:#6b8cff;
-  --btn:#151f33;
-}
+<!doctype html>
+<html lang="lt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Emopulse — Live model</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="bg">
+    <header class="topbar">
+      <div class="brand">
+        <div class="mark">S</div>
+        <div class="brandText">
+          <div class="brandName">Emopulse</div>
+        </div>
+      </div>
 
-*{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0;
-  font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;
-  color:var(--text);
-}
+      <div class="hero">
+        <div class="heroTitle">Understand your emotional field in real time</div>
+        <div class="heroSub">
+          Type anything you're feeling or thinking. Using our camera and AI analyzes.
+        </div>
+      </div>
 
-.bg{
-  background:radial-gradient(1200px 800px at 50% -10%, rgba(107,140,255,0.18), transparent 60%),
-             radial-gradient(900px 700px at 20% 20%, rgba(0,209,255,0.14), transparent 55%),
-             linear-gradient(180deg,var(--bg0),var(--bg1));
-}
+      <nav class="nav">
+        <a class="navLink navLinkActive" href="/index.html">Live model</a>
+        <a class="navLink" href="/investors.html">Investors</a>
+      </nav>
+    </header>
 
-.topbar{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:18px 28px;
-  gap:20px;
-}
+    <main class="grid">
+      <aside class="panel">
+        <div class="panelTitle">Emotional Aura</div>
+        <canvas id="auraCanvas" width="340" height="340" class="aura"></canvas>
 
-.brand{display:flex;align-items:center;gap:12px}
-.mark{
-  width:46px;height:46px;border-radius:999px;
-  background:linear-gradient(90deg,var(--accent),var(--accent2));
-  display:grid;place-items:center;color:#001;font-weight:800;
-}
-.brandName{font-weight:800}
+        <!-- Pitchdeck mygtukas išimtas -->
 
-.hero{text-align:center;max-width:560px}
-.heroTitle{font-size:22px;font-weight:800}
-.heroSub{margin-top:6px;color:var(--muted);font-size:13px}
+        <div class="infoBlocks mt14">
+          <div class="infoBlock">
+            <div class="infoTitle">HOW IT WORKS</div>
+            <div class="infoText">Open Emopulse<br />Camera + text → emotional field</div>
+          </div>
+          <div class="infoBlock">
+            <div class="infoTitle">ROADMAP</div>
+            <div class="infoText">Emotion Field Engine<br />Guided Regulator<br />Emotion Mirror</div>
+          </div>
+          <div class="infoBlock">
+            <div class="infoTitle">PRIVACY FIRST</div>
+            <div class="infoText">No data stored<br />All processing on-device</div>
+          </div>
+        </div>
+      </aside>
 
-.nav{display:flex;gap:12px}
-.navLink{color:var(--muted);text-decoration:none;font-size:13px}
-.navLinkActive{color:var(--text)}
+      <section class="panel panelCenter">
+        <div class="centerTop">
+          <div class="videoWrap">
+            <video id="cam" autoplay playsinline muted></video>
+            <canvas id="overlay" width="520" height="360"></canvas>
+            <div id="camStatus" class="camStatus">Initializing camera…</div>
+          </div>
 
-.grid{
-  max-width:1220px;
-  margin:0 auto;
-  padding:18px 20px 0;
-  display:grid;
-  grid-template-columns:360px 1fr 360px;
-  gap:16px;
-}
+          <div class="forecast">
+            <div class="forecastTitle">Emotional Forecast</div>
 
-.panel{
-  background:linear-gradient(180deg, rgba(255,255,255,0.03), var(--glass));
-  border:1px solid var(--stroke);
-  border-radius:14px;
-  box-shadow:0 10px 30px rgba(0,0,0,0.55);
-  padding:16px;
-}
+            <input
+              id="userText"
+              class="input"
+              placeholder="Type anything you're feeling or thinking ..."
+              value="i am getting a lot done but feeling a bit tired"
+            />
 
-.panelCenter{padding:16px 16px 12px}
-.panelTitle{font-weight:800;letter-spacing:0.2px}
+            <div class="row mt10">
+              <button id="analyzeBtn" class="btn btnPrimary">Analyze my emotional field</button>
+              <button id="soundBtn" class="btn btnGhost" aria-pressed="true">Sound: On</button>
+            </div>
 
-.mt8{margin-top:8px}
-.mt10{margin-top:10px}
-.mt12{margin-top:12px}
-.mt14{margin-top:14px}
+            <div class="aiBox mt12">
+              <div class="aiTitle">AI Interpretation</div>
+              <div id="aiText" class="aiText">—</div>
+              <div id="aiTags" class="aiTags"></div>
+            </div>
+          </div>
+        </div>
 
-.aura{width:100%;height:auto;border-radius:12px;background:rgba(0,0,0,0.12)}
+        <div class="metrics mt14">
+          <div class="metric">
+            <div class="metricLabel">Emopulse Score</div>
+            <div id="score" class="metricValue">—</div>
+          </div>
+          <div class="metric">
+            <div class="metricLabel">Energy</div>
+            <div id="energy" class="metricValueSmall">—</div>
+          </div>
+          <div class="metric">
+            <div class="metricLabel">Stress Risk</div>
+            <div id="stress" class="metricValueSmall">—</div>
+          </div>
+        </div>
 
-.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+        <div class="charts mt12">
+          <canvas id="timeline" width="760" height="140" class="chart"></canvas>
+          <canvas id="pulse" width="260" height="140" class="chart"></canvas>
+        </div>
+      </section>
 
-.btn{
-  border:1px solid var(--stroke);
-  background:var(--btn);
-  color:var(--text);
-  border-radius:10px;
-  padding:10px 12px;
-  cursor:pointer;
-  font-weight:700;
-}
-.btnPrimary{
-  background:linear-gradient(90deg,var(--accent),var(--accent2));
-  color:#001;border:none;
-}
-.btnGhost{background:transparent}
+      <aside class="panel">
+        <div class="panelTitle">WHY EMOPULSE</div>
+        <div class="bullets">
+          <div class="bullet">Real-time emotion awareness using only your camera</div>
+          <div class="bullet">Privacy-first architecture: no data stored, all processing on-device</div>
+        </div>
 
-.input{
-  width:100%;
-  border:1px solid var(--stroke);
-  background:rgba(0,0,0,0.18);
-  color:var(--text);
-  border-radius:10px;
-  padding:10px 12px;
-  outline:none;
-}
-.input:focus{border-color:rgba(0,209,255,0.5)}
+        <div class="miniTitle mt12">Emotional Aura</div>
+        <div class="miniLine">Stability: <span id="stability" class="miniStrong">—</span></div>
+        <div class="miniLine">Intensity: <span id="intensity" class="miniStrong">—</span></div>
+        <div class="miniLine">Score: <span id="score2" class="miniStrong">—</span></div>
 
-.infoBlocks{display:flex;flex-direction:column;gap:12px}
-.infoTitle{font-size:12px;font-weight:900;color:var(--text);opacity:0.95}
-.infoText{color:var(--muted);font-size:13px;line-height:1.25}
+        <div class="row mt12">
+          <button id="tryLive" class="btn btnPrimary">Try it live</button>
+          <!-- Dešinysis pitchdeck mygtukas išimtas -->
+        </div>
 
-.centerTop{display:grid;grid-template-columns:520px 1fr;gap:14px}
-.videoWrap{
-  position:relative;
-  width:520px;height:360px;
-  border-radius:14px;
-  overflow:hidden;
-  background:#000;
-  border:1px solid rgba(255,255,255,0.08);
-}
-#cam{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
-#overlay{position:absolute;left:0;top:0;width:100%;height:100%}
+        <div class="footerMini mt12">
+          <div>Emo1 2024</div>
+        </div>
+      </aside>
+    </main>
 
-.camStatus{
-  position:absolute;left:12px;top:12px;
-  font-size:12px;color:var(--muted);
-  background:rgba(0,0,0,0.35);
-  padding:6px 8px;border-radius:10px;
-  border:1px solid rgba(255,255,255,0.08);
-}
+    <footer class="footer">
+      <div class="contact">
+        <div class="contactTitle">Contact</div>
+        <input id="name" class="input" placeholder="Your Name" />
+        <input id="email" class="input mt8" placeholder="Your Email" />
+        <textarea id="message" class="input mt8" rows="2" placeholder="Your Message"></textarea>
+        <button id="send" class="btn btnPrimary mt10">Send message</button>
+      </div>
 
-.forecastTitle{font-weight:800;margin-bottom:8px}
+      <div class="legal">
+        <div>© 2026 emo1 (Emopulse). All rights reserved.</div>
+        <div class="legalSub">Real-time emotion awareness for real people.</div>
+      </div>
+    </footer>
 
-.aiBox{
-  border:1px solid rgba(0,209,255,0.18);
-  background:rgba(0,209,255,0.06);
-  border-radius:12px;
-  padding:10px 12px;
-}
-.aiTitle{font-weight:900;color:var(--accent);font-size:12px}
-.aiText{margin-top:6px;color:var(--text);font-size:13px;line-height:1.25}
-.aiTags{margin-top:6px;color:var(--accent);font-size:12px}
-
-.metrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-.metric{border:1px solid var(--stroke);border-radius:12px;padding:10px;background:rgba(0,0,0,0.16)}
-.metricLabel{color:var(--muted);font-size:12px;font-weight:800}
-.metricValue{font-size:22px;font-weight:900;margin-top:6px}
-.metricValueSmall{font-size:15px;font-weight:900;margin-top:6px}
-
-.charts{display:grid;grid-template-columns:1fr 260px;gap:10px}
-.chart{width:100%;height:auto;border-radius:12px;border:1px solid var(--stroke);background:rgba(0,0,0,0.14)}
-
-.bullets{margin-top:10px;display:flex;flex-direction:column;gap:8px}
-.bullet{color:var(--muted);font-size:13px;line-height:1.25}
-
-.miniTitle{font-weight:900;font-size:12px}
-.miniLine{color:var(--muted);font-size:13px;margin-top:6px}
-.miniStrong{color:var(--text);font-weight:900}
-
-.footerMini{color:var(--muted);font-size:12px}
-
-.footer{
-  max-width:1220px;
-  margin:16px auto 22px;
-  padding:12px 20px;
-  display:flex;
-  justify-content:space-between;
-  gap:16px;
-  align-items:flex-end;
-}
-.footerCompact{align-items:center}
-
-.contact{width:520px}
-.contactTitle{font-weight:900;margin-bottom:10px}
-
-.legal{text-align:right}
-.legalSub{color:var(--muted);font-size:12px;margin-top:6px}
-
-.gridInvestors{
-  max-width:1220px;
-  margin:0 auto;
-  padding:18px 20px 0;
-  display:grid;
-  grid-template-columns:1fr 360px;
-  gap:16px;
-}
-
-.panelWide{min-height:620px}
-.carouselWrap{
-  margin-top:12px;
-  position:relative;
-  border-radius:14px;
-  overflow:hidden;
-  border:1px solid var(--stroke);
-  background:rgba(0,0,0,0.16);
-}
-
-.deck3d{width:100%;height:520px;display:block}
-
-.carouselHud{position:absolute;left:12px;bottom:12px;display:flex;gap:10px}
-
-.carouselMeta{position:absolute;right:12px;bottom:12px;text-align:right}
-.carouselLabel{font-weight:900}
-.carouselHint{color:var(--muted);font-size:12px;margin-top:4px}
-
-@media (max-width:1200px){
-  .grid{grid-template-columns:1fr;}
-  .centerTop{grid-template-columns:1fr}
-  .videoWrap{width:100%}
-  .contact{width:100%}
-  .charts{grid-template-columns:1fr}
-  .gridInvestors{grid-template-columns:1fr}
-}
-
-/* === Emopulse 3D layer & emotional field UI (papildyta) === */
-
-.emopulse3D{
-  position:relative;
-  margin-top:14px;
-  border-radius:14px;
-  padding:14px 16px;
-  background:radial-gradient(600px 400px at 50% 0%, rgba(0,209,255,0.12), transparent 60%),
-             radial-gradient(500px 380px at 10% 80%, rgba(107,140,255,0.16), transparent 60%),
-             rgba(0,0,0,0.22);
-  border:1px solid rgba(255,255,255,0.08);
-  overflow:hidden;
-}
-
-/* Aura drift fonas už kompaso */
-.auraDriftCanvas{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  opacity:0.7;
-  pointer-events:none;
-}
-
-/* 3D kompaso konteineris */
-#compassContainer{
-  position:relative;
-  width:260px;
-  height:260px;
-  margin:0 auto;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index:2;
-}
-
-#compass3D{
-  width:100%;
-  height:100%;
-  display:block;
-}
-
-/* Kompaso labeliai (Ca / Joy / Stress) */
-.compassLabel{
-  position:absolute;
-  font-size:11px;
-  font-weight:800;
-  letter-spacing:0.04em;
-  text-transform:uppercase;
-  color:var(--muted);
-  text-shadow:0 0 8px rgba(0,0,0,0.8);
-}
-
-.compassLabel-ca{
-  top:6px;
-  left:50%;
-  transform:translateX(-50%);
-}
-
-.compassLabel-joy{
-  bottom:10px;
-  right:18px;
-}
-
-.compassLabel-stress{
-  bottom:10px;
-  left:18px;
-}
-
-/* Emotional field box (dešinėje nuo kompaso) */
-.emotionalFieldBox{
-  position:absolute;
-  right:16px;
-  top:50%;
-  transform:translateY(-50%);
-  min-width:190px;
-  padding:10px 12px;
-  border-radius:12px;
-  background:rgba(4,16,37,0.92);
-  border:1px solid rgba(0,209,255,0.22);
-  box-shadow:0 10px 30px rgba(0,0,0,0.65);
-  z-index:3;
-}
-
-.efTitle{
-  font-size:12px;
-  font-weight:900;
-  color:var(--accent);
-  letter-spacing:0.04em;
-  text-transform:uppercase;
-}
-
-.efLine{
-  margin-top:6px;
-  font-size:13px;
-  color:var(--muted);
-}
-
-.efLine span{
-  color:var(--text);
-  font-weight:800;
-}
-
-/* Responsyvus elgesys mažesniuose ekranuose */
-@media (max-width:1200px){
-  .emopulse3D{
-    margin-top:12px;
-  }
-
-  #compassContainer{
-    width:220px;
-    height:220px;
-  }
-
-  .emotionalFieldBox{
-    position:relative;
-    right:auto;
-    top:auto;
-    transform:none;
-    margin-top:12px;
-  }
-}
+    <script type="module" src="/src/live.js"></script>
+  </body>
+</html>
