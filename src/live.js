@@ -511,3 +511,12 @@ function updateCompass3D(metrics) {
     stress: metrics.stress
   });
 }
+
+import { updateCompass3D } from './compass3d.js';
+
+analyzeBtn.addEventListener('click', () => {
+  const text = userTextEl.value;
+  const metrics = analyzeEmotion(text);
+  updateUI(metrics);
+  updateCompass3D(metrics);
+});
