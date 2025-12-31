@@ -4,9 +4,311 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Emopulse — Live model</title>
-    <link rel="stylesheet" href="styles.css" />
-  </head>
+    <style>
+      :root{
+        --bg0:#041025;
+        --bg1:#071028;
+        --panel:#0f1724;
+        --glass:rgba(255,255,255,0.04);
+        --stroke:rgba(255,255,255,0.08);
+        --muted:#9fb3c8;
+        --text:#e6f7ff;
+        --accent:#00d1ff;
+        --accent2:#6b8cff;
+        --btn:#151f33;
+      }
 
+      *{box-sizing:border-box}
+      html,body{height:100%}
+      body{
+        margin:0;
+        font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;
+        color:var(--text);
+      }
+
+      .bg{
+        background:radial-gradient(1200px 800px at 50% -10%, rgba(107,140,255,0.18), transparent 60%),
+                  radial-gradient(900px 700px at 20% 20%, rgba(0,209,255,0.14), transparent 55%),
+                  linear-gradient(180deg,var(--bg0),var(--bg1));
+      }
+
+      .topbar{
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        padding:18px 28px;
+        gap:20px;
+      }
+
+      .brand{display:flex;align-items:center;gap:12px}
+      .mark{
+        width:46px;height:46px;border-radius:999px;
+        background:linear-gradient(90deg,var(--accent),var(--accent2));
+        display:grid;place-items:center;color:#001;font-weight:800;
+      }
+      .brandName{font-weight:800}
+
+      .hero{text-align:center;max-width:560px}
+      .heroTitle{font-size:22px;font-weight:800}
+      .heroSub{margin-top:6px;color:var(--muted);font-size:13px}
+
+      .nav{display:flex;gap:12px}
+      .navLink{color:var(--muted);text-decoration:none;font-size:13px}
+      .navLinkActive{color:var(--text)}
+
+      .grid{
+        max-width:1220px;
+        margin:0 auto;
+        padding:18px 20px 0;
+        display:grid;
+        grid-template-columns:360px 1fr 360px;
+        gap:16px;
+      }
+
+      .panel{
+        background:linear-gradient(180deg, rgba(255,255,255,0.03), var(--glass));
+        border:1px solid var(--stroke);
+        border-radius:14px;
+        box-shadow:0 10px 30px rgba(0,0,0,0.55);
+        padding:16px;
+      }
+
+      .panelCenter{padding:16px 16px 12px}
+      .panelTitle{font-weight:800;letter-spacing:0.2px}
+
+      .mt8{margin-top:8px}
+      .mt10{margin-top:10px}
+      .mt12{margin-top:12px}
+      .mt14{margin-top:14px}
+
+      .aura{width:100%;height:auto;border-radius:12px;background:rgba(0,0,0,0.12)}
+
+      .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+      .btn{
+        border:1px solid var(--stroke);
+        background:var(--btn);
+        color:var(--text);
+        border-radius:10px;
+        padding:10px 12px;
+        cursor:pointer;
+        font-weight:700;
+      }
+      .btnPrimary{
+        background:linear-gradient(90deg,var(--accent),var(--accent2));
+        color:#001;border:none;
+      }
+      .btnGhost{background:transparent}
+
+      .input{
+        width:100%;
+        border:1px solid var(--stroke);
+        background:rgba(0,0,0,0.18);
+        color:var(--text);
+        border-radius:10px;
+        padding:10px 12px;
+        outline:none;
+      }
+      .input:focus{border-color:rgba(0,209,255,0.5)}
+
+      .infoBlocks{display:flex;flex-direction:column;gap:12px}
+      .infoTitle{font-size:12px;font-weight:900;color:var(--text);opacity:0.95}
+      .infoText{color:var(--muted);font-size:13px;line-height:1.25}
+
+      .centerTop{display:grid;grid-template-columns:520px 1fr;gap:14px}
+      .videoWrap{
+        position:relative;
+        width:520px;height:360px;
+        border-radius:14px;
+        overflow:hidden;
+        background:#000;
+        border:1px solid rgba(255,255,255,0.08);
+      }
+      #cam{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+      #overlay{position:absolute;left:0;top:0;width:100%;height:100%}
+
+      .camStatus{
+        position:absolute;left:12px;top:12px;
+        font-size:12px;color:var(--muted);
+        background:rgba(0,0,0,0.35);
+        padding:6px 8px;border-radius:10px;
+        border:1px solid rgba(255,255,255,0.08);
+      }
+
+      .forecastTitle{font-weight:800;margin-bottom:8px}
+
+      .aiBox{
+        border:1px solid rgba(0,209,255,0.18);
+        background:rgba(0,209,255,0.06);
+        border-radius:12px;
+        padding:10px 12px;
+      }
+      .aiTitle{font-weight:900;color:var(--accent);font-size:12px}
+      .aiText{margin-top:6px;color:var(--text);font-size:13px;line-height:1.25}
+      .aiTags{margin-top:6px;color:var(--accent);font-size:12px}
+
+      .metrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+      .metric{border:1px solid var(--stroke);border-radius:12px;padding:10px;background:rgba(0,0,0,0.16)}
+      .metricLabel{color:var(--muted);font-size:12px;font-weight:800}
+      .metricValue{font-size:22px;font-weight:900;margin-top:6px}
+      .metricValueSmall{font-size:15px;font-weight:900;margin-top:6px}
+
+      .charts{display:grid;grid-template-columns:1fr 260px;gap:10px}
+      .chart{width:100%;height:auto;border-radius:12px;border:1px solid var(--stroke);background:rgba(0,0,0,0.14)}
+
+      .bullets{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+      .bullet{color:var(--muted);font-size:13px;line-height:1.25}
+
+      .miniTitle{font-weight:900;font-size:12px}
+      .miniLine{color:var(--muted);font-size:13px;margin-top:6px}
+      .miniStrong{color:var(--text);font-weight:900}
+
+      .footerMini{color:var(--muted);font-size:12px}
+
+      .footer{
+        max-width:1220px;
+        margin:16px auto 22px;
+        padding:12px 20px;
+        display:flex;
+        justify-content:space-between;
+        gap:16px;
+        align-items:flex-end;
+      }
+
+      .contact{width:520px}
+      .contactTitle{font-weight:900;margin-bottom:10px}
+
+      .legal{text-align:right}
+      .legalSub{color:var(--muted);font-size:12px;margin-top:6px}
+
+      @media (max-width:1200px){
+        .grid{grid-template-columns:1fr;}
+        .centerTop{grid-template-columns:1fr}
+        .videoWrap{width:100%}
+        .contact{width:100%}
+        .charts{grid-template-columns:1fr}
+      }
+
+      /* === Emopulse 3D layer & emotional field UI === */
+
+      .emopulse3D{
+        position:relative;
+        margin-top:14px;
+        border-radius:14px;
+        padding:14px 16px;
+        background:radial-gradient(600px 400px at 50% 0%, rgba(0,209,255,0.12), transparent 60%),
+                  radial-gradient(500px 380px at 10% 80%, rgba(107,140,255,0.16), transparent 60%),
+                  rgba(0,0,0,0.22);
+        border:1px solid rgba(255,255,255,0.08);
+        overflow:hidden;
+      }
+
+      .auraDriftCanvas{
+        position:absolute;
+        inset:0;
+        width:100%;
+        height:100%;
+        opacity:0.7;
+        pointer-events:none;
+      }
+
+      #compassContainer{
+        position:relative;
+        width:260px;
+        height:260px;
+        margin:0 auto;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        z-index:2;
+      }
+
+      #compass3D{
+        width:100%;
+        height:100%;
+        display:block;
+      }
+
+      .compassLabel{
+        position:absolute;
+        font-size:11px;
+        font-weight:800;
+        letter-spacing:0.04em;
+        text-transform:uppercase;
+        color:var(--muted);
+        text-shadow:0 0 8px rgba(0,0,0,0.8);
+      }
+
+      .compassLabel-ca{
+        top:6px;
+        left:50%;
+        transform:translateX(-50%);
+      }
+
+      .compassLabel-joy{
+        bottom:10px;
+        right:18px;
+      }
+
+      .compassLabel-stress{
+        bottom:10px;
+        left:18px;
+      }
+
+      .emotionalFieldBox{
+        position:absolute;
+        right:16px;
+        top:50%;
+        transform:translateY(-50%);
+        min-width:190px;
+        padding:10px 12px;
+        border-radius:12px;
+        background:rgba(4,16,37,0.92);
+        border:1px solid rgba(0,209,255,0.22);
+        box-shadow:0 10px 30px rgba(0,0,0,0.65);
+        z-index:3;
+      }
+
+      .efTitle{
+        font-size:12px;
+        font-weight:900;
+        color:var(--accent);
+        letter-spacing:0.04em;
+        text-transform:uppercase;
+      }
+
+      .efLine{
+        margin-top:6px;
+        font-size:13px;
+        color:var(--muted);
+      }
+
+      .efLine span{
+        color:var(--text);
+        font-weight:800;
+      }
+
+      @media (max-width:1200px){
+        .emopulse3D{
+          margin-top:12px;
+        }
+
+        #compassContainer{
+          width:220px;
+          height:220px;
+        }
+
+        .emotionalFieldBox{
+          position:relative;
+          right:auto;
+          top:auto;
+          transform:none;
+          margin-top:12px;
+        }
+      }
+    </style>
+    <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+  </head>
   <body class="bg">
     <header class="topbar">
       <div class="brand">
@@ -39,11 +341,11 @@
         <div class="infoBlocks mt14">
           <div class="infoBlock">
             <div class="infoTitle">HOW IT WORKS</div>
-            <div class="infoText">Opanilite app<br />Camrart</div>
+            <div class="infoText">Open the app<br />Camera + AI</div>
           </div>
           <div class="infoBlock">
             <div class="infoTitle">ROADMAP</div>
-            <div class="infoText">Emotion Examinerator<br />Enabled Meditor<br />Emotion Mirror</div>
+            <div class="infoText">Emotion Examiner<br />Enabled Mediator<br />Emotion Mirror</div>
           </div>
           <div class="infoBlock">
             <div class="infoTitle">PRIVACY FIRST</div>
@@ -83,43 +385,37 @@
           </div>
         </div>
 
-        <!-- 🔥🔥🔥 PRIDĖTA: 3D EMOTIONAL COMPASS + AURA DRIFT + EMOTIONAL FIELD BOX -->
+        <!-- 3D Emotional Compass + Aura Drift Layer -->
         <div class="emopulse3D">
-          <!-- Aura Drift Background -->
-          <canvas id="auraDrift" width="800" height="600" class="auraDriftCanvas"></canvas>
+          <canvas id="auraDrift" class="auraDriftCanvas"></canvas>
 
-          <!-- 3D Compass Container -->
           <div id="compassContainer">
             <canvas id="compass3D"></canvas>
-
-            <!-- Compass Labels -->
             <div class="compassLabel compassLabel-ca">Ca</div>
             <div class="compassLabel compassLabel-joy">Joy</div>
             <div class="compassLabel compassLabel-stress">Stress</div>
           </div>
 
-          <!-- Emotional Field Output -->
           <div class="emotionalFieldBox">
             <div class="efTitle">Emotional Aura</div>
-            <div class="efLine">Stability: <span id="efStability">—</span></div>
-            <div class="efLine">Intensity: <span id="efIntensity">—</span></div>
-            <div class="efLine">Score: <span id="efScore">—</span></div>
+            <div class="efLine">Stability: <span id="efStability">12° toward</span></div>
+            <div class="efLine">Intensity: <span id="efIntensity">Low</span></div>
+            <div class="efLine">Score: <span id="efScore">76/100</span></div>
           </div>
         </div>
-        <!-- 🔥🔥🔥 PRIDĖTA PABAIGA -->
 
         <div class="metrics mt14">
           <div class="metric">
             <div class="metricLabel">Emopulse Score</div>
-            <div id="score" class="metricValue">—</div>
+            <div id="score" class="metricValue">76</div>
           </div>
           <div class="metric">
             <div class="metricLabel">Energy</div>
-            <div id="energy" class="metricValueSmall">—</div>
+            <div id="energy" class="metricValueSmall">0.66 rising</div>
           </div>
           <div class="metric">
             <div class="metricLabel">Stress Risk</div>
-            <div id="stress" class="metricValueSmall">—</div>
+            <div id="stress" class="metricValueSmall">0.21 low</div>
           </div>
         </div>
 
@@ -137,9 +433,9 @@
         </div>
 
         <div class="miniTitle mt12">Emotional Aura</div>
-        <div class="miniLine">Stability: <span id="stability" class="miniStrong">—</span></div>
-        <div class="miniLine">Intensity: <span id="intensity" class="miniStrong">—</span></div>
-        <div class="miniLine">Score: <span id="score2" class="miniStrong">—</span></div>
+        <div class="miniLine">Stability: <span id="stability" class="miniStrong">12° toward</span></div>
+        <div class="miniLine">Intensity: <span id="intensity" class="miniStrong">Low</span></div>
+        <div class="miniLine">Score: <span id="score2" class="miniStrong">76/100</span></div>
 
         <div class="row mt12">
           <button id="tryLive" class="btn btnPrimary">Try it live</button>
@@ -167,6 +463,275 @@
       </div>
     </footer>
 
-    <script type="module" src="/src/live.js"></script>
+    <script>
+      // Kamera (demo: tik bando gauti stream, be analizės)
+      const cam = document.getElementById('cam');
+      const camStatus = document.getElementById('camStatus');
+
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: true })
+          .then(stream => {
+            cam.srcObject = stream;
+            camStatus.textContent = 'Camera active';
+          })
+          .catch(() => {
+            camStatus.textContent = 'Camera blocked or unavailable';
+          });
+      } else {
+        camStatus.textContent = 'Camera not supported';
+      }
+
+      // AI interpretacijos demo
+      const analyzeBtn = document.getElementById('analyzeBtn');
+      const userText = document.getElementById('userText');
+      const aiText = document.getElementById('aiText');
+      const aiTags = document.getElementById('aiTags');
+
+      const interpretations = [
+        {
+          text: 'Calm focused energy. You are productive, but your system is asking for micro-rest.',
+          tags: ['#calm', '#focused', '#sustainable', '#Sunshine with tranquility']
+        },
+        {
+          text: 'High cognitive load with low emotional turbulence. Great for deep work, but watch your body.',
+          tags: ['#deepwork', '#stable', '#mindful']
+        },
+        {
+          text: 'Soft tension under the surface. You are holding a lot together—remember to exhale.',
+          tags: ['#tension', '#self-awareness', '#release']
+        }
+      ];
+
+      analyzeBtn.addEventListener('click', () => {
+        const pick = interpretations[Math.floor(Math.random() * interpretations.length)];
+        aiText.textContent = pick.text;
+        aiTags.textContent = pick.tags.join(' ');
+      });
+
+      // Timeline ir pulse demo
+      function drawTimeline() {
+        const canvas = document.getElementById('timeline');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const w = canvas.width;
+        const h = canvas.height;
+
+        ctx.clearRect(0,0,w,h);
+        ctx.fillStyle = 'rgba(0,0,0,0.3)';
+        ctx.fillRect(0,0,w,h);
+
+        ctx.strokeStyle = 'rgba(0,209,255,0.8)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        const points = 40;
+        for (let i=0;i<=points;i++){
+          const x = (i/points)*w;
+          const y = h/2 + Math.sin(i*0.4 + Date.now()/600)*h*0.18;
+          if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+        }
+        ctx.stroke();
+      }
+
+      function drawPulse() {
+        const canvas = document.getElementById('pulse');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const w = canvas.width;
+        const h = canvas.height;
+
+        ctx.clearRect(0,0,w,h);
+        ctx.fillStyle = 'rgba(0,0,0,0.3)';
+        ctx.fillRect(0,0,w,h);
+
+        ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        const points = 30;
+        for (let i=0;i<=points;i++){
+          const x = (i/points)*w;
+          const y = h/2 + Math.sin(i*0.9 + Date.now()/300)*h*0.3;
+          if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+        }
+        ctx.stroke();
+      }
+
+      // Aura canvas (kairėje)
+      function drawAura() {
+        const canvas = document.getElementById('auraCanvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const w = canvas.width;
+        const h = canvas.height;
+
+        ctx.clearRect(0,0,w,h);
+
+        const grad = ctx.createRadialGradient(w/2,h/2,10,w/2,h/2,w/2);
+        grad.addColorStop(0,'rgba(0,209,255,0.9)');
+        grad.addColorStop(0.4,'rgba(107,140,255,0.6)');
+        grad.addColorStop(1,'rgba(0,0,0,0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(w/2,h/2,w/2,0,Math.PI*2);
+        ctx.fill();
+      }
+
+      // 3D kompasas + aura drift (Three.js)
+      let compassScene, compassCamera, compassRenderer, compassMesh, compassArrow;
+      function initCompass() {
+        const canvas = document.getElementById('compass3D');
+        if (!canvas) return;
+
+        compassScene = new THREE.Scene();
+        compassScene.background = null;
+
+        const width = canvas.clientWidth || 260;
+        const height = canvas.clientHeight || 260;
+
+        compassCamera = new THREE.PerspectiveCamera(35, width/height, 0.1, 100);
+        compassCamera.position.set(0, 1.4, 3);
+
+        compassRenderer = new THREE.WebGLRenderer({ canvas, alpha:true, antialias:true });
+        compassRenderer.setSize(width, height);
+        compassRenderer.setPixelRatio(window.devicePixelRatio || 1);
+
+        const light = new THREE.PointLight(0xffffff, 1.2);
+        light.position.set(2,3,4);
+        compassScene.add(light);
+        const amb = new THREE.AmbientLight(0x88aaff, 0.6);
+        compassScene.add(amb);
+
+        const baseGeo = new THREE.CylinderGeometry(1.1,1.1,0.18,64);
+        const baseMat = new THREE.MeshStandardMaterial({
+          color:0x061020,
+          metalness:0.6,
+          roughness:0.35,
+          emissive:0x0a1a33,
+          emissiveIntensity:0.6
+        });
+        compassMesh = new THREE.Mesh(baseGeo, baseMat);
+        compassMesh.rotation.x = -Math.PI/2;
+        compassScene.add(compassMesh);
+
+        const arrowGeo = new THREE.ConeGeometry(0.12,0.7,32);
+        const arrowMat = new THREE.MeshStandardMaterial({
+          color:0x00d1ff,
+          emissive:0x00d1ff,
+          emissiveIntensity:0.8,
+          metalness:0.4,
+          roughness:0.2
+        });
+        compassArrow = new THREE.Mesh(arrowGeo, arrowMat);
+        compassArrow.position.set(0,0.4,0);
+        compassScene.add(compassArrow);
+
+        const ringGeo = new THREE.RingGeometry(0.9,1.05,64);
+        const ringMat = new THREE.MeshBasicMaterial({
+          color:0x6b8cff,
+          side:THREE.DoubleSide,
+          transparent:true,
+          opacity:0.5
+        });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        ring.rotation.x = -Math.PI/2;
+        compassScene.add(ring);
+
+        window.addEventListener('resize', () => {
+          const w = canvas.clientWidth || 260;
+          const h = canvas.clientHeight || 260;
+          compassCamera.aspect = w/h;
+          compassCamera.updateProjectionMatrix();
+          compassRenderer.setSize(w,h);
+        });
+      }
+
+      function animateCompass() {
+        if (!compassRenderer) return;
+        requestAnimationFrame(animateCompass);
+
+        const t = Date.now()/1000;
+        compassMesh.rotation.z = t*0.15;
+        compassArrow.rotation.y = Math.sin(t*0.7)*0.6;
+        compassArrow.rotation.x = -Math.PI/2 + Math.cos(t*0.4)*0.15;
+
+        compassRenderer.render(compassScene, compassCamera);
+      }
+
+      // Aura drift (už kompaso)
+      function animateAuraDrift() {
+        const canvas = document.getElementById('auraDrift');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const w = canvas.width = canvas.clientWidth || 800;
+        const h = canvas.height = canvas.clientHeight || 400;
+
+        const t = Date.now()/1000;
+        ctx.clearRect(0,0,w,h);
+
+        for(let i=0;i<80;i++){
+          const angle = i/80 * Math.PI*2;
+          const radius = 80 + Math.sin(t*0.8 + i*0.3)*40;
+          const x = w/2 + Math.cos(angle)*radius;
+          const y = h/2 + Math.sin(angle)*radius*0.6;
+
+          const alpha = 0.3 + 0.3*Math.sin(t*1.2 + i*0.5);
+          ctx.fillStyle = `rgba(0,209,255,${alpha})`;
+          ctx.beginPath();
+          ctx.arc(x,y,4,0,Math.PI*2);
+          ctx.fill();
+        }
+
+        requestAnimationFrame(animateAuraDrift);
+      }
+
+      // Pseudo-emocinis atnaujinimas (kad viskas judėtų)
+      function updateEmotionalMetrics() {
+        const scoreEl = document.getElementById('score');
+        const score2El = document.getElementById('score2');
+        const energyEl = document.getElementById('energy');
+        const stressEl = document.getElementById('stress');
+        const efStability = document.getElementById('efStability');
+        const efIntensity = document.getElementById('efIntensity');
+        const efScore = document.getElementById('efScore');
+        const stabilityMini = document.getElementById('stability');
+        const intensityMini = document.getElementById('intensity');
+
+        const base = 70 + Math.sin(Date.now()/1500)*8;
+        const energy = 0.5 + 0.3*Math.sin(Date.now()/1000 + 1.2);
+        const stress = 0.2 + 0.1*Math.cos(Date.now()/1300 + 0.4);
+
+        const stabilityDeg = (10 + Math.sin(Date.now()/1600)*8).toFixed(1);
+
+        const intensityLabel = energy > 0.7 ? 'High' : energy > 0.55 ? 'Medium' : 'Low';
+        const stressLabel = stress > 0.28 ? 'moderate' : 'low';
+
+        const scoreText = `${Math.round(base)}/100`;
+        if(scoreEl) scoreEl.textContent = Math.round(base);
+        if(score2El) score2El.textContent = scoreText;
+        if(efScore) efScore.textContent = scoreText;
+        if(energyEl) energyEl.textContent = `${energy.toFixed(2)} rising`;
+        if(stressEl) stressEl.textContent = `${stress.toFixed(2)} ${stressLabel}`;
+        if(efStability) efStability.textContent = `${stabilityDeg}° toward`;
+        if(stabilityMini) stabilityMini.textContent = `${stabilityDeg}° toward`;
+        if(efIntensity) efIntensity.textContent = intensityLabel;
+        if(intensityMini) intensityMini.textContent = intensityLabel;
+
+        requestAnimationFrame(updateEmotionalMetrics);
+      }
+
+      function loop() {
+        drawTimeline();
+        drawPulse();
+        drawAura();
+        requestAnimationFrame(loop);
+      }
+
+      window.addEventListener('load', () => {
+        initCompass();
+        animateCompass();
+        animateAuraDrift();
+        loop();
+        updateEmotionalMetrics();
+      });
+    </script>
   </body>
 </html>
