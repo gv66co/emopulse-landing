@@ -1,6 +1,8 @@
 // /src/live.js
 
-import * as THREE from 'three';
+import { updateCompass3D } from './compass3d.js';
+
+// ---------- DOM ELEMENTAI ----------
 
 const camEl = document.getElementById('cam');
 const camStatus = document.getElementById('camStatus');
@@ -26,6 +28,8 @@ const pulseCanvas = document.getElementById('pulse');
 // ---------- CAMERA ----------
 
 async function initCamera() {
+  if (!camEl || !camStatus) return;
+
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
       video: { width: 520, height: 360 },
@@ -41,155 +45,13 @@ async function initCamera() {
   }
 }
 
-// ---------- 3D COSMIC COMPASS ----------
-
-function initCosmicCompass() {
-  const canvas = document.getElementById('auraCanvas');
-  const width = canvas.width;
-  const height = canvas.height;
-
-  const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x020617); // deep space
-
-  const camera = new THREE.PerspectiveCamera(35, width / height, 0.1, 100);
-  camera.position.z = 7;
-
-  const renderer = new THREE.WebGLRenderer({
-    canvas,
-    alpha: true,
-    antialias: true
-  });
-  renderer.setSize(width, height);
-  renderer.setPixelRatio(window.devicePixelRatio || 1);
-
-  const light = new THREE.PointLight(0xffffff, 1.3);
-  light.position.set(4, 6, 8);
-  scene.add(light);
-
-  const ambient = new THREE.AmbientLight(0xffffff, 0.35);
-  scene.add(ambient);
-
-  // Stars
-  const starGeo = new THREE.BufferGeometry();
-  const starCount = 400;
-  const positions = new Float32Array(starCount * 3);
-  for (let i = 0; i < starCount; i++) {
-    positions[i * 3 + 0] = (Math.random() - 0.5) * 20;
-    positions[i * 3 + 1] = (Math.random() - 0.5) * 20;
-    positions[i * 3 + 2] = (Math.random() - 0.5) * 20;
-  }
-  starGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-  const starMat = new THREE.PointsMaterial({
-    color: 0xffffff,
-    size: 0.04,
-    transparent: true,
-    opacity: 0.8
-  });
-  const stars = new THREE.Points(starGeo, starMat);
-  scene.add(stars);
-
-  // Compass core
-  const coreGeo = new THREE.SphereGeometry(1.1, 48, 48);
-  const coreMat = new THREE.MeshStandardMaterial({
-    color: 0x4f46e5,
-    emissive: 0x4f46e5,
-    emissiveIntensity: 0.6,
-    metalness: 0.5,
-    roughness: 0.2
-  });
-  const core = new THREE.Mesh(coreGeo, coreMat);
-  scene.add(core);
-
-  // Needle (emotional direction)
-  const needleGeo = new THREE.ConeGeometry(0.18, 1.6, 32);
-  const needleMat = new THREE.MeshStandardMaterial({
-    color: 0xff4b8b,
-    emissive: 0xff4b8b,
-    emissiveIntensity: 0.7,
-    metalness: 0.4,
-    roughness: 0.3
-  });
-  const needle = new THREE.Mesh(needleGeo, needleMat);
-  needle.position.y = 1.2;
-  needle.rotation.x = Math.PI;
-  scene.add(needle);
-
-  // Rings
-  function makeRing(inner, outer, tiltX, tiltY, color) {
-    const geo = new THREE.RingGeometry(inner, outer, 96);
-    const mat = new THREE.MeshBasicMaterial({
-      color,
-      transparent: true,
-      opacity: 0.45,
-      side: THREE.DoubleSide
-    });
-    const ring = new THREE.Mesh(geo, mat);
-    ring.rotation.x = tiltX;
-    ring.rotation.y = tiltY;
-    scene.add(ring);
-    return ring;
-  }
-
-  const ringOuter = makeRing(2.2, 2.8, Math.PI / 3, 0.2, 0x22d3ee);
-  const ringInner = makeRing(1.6, 2.0, -Math.PI / 4, -0.3, 0xa855f7);
-
-  let lastMetrics = {
-    energy: 0.5,
-    stress: 0.3,
-    score: 50
-  };
-
-  function updateFromMetrics(m) {
-    lastMetrics = m;
-
-    // Color blend based on emotion
-    const calm = new THREE.Color(0x22d3ee);
-    const active = new THREE.Color(0x22c55e);
-    const stressed = new THREE.Color(0xef4444);
-
-    const energyMix = calm.clone().lerp(active, m.energy);
-    const stressMix = energyMix.clone().lerp(stressed, m.stress);
-
-    core.material.color.copy(stressMix);
-    core.material.emissive.copy(stressMix.clone().multiplyScalar(0.7));
-
-    ringOuter.material.color.copy(energyMix);
-    ringInner.material.color.copy(stressMix);
-
-    // Needle tilt: more stress → labiau pakrypęs
-    const tilt = (m.stress - 0.5) * 0.8;
-    needle.rotation.z = tilt;
-  }
-
-  let t = 0;
-  function animate() {
-    requestAnimationFrame(animate);
-    t += 0.016;
-
-    stars.rotation.y += 0.0008;
-    stars.rotation.x += 0.0003;
-
-    core.rotation.y += 0.004 + lastMetrics.energy * 0.01;
-    core.rotation.x += 0.002;
-
-    ringOuter.rotation.z += 0.002 + lastMetrics.energy * 0.004;
-    ringInner.rotation.z -= 0.0015 + lastMetrics.stress * 0.003;
-
-    needle.rotation.y += 0.003;
-
-    renderer.render(scene, camera);
-  }
-
-  animate();
-
-  return updateFromMetrics;
+function hasCamera() {
+  return camEl && camEl.srcObject != null;
 }
 
-const updateCompassFromMetrics = initCosmicCompass();
+// ---------- EMOTION ENGINE ----------
 
-// ---------- EMOTION ENGINE (pseudo) ----------
-
-function analyzeEmotion(text, hasCamera) {
+function analyzeEmotion(text, cameraActive) {
   const t = (text || '').toLowerCase();
 
   let baseScore = 60;
@@ -214,7 +76,7 @@ function analyzeEmotion(text, hasCamera) {
     baseScore -= 8;
   }
 
-  if (hasCamera) {
+  if (cameraActive) {
     baseScore += 3;
     energy += 0.05;
   }
@@ -240,7 +102,7 @@ function analyzeEmotion(text, hasCamera) {
   if (energy > 0.6) tags.push('High energy');
   if (stress > 0.6) tags.push('High stress');
   if (stability > 0.6) tags.push('Stable field');
-  if (hasCamera) tags.push('Camera signal active');
+  if (cameraActive) tags.push('Camera signal active');
 
   return {
     score: baseScore,
@@ -255,8 +117,8 @@ function analyzeEmotion(text, hasCamera) {
 
 // ---------- TIMELINE & PULSE ----------
 
-const timelineCtx = timelineCanvas.getContext('2d');
-const pulseCtx = pulseCanvas.getContext('2d');
+const timelineCtx = timelineCanvas ? timelineCanvas.getContext('2d') : null;
+const pulseCtx = pulseCanvas ? pulseCanvas.getContext('2d') : null;
 const history = [];
 
 function pushHistory(m) {
@@ -270,6 +132,7 @@ function pushHistory(m) {
 }
 
 function drawTimeline() {
+  if (!timelineCanvas || !timelineCtx) return;
   const w = timelineCanvas.width;
   const h = timelineCanvas.height;
   timelineCtx.clearRect(0, 0, w, h);
@@ -312,6 +175,7 @@ function drawTimeline() {
 }
 
 function drawPulse(m) {
+  if (!pulseCanvas || !pulseCtx) return;
   const w = pulseCanvas.width;
   const h = pulseCanvas.height;
   pulseCtx.clearRect(0, 0, w, h);
@@ -332,20 +196,17 @@ function drawPulse(m) {
   pulseCtx.stroke();
 }
 
-// ---------- UI & SOUND ----------
+// ---------- SOUND ----------
 
 let soundOn = true;
 
-soundBtn.addEventListener('click', () => {
-  soundOn = !soundOn;
-  soundBtn.setAttribute('aria-pressed', soundOn ? 'true' : 'false');
-  soundBtn.textContent = soundOn ? 'Sound: On' : 'Sound: Off';
-});
-
-tryLiveBtn.addEventListener('click', () => {
-  userText.focus();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-});
+if (soundBtn) {
+  soundBtn.addEventListener('click', () => {
+    soundOn = !soundOn;
+    soundBtn.setAttribute('aria-pressed', soundOn ? 'true' : 'false');
+    soundBtn.textContent = soundOn ? 'Sound: On' : 'Sound: Off';
+  });
+}
 
 function speak(text) {
   if (!soundOn) return;
@@ -357,33 +218,39 @@ function speak(text) {
   window.speechSynthesis.speak(u);
 }
 
-function hasCamera() {
-  return camEl && camEl.srcObject != null;
+// ---------- TRY LIVE BUTTON ----------
+
+if (tryLiveBtn) {
+  tryLiveBtn.addEventListener('click', () => {
+    if (userText) userText.focus();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
 }
 
+// ---------- UI UPDATE ----------
+
 function updateUI(m) {
-  scoreEl.textContent = m.score;
-  score2El.textContent = m.score;
-  energyEl.textContent = Math.round(m.energy * 100) + '%';
-  stressEl.textContent = Math.round(m.stress * 100) + '%';
+  if (scoreEl) scoreEl.textContent = m.score;
+  if (score2El) score2El.textContent = m.score;
+  if (energyEl) energyEl.textContent = Math.round(m.energy * 100) + '%';
+  if (stressEl) stressEl.textContent = Math.round(m.stress * 100) + '%';
 
-  stabilityEl.textContent = Math.round(m.stability * 100) + '%';
-  intensityEl.textContent = Math.round(m.intensity * 100) + '%';
+  if (stabilityEl) stabilityEl.textContent = Math.round(m.stability * 100) + '%';
+  if (intensityEl) intensityEl.textContent = Math.round(m.intensity * 100) + '%';
 
-  aiTextEl.textContent = m.interpretation;
-  aiTagsEl.innerHTML = '';
-  m.tags.forEach((tag) => {
-    const span = document.createElement('span');
-    span.className = 'aiTag';
-    span.textContent = tag;
-    aiTagsEl.appendChild(span);
-  });
+  if (aiTextEl) aiTextEl.textContent = m.interpretation;
 
-  updateCompassFromMetrics({
-    score: m.score,
-    energy: m.energy,
-    stress: m.stress
-  });
+  if (aiTagsEl) {
+    aiTagsEl.innerHTML = '';
+    m.tags.forEach((tag) => {
+      const span = document.createElement('span');
+      span.className = 'aiTag';
+      span.textContent = tag;
+      aiTagsEl.appendChild(span);
+    });
+  }
+
+  updateCompass3D(m);
 
   pushHistory(m);
   drawTimeline();
@@ -392,13 +259,15 @@ function updateUI(m) {
   speak(m.interpretation);
 }
 
-analyzeBtn.addEventListener('click', () => {
-  const text = userTextEl.value;
-  const metrics = analyzeEmotion(text);
-  updateUI(metrics);
-  updateCompass3D(metrics); // ← PRIDĖTA
-});
+// ---------- ANALYZE BUTTON ----------
 
+if (analyzeBtn) {
+  analyzeBtn.addEventListener('click', () => {
+    const text = userText ? userText.value : '';
+    const metrics = analyzeEmotion(text, hasCamera());
+    updateUI(metrics);
+  });
+}
 
 // ---------- INIT ----------
 
@@ -410,113 +279,4 @@ drawPulse({
   stress: 0.3,
   stability: 0.7,
   intensity: 0.4
-});
-
-// ===============================
-// 3D COMPASS — BLOCK 5.1
-// SCENE + CAMERA + RENDERER SETUP
-// ===============================
-
-import * as THREE from 'three';
-
-let scene, camera, renderer;
-let canvas;
-
-export function initCompass3D() {
-  canvas = document.getElementById('compass3d');
-
-  if (!canvas) {
-    console.error("Canvas #compass3d not found");
-    return;
-  }
-
-  // Scene
-  scene = new THREE.Scene();
-  scene.background = null;
-
-  // Camera
-  camera = new THREE.PerspectiveCamera(
-    45,
-    canvas.clientWidth / canvas.clientHeight,
-    0.1,
-    1000
-  );
-  camera.position.set(0, 0, 3.2);
-
-  // Renderer
-  renderer = new THREE.WebGLRenderer({
-    canvas: canvas,
-    alpha: true,
-    antialias: true
-  });
-
-  renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
-
-  window.addEventListener('resize', resizeCompass3D);
-
-  animateCompass3D();
-}
-
-function resizeCompass3D() {
-  if (!canvas) return;
-
-  camera.aspect = canvas.clientWidth / canvas.clientHeight;
-  camera.updateProjectionMatrix();
-
-  renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
-}
-
-function animateCompass3D() {
-  requestAnimationFrame(animateCompass3D);
-
-  // čia vėliau įdėsime orbitų, sferos ir taškų animacijas
-
-  renderer.render(scene, camera);
-}
-
-// ===============================
-// CONNECT LIVE.JS → 3D COMPASS
-// ===============================
-
-import { updateCompassNodes, updateCompassGlow } from './compass3d.js';
-
-function updateCompass3D(metrics) {
-  if (!metrics) return;
-
-  // Mazgų orbitos pagal energiją / stresą
-  updateCompassNodes({
-    energy: metrics.energy,
-    stress: metrics.stress
-  });
-
-  // Glow spalva pagal emocinį toną
-  updateCompassGlow(metrics);
-}
-
-import { updateCompassDirection } from './compass3d.js';
-
-function updateCompass3D(metrics) {
-  if (!metrics) return;
-
-  updateCompassNodes({
-    energy: metrics.energy,
-    stress: metrics.stress
-  });
-
-  updateCompassGlow(metrics);
-
-  updateCompassDirection({
-    energy: metrics.energy,
-    stress: metrics.stress
-  });
-}
-
-import { updateCompass3D } from './compass3d.js';
-
-analyzeBtn.addEventListener('click', () => {
-  const text = userTextEl.value;
-  const metrics = analyzeEmotion(text);
-  updateUI(metrics);
-  updateCompass3D(metrics);
 });
