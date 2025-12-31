@@ -2,248 +2,151 @@
 <html lang="lt">
   <head>
     <meta charset="UTF-8" />
-    <title>Emopulse — Live model</title>
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <style>
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-      body.bg {
-        min-height: 100vh;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-          sans-serif;
-        color: #e5e7eb;
-        background: radial-gradient(circle at top, #1e293b 0, #020617 55%, #000 100%);
-        display: flex;
-        flex-direction: column;
-      }
-      .topbar {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 16px 32px;
-      }
-      .brand {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-      .mark {
-        width: 28px;
-        height: 28px;
-        border-radius: 999px;
-        background: radial-gradient(circle at 30% 30%, #38bdf8, #4f46e5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #0b1120;
-        font-weight: 700;
-        font-size: 16px;
-      }
-      .brandName {
-        font-weight: 600;
-        letter-spacing: 0.03em;
-      }
-      .hero {
-        text-align: center;
-        max-width: 520px;
-      }
-      .heroTitle {
-        font-size: 22px;
-        font-weight: 600;
-      }
-      .heroSub {
-        margin-top: 6px;
-        font-size: 13px;
-        color: #9ca3af;
-      }
-      .nav {
-        display: flex;
-        gap: 16px;
-        font-size: 13px;
-      }
-      .navLink {
-        color: #9ca3af;
-        text-decoration: none;
-        padding-bottom: 2px;
-        border-bottom: 1px solid transparent;
-      }
-      .navLinkActive {
-        color: #e5e7eb;
-        border-color: #6366f1;
-      }
+    <title>Emopulse — Live model</title>
 
-      main.grid {
-        flex: 1;
-        display: grid;
-        grid-template-columns: 320px minmax(0, 1.2fr) 320px;
-        gap: 16px;
-        padding: 0 24px 24px;
-      }
-      .panel {
-        background: rgba(15, 23, 42, 0.85);
-        border-radius: 18px;
-        border: 1px solid rgba(148, 163, 184, 0.25);
-        padding: 14px 16px;
-        backdrop-filter: blur(18px);
-        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.9);
-      }
-      .panelCenter {
-        padding: 16px 18px;
-      }
-      .panelTitle {
-        font-size: 13px;
-        font-weight: 600;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: #9ca3af;
-        margin-bottom: 10px;
-      }
-      .aura {
-        width: 100%;
-        border-radius: 18px;
-        background: radial-gradient(circle at top, #0f172a, #020617);
-        border: 1px solid rgba(148, 163, 184, 0.3);
-      }
-      .infoBlocks {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 10px;
-        font-size: 11px;
-      }
-      .infoBlock {
-        padding: 8px 10px;
-        border-radius: 10px;
-        background: rgba(15, 23, 42, 0.9);
-        border: 1px solid rgba(148, 163, 184, 0.3);
-      }
-      .infoTitle {
-        font-size: 10px;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        color: #9ca3af;
-        margin-bottom: 4px;
-      }
-      .infoText {
-        color: #e5e7eb;
-        line-height: 1.3;
-      }
+    <!-- FIXED: correct CSS path -->
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
 
-      .centerTop {
-        display: flex;
-        gap: 14px;
-      }
-      .videoWrap {
-        position: relative;
-        width: 520px;
-        max-width: 100%;
-        border-radius: 18px;
-        overflow: hidden;
-        border: 1px solid rgba(148, 163, 184, 0.4);
-        background: radial-gradient(circle at top, #020617, #000);
-      }
-      #cam {
-        width: 100%;
-        display: block;
-        filter: saturate(1.1) contrast(1.05);
-      }
-      #overlay {
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
-      }
-      .camStatus {
-        position: absolute;
-        left: 12px;
-        bottom: 10px;
-        font-size: 11px;
-        padding: 4px 8px;
-        border-radius: 999px;
-        background: rgba(15, 23, 42, 0.8);
-        border: 1px solid rgba(148, 163, 184, 0.5);
-        color: #e5e7eb;
-      }
-      .camStatusActive {
-        border-color: #22c55e;
-        color: #bbf7d0;
-      }
-      .camStatusError {
-        border-color: #ef4444;
-        color: #fecaca;
-      }
+  <body class="bg">
+    <header class="topbar">
+      <div class="brand">
+        <div class="mark">S</div>
+        <div class="brandText">
+          <div class="brandName">Emopulse</div>
+        </div>
+      </div>
 
-      .forecast {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-      }
-      .forecastTitle {
-        font-size: 14px;
-        font-weight: 600;
-        margin-bottom: 8px;
-      }
-      .input {
-        width: 100%;
-        padding: 9px 10px;
-        border-radius: 999px;
-        border: 1px solid rgba(148, 163, 184, 0.6);
-        background: rgba(15, 23, 42, 0.9);
-        color: #e5e7eb;
-        font-size: 13px;
-        outline: none;
-      }
-      .input::placeholder {
-        color: #6b7280;
-      }
-      .row {
-        display: flex;
-        gap: 8px;
-        align-items: center;
-      }
-      .btn {
-        border-radius: 999px;
-        border: none;
-        padding: 7px 14px;
-        font-size: 12px;
-        cursor: pointer;
-        white-space: nowrap;
-      }
-      .btnPrimary {
-        background: linear-gradient(135deg, #4f46e5, #22d3ee);
-        color: #0b1120;
-        font-weight: 600;
-      }
-      .btnGhost {
-        background: transparent;
-        border: 1px solid rgba(148, 163, 184, 0.6);
-        color: #e5e7eb;
-      }
-      .aiBox {
-        margin-top: 10px;
-        padding: 10px 12px;
-        border-radius: 14px;
-        background: rgba(15, 23, 42, 0.9);
-        border: 1px solid rgba(148, 163, 184, 0.4);
-      }
-      .aiTitle {
-        font-size: 11px;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        color: #9ca3af;
-        margin-bottom: 4px;
-      }
-      .aiText {
-        font-size: 13px;
-        color: #e5e7eb;
-      }
-      .aiTags {
-        margin-top: 6px;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
-      }
-      .aiTag {
-        font-size: 10px;
-        padding
+      <div class="hero">
+        <div class="heroTitle">Understand your emotional field in real time</div>
+        <div class="heroSub">
+          Type anything you're feeling or thinking. Using our camera and AI analyzes.
+        </div>
+      </div>
+
+      <nav class="nav">
+        <a class="navLink navLinkActive" href="/index.html">Live model</a>
+        <a class="navLink" href="/investors.html">Investors</a>
+      </nav>
+    </header>
+
+    <main class="grid">
+      <aside class="panel">
+        <div class="panelTitle">Emotional Aura</div>
+        <canvas id="auraCanvas" width="340" height="340" class="aura"></canvas>
+
+        <div class="row mt12">
+          <button id="downloadPitchLeft" class="btn btnPrimary">Download Pitchdeck</button>
+        </div>
+
+        <div class="infoBlocks mt14">
+          <div class="infoBlock">
+            <div class="infoTitle">HOW IT WORKS</div>
+            <div class="infoText">Opanilite app<br />Camrart</div>
+          </div>
+          <div class="infoBlock">
+            <div class="infoTitle">ROADMAP</div>
+            <div class="infoText">Emotion Examinerator<br />Enabled Meditor<br />Emotion Mirror</div>
+          </div>
+          <div class="infoBlock">
+            <div class="infoTitle">PRIVACY FIRST</div>
+            <div class="infoText">No data stored<br />All processing on-device</div>
+          </div>
+        </div>
+      </aside>
+
+      <section class="panel panelCenter">
+        <div class="centerTop">
+          <div class="videoWrap">
+            <video id="cam" autoplay playsinline muted></video>
+            <canvas id="overlay" width="520" height="360"></canvas>
+            <div id="camStatus" class="camStatus">Initializing camera…</div>
+          </div>
+
+          <div class="forecast">
+            <div class="forecastTitle">Emotional Forecast</div>
+
+            <input
+              id="userText"
+              class="input"
+              placeholder="Type anything you're feeling or thinking ..."
+              value="i am getting a lot done but feeling a bit tired"
+            />
+
+            <div class="row mt10">
+              <button id="analyzeBtn" class="btn btnPrimary">Analyze my emotional field</button>
+              <button id="soundBtn" class="btn btnGhost" aria-pressed="true">Sound: On</button>
+            </div>
+
+            <div class="aiBox mt12">
+              <div class="aiTitle">AI Interpretation</div>
+              <div id="aiText" class="aiText">—</div>
+              <div id="aiTags" class="aiTags"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="metrics mt14">
+          <div class="metric">
+            <div class="metricLabel">Emopulse Score</div>
+            <div id="score" class="metricValue">—</div>
+          </div>
+          <div class="metric">
+            <div class="metricLabel">Energy</div>
+            <div id="energy" class="metricValueSmall">—</div>
+          </div>
+          <div class="metric">
+            <div class="metricLabel">Stress Risk</div>
+            <div id="stress" class="metricValueSmall">—</div>
+          </div>
+        </div>
+
+        <div class="charts mt12">
+          <canvas id="timeline" width="760" height="140" class="chart"></canvas>
+          <canvas id="pulse" width="260" height="140" class="chart"></canvas>
+        </div>
+      </section>
+
+      <aside class="panel">
+        <div class="panelTitle">WHY EMOPULSE</div>
+        <div class="bullets">
+          <div class="bullet">Real-time emotion awareness using only your camera</div>
+          <div class="bullet">Privacy-first architecture: no data stored, all processing on-device</div>
+        </div>
+
+        <div class="miniTitle mt12">Emotional Aura</div>
+        <div class="miniLine">Stability: <span id="stability" class="miniStrong">—</span></div>
+        <div class="miniLine">Intensity: <span id="intensity" class="miniStrong">—</span></div>
+        <div class="miniLine">Score: <span id="score2" class="miniStrong">—</span></div>
+
+        <div class="row mt12">
+          <button id="tryLive" class="btn btnPrimary">Try it live</button>
+          <button id="downloadPitchRight" class="btn btnGhost">Download Pitchdeck</button>
+        </div>
+
+        <div class="footerMini mt12">
+          <div>Emo1 2024</div>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="footer">
+      <div class="contact">
+        <div class="contactTitle">Contact</div>
+        <input id="name" class="input" placeholder="Your Name" />
+        <input id="email" class="input mt8" placeholder="Your Email" />
+        <textarea id="message" class="input mt8" rows="2" placeholder="Your Message"></textarea>
+        <button id="send" class="btn btnPrimary mt10">Send message</button>
+      </div>
+
+      <div class="legal">
+        <div>© 2026 emo1 (Emopulse). All rights reserved.</div>
+        <div class="legalSub">Real-time emotion awareness for real people.</div>
+      </div>
+    </footer>
+
+    <!-- FIXED: correct Vite module script -->
+    <script type="module" src="/src/live.js"></script>
+  </body>
+</html>
