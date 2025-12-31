@@ -393,10 +393,12 @@ function updateUI(m) {
 }
 
 analyzeBtn.addEventListener('click', () => {
-  const text = userText.value || '';
-  const metrics = analyzeEmotion(text, hasCamera());
+  const text = userTextEl.value;
+  const metrics = analyzeEmotion(text);
   updateUI(metrics);
+  updateCompass3D(metrics); // ← PRIDĖTA
 });
+
 
 // ---------- INIT ----------
 
