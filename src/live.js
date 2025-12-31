@@ -1,4 +1,4 @@
-import { initCompass, updateCompass3D } from './compass3d.js';
+import { initCompass, updateCompass3D } from './compas3d.js';
 
 const camEl = document.getElementById('cam');
 const camStatus = document.getElementById('camStatus');
