@@ -3,243 +3,144 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Emopulse — Live model</title>
+  <title>Emopulse — Live model (sutvarkyta)</title>
 
-  <!-- Minimal stiliai, kad atitiktų foto dizainą -->
   <style>
     :root{
-      --bg:#071028;
-      --card:#071827;
-      --muted:#9fb3c8;
-      --text:#e6f7ff;
-      --accent:#00d1ff;
-      --accent2:#6b8cff;
-      --glass:rgba(255,255,255,0.03);
+      --bg:#071028; --muted:#9fb3c8; --text:#e6f7ff; --accent:#00d1ff; --accent2:#6b8cff;
     }
-    *{box-sizing:border-box}
-    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(180deg,#041025,#071028);color:var(--text)}
+    *{box-sizing:border-box} html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(180deg,#041025,#071028);color:var(--text)}
     .wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:28px}
-    .card{
-      width:980px;
-      max-width:96vw;
-      border-radius:18px;
-      background:linear-gradient(180deg, rgba(255,255,255,0.02), var(--glass));
-      border:1px solid rgba(255,255,255,0.06);
-      box-shadow:0 20px 60px rgba(0,0,0,0.6);
-      padding:22px;
-      display:grid;
-      grid-template-columns: 1fr 420px;
-      gap:20px;
-      align-items:start;
-    }
+    .card{width:980px;max-width:96vw;border-radius:14px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);box-shadow:0 20px 50px rgba(0,0,0,0.6);padding:18px;display:grid;grid-template-columns:1fr 340px;gap:18px}
+    .leftTop{display:flex;flex-direction:column;gap:10px}
+    .title{font-weight:800;font-size:18px}
+    .subtitle{color:var(--muted);font-size:13px}
+    .inputRow{display:flex;gap:10px;margin-top:8px}
+    .textInput{flex:1;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:rgba(0,0,0,0.12);color:var(--text)}
+    .btn{padding:10px 12px;border-radius:10px;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#001;border:none;font-weight:800;cursor:pointer}
 
-    /* Left column: intro + input + analyze */
-    .left{
-      padding-right:8px;
-    }
-    .brand{display:flex;gap:12px;align-items:center;margin-bottom:6px}
-    .mark{width:44px;height:44px;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--accent2));display:grid;place-items:center;color:#001;font-weight:800}
-    .title{font-size:20px;font-weight:800}
-    .subtitle{color:var(--muted);font-size:13px;margin-top:6px}
+    /* visual area */
+    .visualWrap{grid-column:1 / span 2;display:flex;justify-content:center;margin-top:8px}
+    .visual{width:560px;height:520px;border-radius:14px;background:rgba(0,0,0,0.12);position:relative;overflow:hidden;border:1px solid rgba(255,255,255,0.03)}
+    #auraCanvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
+    #camVideo{position:absolute;left:12px;top:12px;width:220px;height:140px;border-radius:10px;object-fit:cover;transform:scaleX(-1);z-index:3;border:1px solid rgba(255,255,255,0.04)}
+    #compassCanvas{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:320px;height:320px;border-radius:999px;z-index:4}
 
-    .inputRow{margin-top:14px;display:flex;gap:10px;align-items:center}
-    .textInput{flex:1;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:rgba(0,0,0,0.18);color:var(--text);outline:none}
-    .btn{padding:10px 14px;border-radius:10px;border:none;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#001;font-weight:800;cursor:pointer}
-
-    /* Center column: big visual area */
-    .center{
-      grid-column:1 / span 2;
-      display:flex;
-      gap:18px;
-      align-items:flex-start;
-      justify-content:center;
-      margin-top:8px;
-    }
-
-    .visual{
-      width:520px;
-      height:520px;
-      border-radius:16px;
-      background:radial-gradient(400px 300px at 50% 20%, rgba(0,209,255,0.06), transparent 40%), rgba(0,0,0,0.12);
-      border:1px solid rgba(255,255,255,0.04);
-      position:relative;
-      overflow:hidden;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-    }
-
-    /* Compass container */
-    #compass3d{
-      width:320px;
-      height:320px;
-      border-radius:999px;
-      background:transparent;
-      z-index:2;
-    }
-
-    /* Aura canvas sits behind compass */
-    #auraCanvas{
-      position:absolute;
-      inset:0;
-      width:100%;
-      height:100%;
-      z-index:1;
-      pointer-events:none;
-      opacity:0.85;
-    }
-
-    /* Right panel inside card (metrics, signature, mood map, timeline) */
-    .right{
-      width:360px;
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-    }
-
-    .metricCard{
-      border-radius:12px;
-      padding:12px;
-      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.12));
-      border:1px solid rgba(255,255,255,0.04);
-    }
-    .metricTitle{font-weight:900;font-size:12px;color:var(--accent);text-transform:uppercase}
+    /* right column */
+    .right{display:flex;flex-direction:column;gap:12px}
+    .cardSmall{padding:12px;border-radius:10px;background:rgba(0,0,0,0.12);border:1px solid rgba(255,255,255,0.03)}
+    .metricTitle{font-weight:900;color:var(--accent);font-size:12px;text-transform:uppercase}
     .metricValue{font-weight:900;font-size:20px;margin-top:8px}
-
-    .signature{margin-top:6px;color:var(--muted);font-size:13px}
-    .hashtags{margin-top:8px;color:var(--accent);font-size:12px}
-
+    .signature{color:var(--muted);margin-top:6px}
+    .hashtags{color:var(--accent);margin-top:8px;font-size:12px}
     .moodMap{display:flex;gap:8px;margin-top:8px}
-    .moodItem{padding:8px 10px;border-radius:10px;background:rgba(255,255,255,0.02);font-weight:800;font-size:13px;color:var(--muted)}
+    .moodItem{padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.02);font-weight:800;color:var(--muted);font-size:13px}
+    #timelineSmall{width:100%;height:70px;border-radius:8px;background:rgba(0,0,0,0.08);display:block}
 
-    .timeline{
-      margin-top:8px;
-      border-radius:10px;
-      overflow:hidden;
-      border:1px solid rgba(255,255,255,0.04);
-      background:rgba(0,0,0,0.12);
-    }
-    #timelineCanvas{width:100%;height:80px;display:block}
-
-    /* small footer row inside right column */
-    .smallRow{display:flex;justify-content:space-between;align-items:center;margin-top:8px;color:var(--muted);font-size:13px}
-
-    /* responsive */
     @media (max-width:980px){
-      .card{grid-template-columns:1fr; padding:16px}
-      .center{flex-direction:column;gap:12px}
-      .right{width:100%}
+      .card{grid-template-columns:1fr; padding:12px}
       .visual{width:100%;height:420px}
+      #camVideo{display:none}
     }
   </style>
 
-  <!-- Three.js CDN -->
+  <!-- Three.js -->
   <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
 </head>
 <body>
   <div class="wrap">
-    <div class="card" role="main" aria-label="Emopulse live model">
-      <div class="left">
-        <div class="brand">
-          <div class="mark">S</div>
-          <div>
-            <div class="title">Understand your emotional field in real time</div>
-            <div class="subtitle">Type anything you're feeling or thinking. Using our camera and AI analyzes.</div>
-          </div>
-        </div>
+    <div class="card" role="main">
+      <div class="leftTop">
+        <div class="title">Understand your emotional field in real time</div>
+        <div class="subtitle">Type anything you're feeling or thinking. Using our camera and AI analyzes.</div>
 
         <div class="inputRow">
           <input id="userText" class="textInput" placeholder="Type anything you're feeling or thinking ..." value="i am getting a lot done but feeling a bit tired" />
           <button id="analyzeBtn" class="btn">Analyze</button>
         </div>
-
-        <div style="margin-top:12px;color:var(--muted);font-size:13px">
-          Camera-based, privacy-first analysis. All processing on-device.
-        </div>
       </div>
 
-      <!-- center visual area -->
-      <div class="center">
-        <div class="visual" aria-hidden="false">
-          <canvas id="auraCanvas"></canvas>
-          <canvas id="compass3d"></canvas>
-        </div>
-      </div>
-
-      <!-- right column -->
       <div class="right">
-        <div class="metricCard" id="scoreCard">
+        <div class="cardSmall">
           <div class="metricTitle">Emopulse Score</div>
-          <div id="scoreValue" class="metricValue">—</div>
-          <div class="smallRow">
+          <div id="scoreVal" class="metricValue">—</div>
+          <div style="display:flex;justify-content:space-between;margin-top:8px;color:var(--muted);font-size:13px">
             <div>Energy: <strong id="energyVal">—</strong></div>
-            <div>Stress risk: <strong id="stressVal">—</strong></div>
+            <div>Stress: <strong id="stressVal">—</strong></div>
           </div>
         </div>
 
-        <div class="metricCard">
+        <div class="cardSmall">
           <div class="metricTitle">Emotional signature</div>
-          <div class="signature" id="signatureText">—</div>
-          <div class="hashtags" id="hashtags">—</div>
+          <div id="signatureText" class="signature">—</div>
+          <div id="hashtags" class="hashtags">—</div>
         </div>
 
-        <div class="metricCard">
+        <div class="cardSmall">
           <div class="metricTitle">Mood map</div>
-          <div class="moodMap" id="moodMap">
+          <div class="moodMap">
             <div class="moodItem">Positive</div>
             <div class="moodItem">Euphoric</div>
             <div class="moodItem">Intense</div>
           </div>
         </div>
 
-        <div class="metricCard timeline">
+        <div class="cardSmall">
           <div class="metricTitle">Emotional timeline</div>
-          <canvas id="timelineCanvas"></canvas>
+          <canvas id="timelineSmall"></canvas>
+        </div>
+      </div>
+
+      <div class="visualWrap">
+        <div class="visual" aria-hidden="false">
+          <canvas id="auraCanvas"></canvas>
+          <video id="camVideo" autoplay playsinline muted></video>
+          <canvas id="compassCanvas" width="320" height="320"></canvas>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Inline JS: Three.js compass + aura + simple demo data -->
   <script>
-    // ---------- small helper: clamp ----------
-    const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+    // --- Camera preview (visible small video) ---
+    const camVideo = document.getElementById('camVideo');
+    const camStatusLog = (m)=>console.log('[cam]',m);
 
-    // ---------- Aura background (subtle particles) ----------
-    (function initAura(){
+    async function startCamera(){
+      try{
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
+        camVideo.srcObject = stream;
+        camStatusLog('camera active');
+      }catch(e){
+        camStatusLog('camera blocked or unavailable');
+      }
+    }
+    startCamera();
+
+    // --- Aura background (subtle particles) ---
+    (function(){
       const canvas = document.getElementById('auraCanvas');
       const ctx = canvas.getContext('2d');
-
+      let particles = [];
       function resize(){
         canvas.width = canvas.clientWidth;
         canvas.height = canvas.clientHeight;
+        particles = [];
+        for(let i=0;i<50;i++){
+          particles.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:2+Math.random()*4, vx:(Math.random()-0.5)*0.3, vy:(Math.random()-0.5)*0.3, hue:190+Math.random()*60});
+        }
       }
       window.addEventListener('resize', resize);
       resize();
-
-      const particles = [];
-      for(let i=0;i<60;i++){
-        particles.push({
-          x: Math.random()*canvas.width,
-          y: Math.random()*canvas.height,
-          r: 2 + Math.random()*4,
-          vx: (Math.random()-0.5)*0.2,
-          vy: (Math.random()-0.5)*0.2,
-          hue: 190 + Math.random()*60
-        });
-      }
-
       function draw(){
         ctx.clearRect(0,0,canvas.width,canvas.height);
-        // subtle radial vignette
-        const g = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 10, canvas.width/2, canvas.height/2, Math.max(canvas.width, canvas.height)/1.2);
-        g.addColorStop(0, 'rgba(0,209,255,0.06)');
-        g.addColorStop(0.6, 'rgba(107,140,255,0.03)');
-        g.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = g;
-        ctx.fillRect(0,0,canvas.width,canvas.height);
+        // soft radial
+        const g = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 10, canvas.width/2, canvas.height/2, Math.max(canvas.width,canvas.height)/1.2);
+        g.addColorStop(0,'rgba(0,209,255,0.06)');
+        g.addColorStop(0.6,'rgba(107,140,255,0.03)');
+        g.addColorStop(1,'rgba(0,0,0,0)');
+        ctx.fillStyle = g; ctx.fillRect(0,0,canvas.width,canvas.height);
 
-        // particles
         for(let p of particles){
           p.x += p.vx + Math.sin(Date.now()/2000 + p.r)*0.2;
           p.y += p.vy + Math.cos(Date.now()/1800 + p.r)*0.15;
@@ -247,212 +148,107 @@
           if(p.x > canvas.width + 10) p.x = -10;
           if(p.y < -10) p.y = canvas.height + 10;
           if(p.y > canvas.height + 10) p.y = -10;
-
           ctx.beginPath();
           ctx.fillStyle = `hsla(${p.hue},80%,60%,0.12)`;
-          ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
-          ctx.fill();
+          ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
         }
-
         requestAnimationFrame(draw);
       }
       draw();
     })();
 
-    // ---------- Three.js compass (simple) ----------
-    (function initCompass(){
-      const canvas = document.getElementById('compass3d');
-      const width = canvas.clientWidth || 320;
-      const height = canvas.clientHeight || 320;
-
+    // --- Three.js compass in the center ---
+    (function(){
+      const canvas = document.getElementById('compassCanvas');
       const renderer = new THREE.WebGLRenderer({ canvas, alpha:true, antialias:true });
-      renderer.setSize(width, height);
-      renderer.setPixelRatio(window.devicePixelRatio || 1);
+      function resizeRenderer(){
+        const w = canvas.clientWidth; const h = canvas.clientHeight;
+        renderer.setSize(w,h); renderer.setPixelRatio(window.devicePixelRatio || 1);
+      }
+      resizeRenderer();
+      window.addEventListener('resize', resizeRenderer);
 
       const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(40, width/height, 0.1, 100);
-      camera.position.set(0, 1.6, 3);
+      const camera = new THREE.PerspectiveCamera(40, canvas.clientWidth/canvas.clientHeight, 0.1, 100);
+      camera.position.set(0,1.6,3);
 
-      // lights
-      const pl = new THREE.PointLight(0xffffff, 1.1);
-      pl.position.set(2,3,4);
-      scene.add(pl);
-      scene.add(new THREE.AmbientLight(0x88aaff, 0.6));
+      const pl = new THREE.PointLight(0xffffff,1.1); pl.position.set(2,3,4); scene.add(pl);
+      scene.add(new THREE.AmbientLight(0x88aaff,0.6));
 
-      // base disc
-      const base = new THREE.Mesh(
-        new THREE.CylinderGeometry(1.2,1.2,0.12,64),
-        new THREE.MeshStandardMaterial({ color:0x071827, metalness:0.6, roughness:0.4, emissive:0x001022, emissiveIntensity:0.6 })
-      );
-      base.rotation.x = -Math.PI/2;
-      scene.add(base);
+      const base = new THREE.Mesh(new THREE.CylinderGeometry(1.1,1.1,0.12,64), new THREE.MeshStandardMaterial({color:0x071827,metalness:0.6,roughness:0.4,emissive:0x001022,emissiveIntensity:0.6}));
+      base.rotation.x = -Math.PI/2; scene.add(base);
 
-      // ring
-      const ring = new THREE.Mesh(
-        new THREE.RingGeometry(0.9,1.05,128),
-        new THREE.MeshBasicMaterial({ color:0x6b8cff, transparent:true, opacity:0.45, side:THREE.DoubleSide })
-      );
-      ring.rotation.x = -Math.PI/2;
-      scene.add(ring);
+      const ring = new THREE.Mesh(new THREE.RingGeometry(0.9,1.05,128), new THREE.MeshBasicMaterial({color:0x6b8cff,transparent:true,opacity:0.45,side:THREE.DoubleSide}));
+      ring.rotation.x = -Math.PI/2; scene.add(ring);
 
-      // arrow (compass needle)
-      const arrow = new THREE.Mesh(
-        new THREE.ConeGeometry(0.12,0.7,32),
-        new THREE.MeshStandardMaterial({ color:0x00d1ff, emissive:0x00d1ff, metalness:0.3, roughness:0.2 })
-      );
-      arrow.position.set(0,0.35,0);
-      scene.add(arrow);
+      const arrow = new THREE.Mesh(new THREE.ConeGeometry(0.12,0.7,32), new THREE.MeshStandardMaterial({color:0x00d1ff,emissive:0x00d1ff,metalness:0.3,roughness:0.2}));
+      arrow.position.set(0,0.35,0); scene.add(arrow);
 
-      // small marker for opposite direction
-      const tail = new THREE.Mesh(
-        new THREE.ConeGeometry(0.08,0.45,24),
-        new THREE.MeshStandardMaterial({ color:0x6b8cff, emissive:0x2b5cff, metalness:0.2, roughness:0.3 })
-      );
-      tail.rotation.x = Math.PI;
-      tail.position.set(0,-0.05,0.05);
-      tail.position.y = 0.05;
-      scene.add(tail);
-
-      // subtle rotation animation
       function animate(){
         requestAnimationFrame(animate);
         const t = Date.now()/1000;
-        base.rotation.z = t * 0.08;
+        base.rotation.z = t * 0.06;
         arrow.rotation.y = Math.sin(t*0.9)*0.6;
         arrow.rotation.x = -Math.PI/2 + Math.cos(t*0.4)*0.08;
         renderer.render(scene, camera);
       }
       animate();
-
-      // responsive
-      window.addEventListener('resize', () => {
-        const w = canvas.clientWidth;
-        const h = canvas.clientHeight;
-        camera.aspect = w/h;
-        camera.updateProjectionMatrix();
-        renderer.setSize(w,h);
-      });
     })();
 
-    // ---------- Timeline drawing ----------
-    (function initTimeline(){
-      const canvas = document.getElementById('timelineCanvas');
-      const ctx = canvas.getContext('2d');
-
-      function resize(){
-        canvas.width = canvas.clientWidth;
-        canvas.height = canvas.clientHeight;
-      }
-      window.addEventListener('resize', resize);
-      resize();
-
+    // --- Timeline small ---
+    (function(){
+      const canvas = document.getElementById('timelineSmall'); const ctx = canvas.getContext('2d');
+      function resize(){ canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight; }
+      window.addEventListener('resize', resize); resize();
       function draw(){
-        const w = canvas.width, h = canvas.height;
-        ctx.clearRect(0,0,w,h);
-
-        // background
-        ctx.fillStyle = 'rgba(0,0,0,0.12)';
-        ctx.fillRect(0,0,w,h);
-
-        // grid lines
-        ctx.strokeStyle = 'rgba(255,255,255,0.03)';
-        ctx.lineWidth = 1;
-        for(let i=0;i<4;i++){
-          ctx.beginPath();
-          ctx.moveTo(0, h*(i+1)/5);
-          ctx.lineTo(w, h*(i+1)/5);
-          ctx.stroke();
-        }
-
-        // waveform
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle = 'rgba(0,0,0,0.08)'; ctx.fillRect(0,0,canvas.width,canvas.height);
         ctx.beginPath();
-        const points = 60;
-        for(let i=0;i<=points;i++){
-          const x = (i/points)*w;
-          const y = h/2 + Math.sin(i*0.35 + Date.now()/800)*h*0.18 + Math.cos(i*0.12 + Date.now()/1200)*h*0.06;
+        const pts = 60;
+        for(let i=0;i<=pts;i++){
+          const x = (i/pts)*canvas.width;
+          const y = canvas.height/2 + Math.sin(i*0.35 + Date.now()/800)*canvas.height*0.18;
           if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
         }
-        ctx.strokeStyle = 'rgba(0,209,255,0.95)';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-
+        ctx.strokeStyle = 'rgba(0,209,255,0.95)'; ctx.lineWidth = 2; ctx.stroke();
         requestAnimationFrame(draw);
       }
       draw();
     })();
 
-    // ---------- Demo metrics update (connect to real model later) ----------
-    (function demoMetrics(){
-      const scoreEl = document.getElementById('scoreValue');
-      const energyEl = document.getElementById('energyVal');
-      const stressEl = document.getElementById('stressVal');
-      const signatureEl = document.getElementById('signatureText');
-      const tagsEl = document.getElementById('hashtags');
-
-      const signatures = [
-        {sig:'Calm focused energy', tags:'#calm #focused #Sunshine'},
-        {sig:'Soft tension under the surface', tags:'#tension #self-awareness'},
-        {sig:'High cognitive load, low turbulence', tags:'#deepwork #stable'}
+    // --- Demo metrics (live-like) ---
+    (function(){
+      const scoreEl = document.getElementById('scoreVal'), energyEl = document.getElementById('energyVal'), stressEl = document.getElementById('stressVal');
+      const sigEl = document.getElementById('signatureText'), tagsEl = document.getElementById('hashtags');
+      const sigs = [
+        {s:'Calm focused energy', t:'#calm #focused #Sunshine with tranquility'},
+        {s:'Soft tension under the surface', t:'#tension #self-awareness'},
+        {s:'High cognitive load, low turbulence', t:'#deepwork #stable'}
       ];
-
       function update(){
         const t = Date.now()/1500;
         const base = 70 + Math.sin(t)*6 + Math.cos(t/1.7)*3;
-        const energy = clamp(0.5 + Math.sin(Date.now()/1000)*0.25, 0, 1);
-        const stress = clamp(0.2 + Math.cos(Date.now()/1300)*0.12, 0, 1);
-
+        const energy = Math.max(0, Math.min(1, 0.5 + Math.sin(Date.now()/1000)*0.25));
+        const stress = Math.max(0, Math.min(1, 0.2 + Math.cos(Date.now()/1300)*0.12));
         scoreEl.textContent = Math.round(base) + '/100';
         energyEl.textContent = energy.toFixed(2) + ' rising';
         stressEl.textContent = stress.toFixed(2) + ' low';
-
-        // pick signature occasionally
-        if(Math.random() < 0.01){
-          const p = signatures[Math.floor(Math.random()*signatures.length)];
-          signatureEl.textContent = p.sig;
-          tagsEl.textContent = p.tags;
-        }
-
+        if(Math.random() < 0.008){ const p = sigs[Math.floor(Math.random()*sigs.length)]; sigEl.textContent = p.s; tagsEl.textContent = p.t; }
         requestAnimationFrame(update);
       }
       update();
     })();
 
-    // ---------- Analyze button: quick demo response ----------
-    (function analyzeDemo(){
-      const btn = document.getElementById('analyzeBtn');
-      const input = document.getElementById('userText');
-      const signatureEl = document.getElementById('signatureText');
-      const tagsEl = document.getElementById('hashtags');
-
-      const responses = [
-        {sig:'Calm focused energy', tags:'#calm #focused #Sunshine with tranquility'},
-        {sig:'Soft tension under the surface', tags:'#tension #self-awareness #release'},
-        {sig:'High cognitive load, low turbulence', tags:'#deepwork #stable #sustained'}
-      ];
-
-      btn.addEventListener('click', () => {
-        const text = (input.value || '').toLowerCase();
-        // simple heuristic: if contains "tired" -> softer signature
-        let pick = responses[0];
-        if(text.includes('tired') || text.includes('exhaust')) pick = responses[1];
-        if(text.includes('work') || text.includes('deep')) pick = responses[2];
-
-        signatureEl.textContent = pick.sig;
-        tagsEl.textContent = pick.tags;
+    // --- Analyze button quick demo ---
+    (function(){
+      const btn = document.getElementById('analyzeBtn'), input = document.getElementById('userText');
+      btn.addEventListener('click', ()=>{
+        const text = (input.value||'').toLowerCase();
+        const sig = document.getElementById('signatureText'), tags = document.getElementById('hashtags');
+        if(text.includes('tired')){ sig.textContent='Soft tension under the surface'; tags.textContent='#tired #rest'; }
+        else if(text.includes('work')){ sig.textContent='High cognitive load, low turbulence'; tags.textContent='#deepwork #focus'; }
+        else { sig.textContent='Calm focused energy'; tags.textContent='#calm #focused'; }
       });
-    })();
-
-    // ---------- Optional: request camera (non-blocking) ----------
-    (function tryCamera(){
-      // we don't force camera; if user grants, it will run in background
-      if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
-        navigator.mediaDevices.getUserMedia({ video: true })
-          .then(stream => {
-            // we don't attach to DOM; keep privacy-first. If you want preview, we can add video element.
-            stream.getTracks().forEach(t => t.stop()); // stop immediately for demo
-          })
-          .catch(()=>{/* ignore */});
-      }
     })();
   </script>
 </body>
