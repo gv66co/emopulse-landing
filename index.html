@@ -1,14 +1,12 @@
-<link rel="stylesheet" href="/emopulse.css">
-
-
-await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
-await faceapi.nets.faceExpressionNet.loadFromUri('/models');
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>Emopulse – Emotional Field</title>
+
+  <!-- TVARKINGAS CSS IMPORTAS -->
+  <link rel="stylesheet" href="/emopulse.css">
+
   <style>
     * {
       box-sizing: border-box;
@@ -113,6 +111,9 @@ await faceapi.nets.faceExpressionNet.loadFromUri('/models');
       opacity: 0.9;
       transform: translateY(18%);
     }
+  </style>
+</head>
+
 
     .compass-sphere {
       position: relative;
