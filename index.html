@@ -1,106 +1,355 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="lt">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Emopulse — Live Emotional Field</title>
-  <link rel="stylesheet" href="/styles.css" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Emopulse — Emotional Compass 1.1</title>
+  <style>
+    :root{
+      --bg:#071022;
+      --panel:#071827;
+      --muted:#94a3b8;
+      --accent:#3abff8;
+      --accent-warm:#fbbf24;
+      --danger:#f87171;
+      --glass: rgba(255,255,255,0.04);
+      --glass-2: rgba(255,255,255,0.02);
+      --card-radius:14px;
+      --font: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#04060a 0%, var(--bg) 60%);font-family:var(--font);color:#e6eef8}
+    .app {
+      display:flex;
+      gap:28px;
+      align-items:center;
+      justify-content:center;
+      height:100vh;
+      padding:28px;
+      box-sizing:border-box;
+    }
+
+    /* Canvas area */
+    .stage {
+      width:720px;
+      max-width:62vw;
+      height:720px;
+      max-height:86vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      position:relative;
+      border-radius:20px;
+      background: radial-gradient(1200px 600px at 20% 20%, rgba(58,191,248,0.06), transparent 10%),
+                  linear-gradient(180deg, rgba(255,255,255,0.02), transparent 30%);
+      box-shadow: 0 10px 40px rgba(2,6,23,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+      overflow:hidden;
+    }
+    canvas#compass3d { width:100%; height:100%; display:block; }
+
+    /* Right panel */
+    .panel {
+      width:360px;
+      max-width:34vw;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:var(--card-radius);
+      padding:18px;
+      box-shadow: 0 8px 30px rgba(2,6,23,0.6);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255,255,255,0.03);
+    }
+
+    .header {
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin-bottom:12px;
+    }
+    .logo-dot {
+      width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#6ee7b7);
+      display:flex;align-items:center;justify-content:center;font-weight:700;color:#021124;
+      box-shadow:0 6px 18px rgba(58,191,248,0.12), inset 0 -6px 18px rgba(255,255,255,0.02);
+    }
+    .title { font-size:16px; font-weight:600; color:#eaf6ff; }
+    .subtitle { font-size:12px; color:var(--muted); margin-top:2px; }
+
+    .input-row { margin:14px 0 18px 0; display:flex; gap:8px; align-items:center; }
+    .text-input {
+      flex:1;
+      padding:10px 12px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,0.03);
+      background:var(--glass);
+      color:#eaf6ff;
+      outline:none;
+      font-size:13px;
+    }
+    .btn {
+      padding:10px 12px;
+      border-radius:10px;
+      background:linear-gradient(180deg,var(--accent),#1ea7e8);
+      color:#021124;
+      font-weight:700;
+      border:none;
+      cursor:pointer;
+      box-shadow:0 6px 18px rgba(58,191,248,0.12);
+    }
+
+    .camera-indicator {
+      display:flex;align-items:center;gap:8px;margin-top:6px;color:var(--muted);font-size:13px;
+    }
+    .cam-dot { width:10px;height:10px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px rgba(34,197,94,0.6); }
+
+    .metrics { margin-top:16px; display:grid; gap:12px; }
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));
+      border-radius:12px;
+      padding:12px;
+      border:1px solid rgba(255,255,255,0.02);
+    }
+    .card h4 { margin:0 0 6px 0; font-size:13px; color:#dff6ff; }
+    .muted { color:var(--muted); font-size:13px; }
+
+    .score {
+      display:flex;align-items:center;justify-content:space-between;
+      gap:12px;
+    }
+    .score .big { font-size:22px; font-weight:700; color:#eaf6ff; }
+    .progress {
+      height:8px;border-radius:8px;background:var(--glass-2);overflow:hidden;
+      flex:1;margin-left:12px;
+    }
+    .progress > i { display:block;height:100%;background:linear-gradient(90deg,var(--accent),#6ee7b7); }
+
+    .moodmap { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+    .tag { background:rgba(255,255,255,0.03); padding:6px 8px; border-radius:8px; font-size:12px; color:var(--muted); }
+
+    .timeline { height:56px; background:linear-gradient(90deg, rgba(255,255,255,0.01), transparent); border-radius:8px; margin-top:8px; }
+
+    footer.note { margin-top:12px; font-size:12px; color:var(--muted); text-align:center; }
+
+    /* Responsive */
+    @media (max-width:1000px){
+      .app { flex-direction:column; gap:18px; padding:18px; }
+      .panel { width:100%; max-width:720px; }
+      .stage { width:100%; height:60vh; max-height:60vh; }
+    }
+  </style>
 </head>
+<body>
+  <div class="app">
+    <div class="stage" aria-hidden="false">
+      <canvas id="compass3d" aria-label="3D emotional compass"></canvas>
 
-<body class="emopulse-cosmic">
-
-  <div class="cosmic-bg-stars"></div>
-
-  <header class="cosmic-header">
-    <div class="cosmic-logo">
-      <div class="cosmic-logo-mark"></div>
-      Emopulse
-    </div>
-
-    <nav class="cosmic-nav">
-      <a href="#" class="active">Live model</a>
-      <a href="#">Investors</a>
-    </nav>
-  </header>
-
-  <section class="cosmic-hero">
-    <div class="cosmic-hero-text">
-      <h1>Understand your emotional field in real time</h1>
-      <p>Camera + AI emotional engine</p>
-      <button class="cosmic-cta">Start Live Scan</button>
-    </div>
-
-    <div class="cosmic-camera-panel">
-      <video id="cam" class="cosmic-camera-video" autoplay muted playsinline></video>
-      <div id="camStatus" class="cosmic-camera-status">Camera active — reading your field…</div>
-    </div>
-  </section>
-
-  <div class="cosmic-center">
-    <canvas id="compass3d" width="600" height="600"></canvas>
-
-    <div class="cosmic-metrics">
-      <div class="cosmic-metric">
-        <div class="cosmic-metric-label">Energy</div>
-        <div id="energy" class="cosmic-metric-value">66</div>
-      </div>
-
-      <div class="cosmic-metric">
-        <div class="cosmic-metric-label">Stress</div>
-        <div id="stress" class="cosmic-metric-value">12</div>
-      </div>
-
-      <div class="cosmic-metric">
-        <div class="cosmic-metric-label">Stability</div>
-        <div id="stability" class="cosmic-metric-value">low</div>
+      <!-- subtle overlay labels to mimic photo (optional) -->
+      <div style="position:absolute;left:18px;top:18px;color:var(--muted);font-size:13px;">
+        <div style="font-weight:700;color:#dff6ff">Emopulse</div>
+        <div style="margin-top:6px;color:var(--muted)">Live Emotional Field · Camera + AI</div>
       </div>
     </div>
+
+    <aside class="panel" role="region" aria-label="Emotional metrics panel">
+      <div class="header">
+        <div class="logo-dot">EP</div>
+        <div>
+          <div class="title">Understand your emotional field in real time</div>
+          <div class="subtitle">Type anything you're feeling or thinking. Using our camera and AI analyzes.</div>
+        </div>
+      </div>
+
+      <div class="input-row">
+        <input id="textInput" class="text-input" placeholder="Type anything you're feeling or thinking . ." />
+        <button id="analyzeBtn" class="btn">Analyze my emotional field</button>
+      </div>
+
+      <div class="camera-indicator">
+        <div class="cam-dot" id="camDot"></div>
+        <div id="camText" class="muted">Camera active — reading your field…</div>
+      </div>
+
+      <div class="metrics">
+        <div class="card">
+          <h4>Emotional Aura</h4>
+          <div class="muted">Stability: <strong id="stability">12° toward</strong></div>
+          <div class="muted">Intensity: <strong id="intensity">Low</strong></div>
+          <div class="score" style="margin-top:8px;">
+            <div class="big" id="scoreVal">76</div>
+            <div class="progress" aria-hidden="true"><i id="scoreBar" style="width:76%"></i></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h4>Emotional signature</h4>
+          <div style="font-weight:600;color:#eaf6ff">Calm focused energy</div>
+          <div class="moodmap" style="margin-top:8px;">
+            <div class="tag">#calm</div>
+            <div class="tag">#focused energy</div>
+            <div class="tag">#sunshine</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h4>Mood Map</h4>
+          <div class="muted">Positive · Euphoric · Intense</div>
+          <div class="timeline" id="energyGraph"></div>
+        </div>
+
+        <div class="card">
+          <h4>Metrics</h4>
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div class="muted">Energy</div>
+              <div style="font-weight:700;color:#eaf6ff" id="energyVal">0.66 rising</div>
+            </div>
+            <div>
+              <div class="muted">Stress risk</div>
+              <div style="font-weight:700;color:#eaf6ff" id="stressVal">0.21 low</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h4>Emopulse Score</h4>
+          <div style="font-size:20px;font-weight:700;color:#eaf6ff" id="emopulseScore">76 / 100</div>
+        </div>
+
+      </div>
+
+      <footer class="note">Emotional Timeline updates in real time</footer>
+    </aside>
   </div>
 
-  <section class="cosmic-input-area">
-    <input id="userText" class="cosmic-input" placeholder="How are you feeling today?" />
-    <button id="analyzeBtn" class="cosmic-analyze-btn">Analyze</button>
+  <!-- Scripts: three.js and minimal UI logic -->
+  <script type="module">
+    import * as THREE from 'https://unpkg.com/three@0.158.0/build/three.module.js';
 
-    <div class="cosmic-ai-box">
-      <div class="cosmic-ai-title">AI Interpretation</div>
-      <div id="aiText" class="cosmic-ai-text">Calm focused energy</div>
+    // Basic renderer + placeholder scene so canvas isn't blank.
+    // Replace or extend this with your compass3d.js module for full 3D compass.
+    const canvas = document.getElementById('compass3d');
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    function resize() {
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
+      if (canvas.width !== w || canvas.height !== h) {
+        renderer.setSize(w, h, false);
+      }
+    }
 
-      <div id="aiTags" class="cosmic-ai-tags"></div>
-    </div>
-  </section>
+    const scene = new THREE.Scene();
+    scene.background = null;
 
-  <section class="cosmic-graphs">
-    <div class="cosmic-graph-block">
-      <h3>Emotional Timeline</h3>
-      <canvas id="timeline" width="400" height="120"></canvas>
-    </div>
+    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+    camera.position.set(0, 1.6, 3.2);
 
-    <div class="cosmic-graph-block">
-      <h3>Emotional Pulse</h3>
-      <canvas id="pulse" width="400" height="120"></canvas>
-    </div>
-  </section>
+    // lights
+    const ambient = new THREE.AmbientLight(0xffffff, 0.35);
+    scene.add(ambient);
+    const dir = new THREE.DirectionalLight(0xffffff, 0.7);
+    dir.position.set(5, 10, 7);
+    scene.add(dir);
 
-  <section class="cosmic-banners">
-    <div class="cosmic-banner mood">
-      <div class="cosmic-banner-title">Mood Map</div>
-      <div class="cosmic-banner-main">Positive • Euphoric • Intense</div>
-      <div class="cosmic-banner-sub">Score: <span id="score2">76</span> / 100</div>
-    </div>
+    // simple glowing core placeholder
+    const coreGeo = new THREE.SphereGeometry(0.55, 32, 32);
+    const coreMat = new THREE.MeshStandardMaterial({ color: 0x0ea5e9, emissive: 0x0ea5e9, emissiveIntensity: 0.6, metalness:0.4, roughness:0.3 });
+    const core = new THREE.Mesh(coreGeo, coreMat);
+    scene.add(core);
 
-    <div class="cosmic-banner timeline">
-      <div class="cosmic-banner-title">Energy Trend</div>
-      <div class="cosmic-banner-main">Live emotional trajectory</div>
-      <div class="cosmic-banner-sub">Updated in real time</div>
-    </div>
+    // subtle particles ring
+    const ringGeo = new THREE.RingGeometry(0.95, 1.05, 64);
+    const ringMat = new THREE.MeshBasicMaterial({ color: 0x94a3b8, transparent:true, opacity:0.18, side:THREE.DoubleSide });
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.rotation.x = Math.PI/2;
+    scene.add(ring);
 
-    <div class="cosmic-banner stress">
-      <div class="cosmic-banner-title">Stress Risk</div>
-      <div class="cosmic-banner-main">Sunshine with tranquility</div>
-      <div class="cosmic-banner-sub">Risk: <span id="score">21</span> low</div>
-    </div>
-  </section>
+    // compass needle placeholder
+    const needle = new THREE.Group();
+    const shaft = new THREE.CylinderGeometry(0.02,0.02,1.2,12);
+    const shaftMesh = new THREE.Mesh(shaft, new THREE.MeshStandardMaterial({ color:0xffffff, emissive:0xffffff, emissiveIntensity:0.15 }));
+    shaftMesh.rotation.x = Math.PI/2;
+    needle.add(shaftMesh);
+    const head = new THREE.ConeGeometry(0.06,0.18,12);
+    const headN = new THREE.Mesh(head, new THREE.MeshStandardMaterial({ color:0xf87171, emissive:0xf87171, emissiveIntensity:0.6 }));
+    headN.position.set(0,0.6,0);
+    headN.rotation.x = Math.PI/2;
+    needle.add(headN);
+    scene.add(needle);
 
-  <script type="module" src="/src/live.js"></script>
+    // simple animation loop
+    function animate() {
+      resize();
+      const t = performance.now() * 0.001;
+      core.rotation.y = t * 0.2;
+      ring.rotation.z = t * 0.05;
+      needle.rotation.y = Math.sin(t*0.5) * 0.6;
+      renderer.render(scene, camera);
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    // UI logic: simulate metrics and wire up analyze button
+    const energyEl = document.getElementById('energyVal');
+    const stressEl = document.getElementById('stressVal');
+    const scoreEl = document.getElementById('scoreVal');
+    const scoreBar = document.getElementById('scoreBar');
+    const emopulseScore = document.getElementById('emopulseScore');
+    const intensityEl = document.getElementById('intensity');
+    const stabilityEl = document.getElementById('stability');
+    const camDot = document.getElementById('camDot');
+    const camText = document.getElementById('camText');
+
+    // initial values from photo
+    let energy = 0.66;
+    let stress = 0.21;
+    let score = 76;
+
+    function updateUI() {
+      energyEl.textContent = energy.toFixed(2) + (Math.random() > 0.5 ? ' rising' : ' steady');
+      stressEl.textContent = stress.toFixed(2) + (stress > 0.6 ? ' high' : ' low');
+      scoreEl.textContent = Math.round(score);
+      scoreBar.style.width = Math.round(score) + '%';
+      emopulseScore.textContent = Math.round(score) + ' / 100';
+      intensityEl.textContent = (score > 80 ? 'High' : score > 50 ? 'Low' : 'Very Low');
+      stabilityEl.textContent = Math.round((Math.atan2(stress, energy) * 180 / Math.PI)) + '° toward';
+      // needle color/emissive based on stress/energy
+      const needleColor = stress > 0.6 ? 0xf87171 : (energy > 0.7 ? 0xfbbf24 : 0x38bdf8);
+      needle.children.forEach(c => { if (c.material) { c.material.color.setHex(needleColor); c.material.emissive.setHex(needleColor); }});
+    }
+
+    // simulate small fluctuations
+    setInterval(() => {
+      energy = Math.min(1, Math.max(0, energy + (Math.random()-0.5)*0.02));
+      stress = Math.min(1, Math.max(0, stress + (Math.random()-0.5)*0.01));
+      score = Math.min(100, Math.max(0, score + (Math.random()-0.5)*0.6));
+      updateUI();
+    }, 900);
+
+    // analyze button: quick pulse animation and camera indicator toggle
+    document.getElementById('analyzeBtn').addEventListener('click', () => {
+      camDot.style.background = '#fbbf24';
+      camDot.style.boxShadow = '0 0 12px rgba(251,191,36,0.6)';
+      camText.textContent = 'Analyzing…';
+      // simulate analysis then restore
+      setTimeout(() => {
+        camDot.style.background = '#22c55e';
+        camDot.style.boxShadow = '0 0 8px rgba(34,197,94,0.6)';
+        camText.textContent = 'Camera active — reading your field…';
+        // small random shift to values to simulate result
+        energy = Math.min(1, Math.max(0, energy + (Math.random()-0.5)*0.12));
+        stress = Math.min(1, Math.max(0, stress + (Math.random()-0.5)*0.12));
+        score = Math.round((1 - stress) * 100 * 0.85 + energy * 100 * 0.15);
+        updateUI();
+      }, 1200);
+    });
+
+    // accessibility: allow Enter to trigger analyze
+    document.getElementById('textInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('analyzeBtn').click();
+    });
+
+    // If you have a separate compass3d.js module, you can import and call its init here:
+    // import { initCompass, updateCompass3D } from './compass3d.js';
+    // initCompass();
+    // then call updateCompass3D({ energy, stress }) inside updateUI() to sync visuals.
+  </script>
 </body>
 </html>
