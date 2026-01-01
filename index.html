@@ -3,148 +3,124 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Emopulse — Emotional Compass 1.1</title>
+  <title>Emopulse — Emotional Compass 1.1 (Integrated)</title>
+
+  <!-- Integrated CSS: emopulse-1.1 styles -->
   <style>
     :root{
-      --bg:#071022;
-      --panel:#071827;
-      --muted:#94a3b8;
-      --accent:#3abff8;
-      --accent-warm:#fbbf24;
-      --danger:#f87171;
-      --glass: rgba(255,255,255,0.04);
+      --bg-0: #03050a;
+      --bg-1: #071022;
+      --panel: rgba(6,18,30,0.6);
+      --muted: #94a3b8;
+      --accent-cool: #3abff8;
+      --accent-warm: #fbbf24;
+      --danger: #f87171;
+      --glass: rgba(255,255,255,0.03);
       --glass-2: rgba(255,255,255,0.02);
-      --card-radius:14px;
-      --font: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      --card-radius: 14px;
+      --text: #eaf6ff;
+      --soft: rgba(234,246,255,0.06);
+      --shadow: rgba(2,6,23,0.6);
+      --font-stack: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      --ui-z: 50;
     }
-    html,body{height:100%;margin:0;background:linear-gradient(180deg,#04060a 0%, var(--bg) 60%);font-family:var(--font);color:#e6eef8}
-    .app {
-      display:flex;
-      gap:28px;
-      align-items:center;
-      justify-content:center;
-      height:100vh;
-      padding:28px;
-      box-sizing:border-box;
-    }
+    * { box-sizing: border-box; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+    html,body { height:100%; margin:0; font-family:var(--font-stack); background: linear-gradient(180deg,#02040a 0%, var(--bg-1) 60%); color:var(--text); }
+    .app { display:flex; gap:28px; align-items:center; justify-content:center; height:100vh; padding:28px; overflow:hidden; }
 
-    /* Canvas area */
+    /* Stage (canvas container) */
     .stage {
-      width:720px;
-      max-width:62vw;
-      height:720px;
-      max-height:86vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      position:relative;
-      border-radius:20px;
-      background: radial-gradient(1200px 600px at 20% 20%, rgba(58,191,248,0.06), transparent 10%),
-                  linear-gradient(180deg, rgba(255,255,255,0.02), transparent 30%);
-      box-shadow: 0 10px 40px rgba(2,6,23,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+      width:720px; max-width:62vw; height:720px; max-height:86vh;
+      display:flex; align-items:center; justify-content:center; position:relative; border-radius:20px;
+      background:
+        radial-gradient(1200px 600px at 18% 18%, rgba(58,191,248,0.06), transparent 8%),
+        radial-gradient(800px 400px at 80% 80%, rgba(251,191,36,0.02), transparent 6%),
+        linear-gradient(180deg, rgba(255,255,255,0.02), transparent 30%);
+      box-shadow: 0 10px 40px var(--shadow), inset 0 1px 0 rgba(255,255,255,0.02);
       overflow:hidden;
     }
-    canvas#compass3d { width:100%; height:100%; display:block; }
+    .stage::before, .stage::after { content:""; position:absolute; inset:0; pointer-events:none; z-index:0; }
+    .stage::before {
+      background:
+        radial-gradient(600px 300px at 10% 20%, rgba(58,191,248,0.06), transparent 10%),
+        radial-gradient(500px 250px at 85% 75%, rgba(248,150,30,0.03), transparent 8%);
+      opacity:0.9; filter: blur(18px); mix-blend-mode: screen;
+    }
+    .stage::after {
+      background: linear-gradient(90deg, rgba(58,191,248,0.02), rgba(251,191,36,0.01));
+      mix-blend-mode: overlay; opacity:0.6; animation: slowShift 18s linear infinite;
+    }
+    @keyframes slowShift { 0%{transform:translateX(-6%)}50%{transform:translateX(6%)}100%{transform:translateX(-6%)} }
+
+    canvas#compass3d { width:100%; height:100%; display:block; border-radius:16px; position:relative; z-index:1; }
+
+    .stage .brand { position:absolute; left:18px; top:18px; z-index:10; color:var(--muted); font-size:13px; line-height:1; }
+    .stage .brand .name { font-weight:700; color:var(--text); margin-bottom:6px; }
 
     /* Right panel */
     .panel {
-      width:360px;
-      max-width:34vw;
+      width:360px; max-width:34vw;
       background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      border-radius:var(--card-radius);
-      padding:18px;
-      box-shadow: 0 8px 30px rgba(2,6,23,0.6);
-      backdrop-filter: blur(6px);
-      border: 1px solid rgba(255,255,255,0.03);
+      border-radius:var(--card-radius); padding:18px; box-shadow: 0 8px 30px var(--shadow);
+      backdrop-filter: blur(8px) saturate(120%); border: 1px solid rgba(255,255,255,0.03);
+      display:flex; flex-direction:column; gap:12px; z-index:var(--ui-z);
     }
 
-    .header {
-      display:flex;
-      align-items:center;
-      gap:12px;
-      margin-bottom:12px;
-    }
-    .logo-dot {
-      width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#6ee7b7);
-      display:flex;align-items:center;justify-content:center;font-weight:700;color:#021124;
-      box-shadow:0 6px 18px rgba(58,191,248,0.12), inset 0 -6px 18px rgba(255,255,255,0.02);
-    }
-    .title { font-size:16px; font-weight:600; color:#eaf6ff; }
+    .header { display:flex; align-items:center; gap:12px; margin-bottom:6px; }
+    .logo-dot { width:44px; height:44px; border-radius:10px; background: linear-gradient(135deg, var(--accent-cool), #6ee7b7); display:flex; align-items:center; justify-content:center; font-weight:700; color:#021124; box-shadow: 0 8px 26px rgba(58,191,248,0.12), inset 0 -6px 18px rgba(255,255,255,0.02); }
+    .title { font-size:15px; font-weight:700; color:var(--text); line-height:1.05; }
     .subtitle { font-size:12px; color:var(--muted); margin-top:2px; }
 
-    .input-row { margin:14px 0 18px 0; display:flex; gap:8px; align-items:center; }
-    .text-input {
-      flex:1;
-      padding:10px 12px;
-      border-radius:10px;
-      border:1px solid rgba(255,255,255,0.03);
-      background:var(--glass);
-      color:#eaf6ff;
-      outline:none;
-      font-size:13px;
-    }
-    .btn {
-      padding:10px 12px;
-      border-radius:10px;
-      background:linear-gradient(180deg,var(--accent),#1ea7e8);
-      color:#021124;
-      font-weight:700;
-      border:none;
-      cursor:pointer;
-      box-shadow:0 6px 18px rgba(58,191,248,0.12);
-    }
+    .input-row { margin:14px 0 6px 0; display:flex; gap:8px; align-items:center; }
+    .text-input { flex:1; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.03); background:var(--glass); color:var(--text); outline:none; font-size:13px; transition: box-shadow .18s ease, transform .12s ease; }
+    .text-input:focus { box-shadow: 0 6px 18px rgba(58,191,248,0.08); transform: translateY(-1px); }
+    .btn { padding:10px 12px; border-radius:10px; background: linear-gradient(180deg, var(--accent-cool), #1ea7e8); color:#021124; font-weight:800; border:none; cursor:pointer; box-shadow: 0 8px 26px rgba(58,191,248,0.12); transition: transform .12s ease, box-shadow .12s ease; }
+    .btn:active { transform: translateY(1px); box-shadow: 0 6px 18px rgba(58,191,248,0.08); }
 
-    .camera-indicator {
-      display:flex;align-items:center;gap:8px;margin-top:6px;color:var(--muted);font-size:13px;
-    }
-    .cam-dot { width:10px;height:10px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px rgba(34,197,94,0.6); }
+    .camera-indicator { display:flex; align-items:center; gap:8px; margin-top:6px; color:var(--muted); font-size:13px; }
+    .cam-dot { width:10px; height:10px; border-radius:50%; background:#22c55e; box-shadow: 0 0 8px rgba(34,197,94,0.6), 0 0 18px rgba(34,197,94,0.08); transition: background .18s ease, box-shadow .18s ease; }
 
-    .metrics { margin-top:16px; display:grid; gap:12px; }
-    .card {
-      background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));
-      border-radius:12px;
-      padding:12px;
-      border:1px solid rgba(255,255,255,0.02);
-    }
+    .metrics { margin-top:8px; display:grid; gap:12px; }
+    .card { background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005)); border-radius:12px; padding:12px; border:1px solid rgba(255,255,255,0.02); box-shadow: 0 6px 18px rgba(2,6,23,0.35); }
     .card h4 { margin:0 0 6px 0; font-size:13px; color:#dff6ff; }
     .muted { color:var(--muted); font-size:13px; }
 
-    .score {
-      display:flex;align-items:center;justify-content:space-between;
-      gap:12px;
-    }
-    .score .big { font-size:22px; font-weight:700; color:#eaf6ff; }
-    .progress {
-      height:8px;border-radius:8px;background:var(--glass-2);overflow:hidden;
-      flex:1;margin-left:12px;
-    }
-    .progress > i { display:block;height:100%;background:linear-gradient(90deg,var(--accent),#6ee7b7); }
+    .score { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:6px; }
+    .score .big { font-size:22px; font-weight:800; color:var(--text); }
+    .progress { height:8px; border-radius:8px; background:var(--glass-2); overflow:hidden; flex:1; margin-left:12px; }
+    .progress > i { display:block; height:100%; background: linear-gradient(90deg, var(--accent-cool), #6ee7b7); width:0%; transition: width .6s cubic-bezier(.2,.9,.2,1); }
 
     .moodmap { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
-    .tag { background:rgba(255,255,255,0.03); padding:6px 8px; border-radius:8px; font-size:12px; color:var(--muted); }
+    .tag { background: rgba(255,255,255,0.03); padding:6px 8px; border-radius:8px; font-size:12px; color:var(--muted); box-shadow: inset 0 -2px 6px rgba(255,255,255,0.01); }
 
-    .timeline { height:56px; background:linear-gradient(90deg, rgba(255,255,255,0.01), transparent); border-radius:8px; margin-top:8px; }
+    .timeline { height:56px; background: linear-gradient(90deg, rgba(255,255,255,0.01), transparent); border-radius:8px; margin-top:8px; position:relative; overflow:hidden; }
+    .timeline::after { content:""; position:absolute; left:0; top:0; bottom:0; width:100%; background: linear-gradient(90deg, rgba(58,191,248,0.06), rgba(251,191,36,0.03)); opacity:0.6; mix-blend-mode: screen; }
 
     footer.note { margin-top:12px; font-size:12px; color:var(--muted); text-align:center; }
 
-    /* Responsive */
     @media (max-width:1000px){
-      .app { flex-direction:column; gap:18px; padding:18px; }
-      .panel { width:100%; max-width:720px; }
-      .stage { width:100%; height:60vh; max-height:60vh; }
+      .app { flex-direction:column; gap:18px; padding:18px; align-items:stretch; justify-content:flex-start; }
+      .panel { width:100%; max-width:100%; order:2; }
+      .stage { width:100%; height:60vh; max-height:60vh; order:1; border-radius:14px; }
     }
+
+    .title, .score .big, .card h4 { text-shadow: 0 6px 18px rgba(58,191,248,0.06); }
+    .hidden { display:none !important; }
+    .particles-overlay { position:absolute; inset:0; pointer-events:none; z-index:2; background-image: radial-gradient(circle at 10% 20%, rgba(58,191,248,0.06) 0px, transparent 40px), radial-gradient(circle at 80% 75%, rgba(248,150,30,0.03) 0px, transparent 30px); mix-blend-mode: screen; opacity:0.9; filter: blur(6px); }
+    .glow-cool { box-shadow: 0 6px 30px rgba(58,191,248,0.18), 0 0 80px rgba(58,191,248,0.06); }
+    .glow-warm { box-shadow: 0 6px 30px rgba(251,191,36,0.14), 0 0 60px rgba(251,191,36,0.04); }
+    .glow-danger { box-shadow: 0 6px 30px rgba(248,113,113,0.14), 0 0 60px rgba(248,113,113,0.04); }
   </style>
 </head>
 <body>
   <div class="app">
     <div class="stage" aria-hidden="false">
       <canvas id="compass3d" aria-label="3D emotional compass"></canvas>
-
-      <!-- subtle overlay labels to mimic photo (optional) -->
-      <div style="position:absolute;left:18px;top:18px;color:var(--muted);font-size:13px;">
-        <div style="font-weight:700;color:#dff6ff">Emopulse</div>
-        <div style="margin-top:6px;color:var(--muted)">Live Emotional Field · Camera + AI</div>
+      <div class="brand" aria-hidden="true">
+        <div class="name">Emopulse</div>
+        <div style="color:var(--muted);font-size:12px">Live Emotional Field · Camera + AI</div>
       </div>
+      <div class="particles-overlay" aria-hidden="true"></div>
     </div>
 
     <aside class="panel" role="region" aria-label="Emotional metrics panel">
@@ -218,75 +194,487 @@
     </aside>
   </div>
 
-  <!-- Scripts: three.js and minimal UI logic -->
+  <!-- Three.js and examples via CDN (module imports) -->
   <script type="module">
     import * as THREE from 'https://unpkg.com/three@0.158.0/build/three.module.js';
+    import { OrbitControls } from 'https://unpkg.com/three@0.158.0/examples/jsm/controls/OrbitControls.js';
+    import { EffectComposer } from 'https://unpkg.com/three@0.158.0/examples/jsm/postprocessing/EffectComposer.js';
+    import { RenderPass } from 'https://unpkg.com/three@0.158.0/examples/jsm/postprocessing/RenderPass.js';
+    import { UnrealBloomPass } from 'https://unpkg.com/three@0.158.0/examples/jsm/postprocessing/UnrealBloomPass.js';
 
-    // Basic renderer + placeholder scene so canvas isn't blank.
-    // Replace or extend this with your compass3d.js module for full 3D compass.
-    const canvas = document.getElementById('compass3d');
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    function resize() {
+    /* ------------------------------
+       Integrated compass3d logic (version 1.1)
+       ------------------------------ */
+
+    let scene, camera, renderer, composer, controls;
+    let canvas = document.getElementById('compass3d');
+
+    let coreSphere, glowMesh;
+    let orbitRings = [];
+    let particles = [];
+    let emotionalNodes = [];
+    let compassNeedleGroup;
+    let targetRotation = 0;
+    let needleTargetRotation = 0;
+    let trajectoryPoints = [];
+    let trajectoryLine;
+    let particleField;
+    let subtleLightDisks = [];
+
+    const TRAJECTORY_MAX = 160;
+
+    // default metrics
+    let metricsState = { energy: 0.66, stress: 0.21, score: 76 };
+
+    function initCompass3D() {
+      if (!canvas) {
+        console.error('Canvas not found');
+        return;
+      }
+
+      scene = new THREE.Scene();
+      scene.background = null;
+
+      camera = new THREE.PerspectiveCamera(45, Math.max(1, canvas.clientWidth / canvas.clientHeight), 0.1, 1000);
+      camera.position.set(0, 1.6, 3.2);
+
+      renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'high-performance' });
+      renderer.outputEncoding = THREE.sRGBEncoding;
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
+
+      addLights();
+      setupPostProcessing();
+
+      controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.08;
+      controls.minDistance = 1.6;
+      controls.maxDistance = 6;
+      controls.enablePan = false;
+
+      createCoreSphere();
+      createGlowShell();
+      createOrbitRings();
+      createParticles();
+      createEmotionalNodes();
+      createCompassHousing();
+      createCompassNeedle();
+      initTrajectory();
+      createParticleField();
+      createSubtleLightDisks();
+
+      window.addEventListener('resize', resizeCompass3D);
+      animateCompass3D();
+    }
+
+    function addLights() {
+      const ambient = new THREE.AmbientLight(0xffffff, 0.28);
+      scene.add(ambient);
+
+      const key = new THREE.DirectionalLight(0xffffff, 0.9);
+      key.position.set(6, 10, 6);
+      scene.add(key);
+
+      const fill = new THREE.PointLight(0x3abff8, 0.18, 20);
+      fill.position.set(-4, 2, -3);
+      scene.add(fill);
+
+      const rim = new THREE.PointLight(0xfbbf24, 0.12, 20);
+      rim.position.set(3, -2, 4);
+      scene.add(rim);
+    }
+
+    function setupPostProcessing() {
+      composer = new EffectComposer(renderer);
+      const renderPass = new RenderPass(scene, camera);
+      composer.addPass(renderPass);
+
+      const bloomPass = new UnrealBloomPass(new THREE.Vector2(canvas.clientWidth, canvas.clientHeight), 0.9, 0.6, 0.1);
+      bloomPass.renderToScreen = true;
+      composer.addPass(bloomPass);
+    }
+
+    function resizeCompass3D() {
+      if (!canvas || !camera || !renderer) return;
       const w = canvas.clientWidth;
       const h = canvas.clientHeight;
-      if (canvas.width !== w || canvas.height !== h) {
-        renderer.setSize(w, h, false);
+      camera.aspect = Math.max(0.1, w / Math.max(1, h));
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h, false);
+      if (composer) composer.setSize(w, h);
+    }
+
+    const GlowShader = {
+      uniforms: {
+        c: { value: 0.4 },
+        p: { value: 2.4 },
+        glowColor: { value: new THREE.Color(0x3abff8) },
+        viewVector: { value: new THREE.Vector3(0, 0, 3) },
+        intensityBoost: { value: 1.0 }
+      },
+      vertexShader: `
+        uniform vec3 viewVector;
+        uniform float c;
+        uniform float p;
+        uniform float intensityBoost;
+        varying float intensity;
+        void main() {
+          vec3 vNormal = normalize(normalMatrix * normal);
+          vec3 vNormel = normalize(normalMatrix * viewVector);
+          intensity = pow(c - dot(vNormal, vNormel), p) * intensityBoost;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform vec3 glowColor;
+        varying float intensity;
+        void main() {
+          vec3 glow = glowColor * intensity;
+          gl_FragColor = vec4(glow, intensity);
+        }
+      `
+    };
+
+    function createCoreSphere() {
+      const sphereGeo = new THREE.SphereGeometry(0.55, 64, 64);
+      const sphereMat = new THREE.MeshStandardMaterial({
+        color: 0x0ea5e9,
+        roughness: 0.35,
+        metalness: 0.65,
+        emissive: 0x0ea5e9,
+        emissiveIntensity: 0.45
+      });
+      coreSphere = new THREE.Mesh(sphereGeo, sphereMat);
+      coreSphere.position.set(0, 0, 0);
+      scene.add(coreSphere);
+    }
+
+    function createGlowShell() {
+      const glowGeo = new THREE.SphereGeometry(0.78, 64, 64);
+      const glowMat = new THREE.ShaderMaterial({
+        uniforms: THREE.UniformsUtils.clone(GlowShader.uniforms),
+        vertexShader: GlowShader.vertexShader,
+        fragmentShader: GlowShader.fragmentShader,
+        side: THREE.BackSide,
+        blending: THREE.AdditiveBlending,
+        transparent: true,
+        depthWrite: false
+      });
+      glowMesh = new THREE.Mesh(glowGeo, glowMat);
+      glowMesh.position.copy(coreSphere.position);
+      scene.add(glowMesh);
+    }
+
+    function createOrbitRings() {
+      const ringMaterial = new THREE.MeshBasicMaterial({ color: 0x94a3b8, transparent: true, opacity: 0.22, side: THREE.DoubleSide });
+      const radii = [0.95, 1.25, 1.55];
+      radii.forEach((r, i) => {
+        const ringGeo = new THREE.RingGeometry(r - 0.01, r + 0.01, 256);
+        const ring = new THREE.Mesh(ringGeo, ringMaterial);
+        ring.rotation.x = Math.PI / 2;
+        scene.add(ring);
+        orbitRings.push(ring);
+      });
+    }
+
+    function createParticles() {
+      const particleGeo = new THREE.SphereGeometry(0.015, 8, 8);
+      const particleMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.85 });
+      for (let i = 0; i < 80; i++) {
+        const p = new THREE.Mesh(particleGeo, particleMat);
+        const radius = 1.8 + Math.random() * 0.9;
+        const angle = Math.random() * Math.PI * 2;
+        p.userData = { radius, angle, speed: 0.002 + Math.random() * 0.006, yOffset: (Math.random() - 0.5) * 0.6 };
+        p.position.set(Math.cos(angle) * radius, p.userData.yOffset, Math.sin(angle) * radius);
+        particles.push(p);
+        scene.add(p);
       }
     }
 
-    const scene = new THREE.Scene();
-    scene.background = null;
-
-    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
-    camera.position.set(0, 1.6, 3.2);
-
-    // lights
-    const ambient = new THREE.AmbientLight(0xffffff, 0.35);
-    scene.add(ambient);
-    const dir = new THREE.DirectionalLight(0xffffff, 0.7);
-    dir.position.set(5, 10, 7);
-    scene.add(dir);
-
-    // simple glowing core placeholder
-    const coreGeo = new THREE.SphereGeometry(0.55, 32, 32);
-    const coreMat = new THREE.MeshStandardMaterial({ color: 0x0ea5e9, emissive: 0x0ea5e9, emissiveIntensity: 0.6, metalness:0.4, roughness:0.3 });
-    const core = new THREE.Mesh(coreGeo, coreMat);
-    scene.add(core);
-
-    // subtle particles ring
-    const ringGeo = new THREE.RingGeometry(0.95, 1.05, 64);
-    const ringMat = new THREE.MeshBasicMaterial({ color: 0x94a3b8, transparent:true, opacity:0.18, side:THREE.DoubleSide });
-    const ring = new THREE.Mesh(ringGeo, ringMat);
-    ring.rotation.x = Math.PI/2;
-    scene.add(ring);
-
-    // compass needle placeholder
-    const needle = new THREE.Group();
-    const shaft = new THREE.CylinderGeometry(0.02,0.02,1.2,12);
-    const shaftMesh = new THREE.Mesh(shaft, new THREE.MeshStandardMaterial({ color:0xffffff, emissive:0xffffff, emissiveIntensity:0.15 }));
-    shaftMesh.rotation.x = Math.PI/2;
-    needle.add(shaftMesh);
-    const head = new THREE.ConeGeometry(0.06,0.18,12);
-    const headN = new THREE.Mesh(head, new THREE.MeshStandardMaterial({ color:0xf87171, emissive:0xf87171, emissiveIntensity:0.6 }));
-    headN.position.set(0,0.6,0);
-    headN.rotation.x = Math.PI/2;
-    needle.add(headN);
-    scene.add(needle);
-
-    // simple animation loop
-    function animate() {
-      resize();
-      const t = performance.now() * 0.001;
-      core.rotation.y = t * 0.2;
-      ring.rotation.z = t * 0.05;
-      needle.rotation.y = Math.sin(t*0.5) * 0.6;
-      renderer.render(scene, camera);
-      requestAnimationFrame(animate);
+    function createEmotionalNodes() {
+      const nodeGeo = new THREE.SphereGeometry(0.08, 16, 16);
+      const configs = [
+        { name: 'Ca', color: 0x38bdf8, radius: 1.05, speed: 0.6 },
+        { name: 'Joy', color: 0xf97316, radius: 1.25, speed: 0.45 },
+        { name: 'Stress', color: 0xf87171, radius: 1.45, speed: 0.35 }
+      ];
+      configs.forEach(cfg => {
+        const mat = new THREE.MeshStandardMaterial({ color: cfg.color, emissive: cfg.color, emissiveIntensity: 0.6, roughness: 0.28, metalness: 0.45 });
+        const node = new THREE.Mesh(nodeGeo, mat);
+        node.userData = { angle: Math.random() * Math.PI * 2, radius: cfg.radius, speed: cfg.speed * 0.002, name: cfg.name };
+        node.position.set(Math.cos(node.userData.angle) * node.userData.radius, 0, Math.sin(node.userData.angle) * node.userData.radius);
+        emotionalNodes.push(node);
+        scene.add(node);
+      });
     }
-    animate();
 
-    // UI logic: simulate metrics and wire up analyze button
+    function animateRingsAndParticles() {
+      const t = performance.now() * 0.0003;
+      orbitRings.forEach((ring, i) => ring.rotation.z = t * (0.2 + i * 0.12));
+      particles.forEach(p => {
+        p.userData.angle += p.userData.speed;
+        p.position.x = Math.cos(p.userData.angle) * p.userData.radius;
+        p.position.z = Math.sin(p.userData.angle) * p.userData.radius;
+        p.position.y = p.userData.yOffset + Math.sin(performance.now() * 0.001 + p.userData.angle) * 0.06;
+      });
+    }
+
+    function animateEmotionalNodes() {
+      emotionalNodes.forEach(node => {
+        node.userData.angle += node.userData.speed;
+        node.position.x = Math.cos(node.userData.angle) * node.userData.radius;
+        node.position.z = Math.sin(node.userData.angle) * node.userData.radius;
+        node.position.y = Math.sin(performance.now() * 0.001 + node.userData.angle) * 0.12;
+        const pulse = 1 + Math.sin(performance.now() * 0.002 + node.userData.angle) * 0.03;
+        node.scale.set(pulse, pulse, pulse);
+      });
+    }
+
+    function createCompassHousing() {
+      const outerGeo = new THREE.TorusGeometry(1.65, 0.06, 16, 200);
+      const outerMat = new THREE.MeshStandardMaterial({ color: 0x111827, metalness: 0.6, roughness: 0.35 });
+      const outer = new THREE.Mesh(outerGeo, outerMat);
+      outer.rotation.x = Math.PI / 2;
+      scene.add(outer);
+
+      const diskGeo = new THREE.CircleGeometry(1.6, 128);
+      const diskMat = new THREE.MeshStandardMaterial({ color: 0x071022, metalness: 0.12, roughness: 0.8, side: THREE.DoubleSide });
+      const disk = new THREE.Mesh(diskGeo, diskMat);
+      disk.rotation.x = Math.PI / 2;
+      disk.position.y = -0.002;
+      scene.add(disk);
+
+      const tickGroup = new THREE.Group();
+      const tickMat = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.2, roughness: 0.6 });
+      for (let i = 0; i < 360; i += 6) {
+        const len = (i % 90 === 0) ? 0.14 : (i % 30 === 0 ? 0.08 : 0.04);
+        const geo = new THREE.BoxGeometry(0.02, len, 0.01);
+        const tick = new THREE.Mesh(geo, tickMat);
+        const rad = THREE.MathUtils.degToRad(i);
+        const r = 1.45;
+        tick.position.set(Math.cos(rad) * r, 0.01, Math.sin(rad) * r);
+        tick.lookAt(0, 0.01, 0);
+        tick.rotateX(Math.PI / 2);
+        tickGroup.add(tick);
+      }
+      scene.add(tickGroup);
+
+      const labels = ['N','E','S','W'];
+      const labelAngles = [0,90,180,270];
+      labelAngles.forEach((deg, idx) => {
+        const canvasLabel = document.createElement('canvas');
+        canvasLabel.width = 128; canvasLabel.height = 128;
+        const ctx = canvasLabel.getContext('2d');
+        ctx.clearRect(0,0,128,128);
+        ctx.font = 'bold 72px Arial';
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(labels[idx], 64, 64);
+        const tex = new THREE.CanvasTexture(canvasLabel);
+        tex.encoding = THREE.sRGBEncoding;
+        tex.needsUpdate = true;
+        const spriteMat = new THREE.SpriteMaterial({ map: tex, transparent: true });
+        const sprite = new THREE.Sprite(spriteMat);
+        const rad = THREE.MathUtils.degToRad(deg);
+        const r = 1.9;
+        sprite.position.set(Math.cos(rad) * r, 0.02, Math.sin(rad) * r);
+        sprite.scale.set(0.42, 0.42, 0.42);
+        scene.add(sprite);
+      });
+    }
+
+    function createCompassNeedle() {
+      compassNeedleGroup = new THREE.Group();
+      const shaftGeo = new THREE.CylinderGeometry(0.02, 0.02, 1.6, 12);
+      const shaftMat = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 0.18, metalness: 0.6, roughness: 0.25 });
+      const shaft = new THREE.Mesh(shaftGeo, shaftMat);
+      shaft.rotation.x = Math.PI / 2;
+      shaft.position.y = 0.01;
+      compassNeedleGroup.add(shaft);
+
+      const headGeo = new THREE.ConeGeometry(0.06, 0.18, 12);
+      const headMatN = new THREE.MeshStandardMaterial({ color: 0xf87171, emissive: 0xf87171, emissiveIntensity: 0.6 });
+      const headN = new THREE.Mesh(headGeo, headMatN);
+      headN.position.set(0, 0.9, 0);
+      headN.rotation.x = Math.PI / 2;
+      compassNeedleGroup.add(headN);
+
+      const headMatS = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 0.18 });
+      const headS = new THREE.Mesh(headGeo, headMatS);
+      headS.position.set(0, -0.9, 0);
+      headS.rotation.x = -Math.PI / 2;
+      compassNeedleGroup.add(headS);
+
+      const hubGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.06, 16);
+      const hubMat = new THREE.MeshStandardMaterial({ color: 0x111827, metalness: 0.8, roughness: 0.2 });
+      const hub = new THREE.Mesh(hubGeo, hubMat);
+      hub.position.set(0, 0.01, 0);
+      compassNeedleGroup.add(hub);
+
+      compassNeedleGroup.position.set(0, 0.02, 0);
+      scene.add(compassNeedleGroup);
+    }
+
+    function updateArrowColor(metrics) {
+      if (!compassNeedleGroup) return;
+      let color = new THREE.Color(0x38bdf8);
+      if (metrics.stress > 0.6) color = new THREE.Color(0xf87171);
+      else if (metrics.energy > 0.7) color = new THREE.Color(0xfbbf24);
+      compassNeedleGroup.children.forEach(part => {
+        if (part.material) {
+          part.material.emissive = color;
+          if (part.geometry && part.geometry.type !== 'ConeGeometry') part.material.color = color;
+        }
+      });
+    }
+
+    function initTrajectory() {
+      const geometry = new THREE.BufferGeometry();
+      const positions = new Float32Array(TRAJECTORY_MAX * 3);
+      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      const material = new THREE.LineBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.9, linewidth: 2 });
+      trajectoryLine = new THREE.Line(geometry, material);
+      trajectoryLine.frustumCulled = false;
+      scene.add(trajectoryLine);
+    }
+
+    function addTrajectoryPoint({ energy, stress }) {
+      const angle = Math.atan2(stress, energy);
+      const radius = 1.6;
+      const x = Math.cos(angle) * radius;
+      const y = Math.sin(performance.now() * 0.001) * 0.15;
+      const z = Math.sin(angle) * radius;
+      trajectoryPoints.push(new THREE.Vector3(x, y, z));
+      if (trajectoryPoints.length > TRAJECTORY_MAX) trajectoryPoints.shift();
+    }
+
+    function updateTrajectoryLine() {
+      if (!trajectoryLine) return;
+      const positions = trajectoryLine.geometry.attributes.position.array;
+      for (let i = 0; i < TRAJECTORY_MAX; i++) {
+        const p = trajectoryPoints[i];
+        if (p) {
+          positions[i * 3] = p.x;
+          positions[i * 3 + 1] = p.y;
+          positions[i * 3 + 2] = p.z;
+        } else {
+          positions[i * 3] = 0;
+          positions[i * 3 + 1] = 0;
+          positions[i * 3 + 2] = 0;
+        }
+      }
+      trajectoryLine.geometry.attributes.position.needsUpdate = true;
+      trajectoryLine.material.opacity = Math.min(1, trajectoryPoints.length / TRAJECTORY_MAX);
+    }
+
+    function updateCompassNodes({ energy, stress }) {
+      emotionalNodes.forEach(node => {
+        if (node.userData.name === 'Ca') node.userData.radius = 1.0 + energy * 0.4;
+        if (node.userData.name === 'Joy') node.userData.radius = 1.2 + energy * 0.3;
+        if (node.userData.name === 'Stress') node.userData.radius = 1.4 + stress * 0.6;
+      });
+    }
+
+    function updateCompassGlow(metrics) {
+      if (!glowMesh) return;
+      let color = new THREE.Color(0x3abff8);
+      if (metrics.stress > 0.6) color = new THREE.Color(0xf87171);
+      else if (metrics.energy > 0.7) color = new THREE.Color(0xfbbf24);
+      else if (metrics.energy < 0.3) color = new THREE.Color(0x64748b);
+      glowMesh.material.uniforms.glowColor.value.copy(color);
+      const boost = 0.9 + (metrics.score / 100) * 0.6;
+      glowMesh.material.uniforms.intensityBoost.value = boost;
+    }
+
+    function updateCompassDirection({ energy, stress }) {
+      const angle = Math.atan2(stress, energy);
+      targetRotation = angle;
+    }
+
+    function updateArrowDirection({ energy, stress }) {
+      const angle = Math.atan2(stress, energy);
+      needleTargetRotation = angle;
+    }
+
+    function updateCompass3D(metrics) {
+      if (!metrics) return;
+      metricsState.energy = metrics.energy;
+      metricsState.stress = metrics.stress;
+      metricsState.score = metrics.score !== undefined ? metrics.score : metricsState.score;
+      updateCompassNodes({ energy: metrics.energy, stress: metrics.stress });
+      updateCompassGlow(metrics);
+      updateCompassDirection({ energy: metrics.energy, stress: metrics.stress });
+      updateArrowColor(metrics);
+      updateArrowDirection({ energy: metrics.energy, stress: metrics.stress });
+      addTrajectoryPoint({ energy: metrics.energy, stress: metrics.stress });
+      syncUI(metricsState);
+    }
+
+    function createParticleField() {
+      const geo = new THREE.BufferGeometry();
+      const count = 220;
+      const positions = new Float32Array(count * 3);
+      const colors = new Float32Array(count * 3);
+      for (let i = 0; i < count; i++) {
+        const r = 6 + Math.random() * 6;
+        const theta = Math.random() * Math.PI * 2;
+        const phi = (Math.random() - 0.5) * Math.PI * 0.6;
+        const x = Math.cos(theta) * Math.cos(phi) * r;
+        const y = Math.sin(phi) * r * 0.4;
+        const z = Math.sin(theta) * Math.cos(phi) * r;
+        positions[i * 3] = x; positions[i * 3 + 1] = y; positions[i * 3 + 2] = z;
+        const c = new THREE.Color().setHSL(0.55 + Math.random() * 0.08, 0.8, 0.6);
+        colors[i * 3] = c.r; colors[i * 3 + 1] = c.g; colors[i * 3 + 2] = c.b;
+      }
+      geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+      const mat = new THREE.PointsMaterial({ size: 0.02, vertexColors: true, transparent: true, opacity: 0.6 });
+      particleField = new THREE.Points(geo, mat);
+      particleField.frustumCulled = false;
+      scene.add(particleField);
+    }
+
+    function createSubtleLightDisks() {
+      const diskGeo = new THREE.CircleGeometry(2.6, 64);
+      const coolMat = new THREE.MeshBasicMaterial({ color: 0x3abff8, transparent: true, opacity: 0.06, blending: THREE.AdditiveBlending });
+      const warmMat = new THREE.MeshBasicMaterial({ color: 0xfbbf24, transparent: true, opacity: 0.03, blending: THREE.AdditiveBlending });
+      const coolDisk = new THREE.Mesh(diskGeo, coolMat);
+      coolDisk.rotation.x = Math.PI / 2; coolDisk.position.set(-1.2, -0.6, -1.2); scene.add(coolDisk); subtleLightDisks.push(coolDisk);
+      const warmDisk = new THREE.Mesh(diskGeo, warmMat);
+      warmDisk.rotation.x = Math.PI / 2; warmDisk.position.set(1.6, -0.8, 1.2); scene.add(warmDisk); subtleLightDisks.push(warmDisk);
+    }
+
+    function animateCompass3D() {
+      requestAnimationFrame(animateCompass3D);
+      scene.rotation.y += (targetRotation - scene.rotation.y) * 0.05;
+      if (compassNeedleGroup) {
+        const current = compassNeedleGroup.rotation.y;
+        compassNeedleGroup.rotation.y += (needleTargetRotation - current) * 0.08;
+      }
+      if (glowMesh && glowMesh.material && glowMesh.material.uniforms) {
+        const worldPos = new THREE.Vector3();
+        glowMesh.getWorldPosition(worldPos);
+        const viewVec = new THREE.Vector3().subVectors(camera.position, worldPos).normalize();
+        glowMesh.material.uniforms.viewVector.value.copy(viewVec);
+      }
+      if (coreSphere) {
+        const t = performance.now() * 0.001;
+        const scale = 1 + Math.sin(t * 2.0) * 0.04;
+        coreSphere.scale.set(scale, scale, scale);
+        const glowScale = 1.12 + Math.sin(t * 1.5) * 0.05;
+        if (glowMesh) glowMesh.scale.set(glowScale, glowScale, glowScale);
+      }
+      animateRingsAndParticles();
+      animateEmotionalNodes();
+      updateTrajectoryLine();
+      if (particleField) particleField.rotation.y += 0.0006;
+      if (composer) composer.render(); else renderer.render(scene, camera);
+      if (controls) controls.update();
+    }
+
+    // ---------------- UI sync and simulation ----------------
     const energyEl = document.getElementById('energyVal');
     const stressEl = document.getElementById('stressVal');
     const scoreEl = document.getElementById('scoreVal');
@@ -296,60 +684,59 @@
     const stabilityEl = document.getElementById('stability');
     const camDot = document.getElementById('camDot');
     const camText = document.getElementById('camText');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const textInput = document.getElementById('textInput');
 
-    // initial values from photo
-    let energy = 0.66;
-    let stress = 0.21;
-    let score = 76;
-
-    function updateUI() {
-      energyEl.textContent = energy.toFixed(2) + (Math.random() > 0.5 ? ' rising' : ' steady');
-      stressEl.textContent = stress.toFixed(2) + (stress > 0.6 ? ' high' : ' low');
-      scoreEl.textContent = Math.round(score);
-      scoreBar.style.width = Math.round(score) + '%';
-      emopulseScore.textContent = Math.round(score) + ' / 100';
-      intensityEl.textContent = (score > 80 ? 'High' : score > 50 ? 'Low' : 'Very Low');
-      stabilityEl.textContent = Math.round((Math.atan2(stress, energy) * 180 / Math.PI)) + '° toward';
-      // needle color/emissive based on stress/energy
-      const needleColor = stress > 0.6 ? 0xf87171 : (energy > 0.7 ? 0xfbbf24 : 0x38bdf8);
-      needle.children.forEach(c => { if (c.material) { c.material.color.setHex(needleColor); c.material.emissive.setHex(needleColor); }});
+    function syncUI(state) {
+      energyEl.textContent = state.energy.toFixed(2) + (Math.random() > 0.5 ? ' rising' : ' steady');
+      stressEl.textContent = state.stress.toFixed(2) + (state.stress > 0.6 ? ' high' : ' low');
+      scoreEl.textContent = Math.round(state.score);
+      scoreBar.style.width = Math.round(state.score) + '%';
+      emopulseScore.textContent = Math.round(state.score) + ' / 100';
+      intensityEl.textContent = (state.score > 80 ? 'High' : state.score > 50 ? 'Low' : 'Very Low');
+      stabilityEl.textContent = Math.round((Math.atan2(state.stress, state.energy) * 180 / Math.PI)) + '° toward';
+      const needleColor = state.stress > 0.6 ? 0xf87171 : (state.energy > 0.7 ? 0xfbbf24 : 0x38bdf8);
+      if (compassNeedleGroup) compassNeedleGroup.children.forEach(c => { if (c.material) { c.material.color.setHex(needleColor); c.material.emissive.setHex(needleColor); }});
     }
 
-    // simulate small fluctuations
+    // small simulation loop to vary metrics slightly
     setInterval(() => {
-      energy = Math.min(1, Math.max(0, energy + (Math.random()-0.5)*0.02));
-      stress = Math.min(1, Math.max(0, stress + (Math.random()-0.5)*0.01));
-      score = Math.min(100, Math.max(0, score + (Math.random()-0.5)*0.6));
-      updateUI();
+      metricsState.energy = Math.min(1, Math.max(0, metricsState.energy + (Math.random()-0.5)*0.02));
+      metricsState.stress = Math.min(1, Math.max(0, metricsState.stress + (Math.random()-0.5)*0.01));
+      metricsState.score = Math.min(100, Math.max(0, metricsState.score + (Math.random()-0.5)*0.6));
+      updateCompass3D(metricsState);
     }, 900);
 
-    // analyze button: quick pulse animation and camera indicator toggle
-    document.getElementById('analyzeBtn').addEventListener('click', () => {
+    analyzeBtn.addEventListener('click', () => {
       camDot.style.background = '#fbbf24';
       camDot.style.boxShadow = '0 0 12px rgba(251,191,36,0.6)';
       camText.textContent = 'Analyzing…';
-      // simulate analysis then restore
       setTimeout(() => {
         camDot.style.background = '#22c55e';
         camDot.style.boxShadow = '0 0 8px rgba(34,197,94,0.6)';
         camText.textContent = 'Camera active — reading your field…';
-        // small random shift to values to simulate result
-        energy = Math.min(1, Math.max(0, energy + (Math.random()-0.5)*0.12));
-        stress = Math.min(1, Math.max(0, stress + (Math.random()-0.5)*0.12));
-        score = Math.round((1 - stress) * 100 * 0.85 + energy * 100 * 0.15);
-        updateUI();
+        metricsState.energy = Math.min(1, Math.max(0, metricsState.energy + (Math.random()-0.5)*0.12));
+        metricsState.stress = Math.min(1, Math.max(0, metricsState.stress + (Math.random()-0.5)*0.12));
+        metricsState.score = Math.round((1 - metricsState.stress) * 100 * 0.85 + metricsState.energy * 100 * 0.15);
+        updateCompass3D(metricsState);
       }, 1200);
     });
 
-    // accessibility: allow Enter to trigger analyze
-    document.getElementById('textInput').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') document.getElementById('analyzeBtn').click();
+    textInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') analyzeBtn.click(); });
+
+    // auto-init on DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', () => {
+      // small delay to allow CSS sizing to settle
+      setTimeout(() => {
+        initCompass3D();
+        updateCompass3D(metricsState);
+      }, 60);
     });
 
-    // If you have a separate compass3d.js module, you can import and call its init here:
-    // import { initCompass, updateCompass3D } from './compass3d.js';
-    // initCompass();
-    // then call updateCompass3D({ energy, stress }) inside updateUI() to sync visuals.
+    // expose update function to window for debugging if needed
+    window.updateCompass3D = updateCompass3D;
+    window.setMetrics = (e,s,sc) => { metricsState.energy = e; metricsState.stress = s; metricsState.score = sc; updateCompass3D(metricsState); };
+
   </script>
 </body>
 </html>
