@@ -654,156 +654,158 @@
       }
     }
 
-    function mapExpressionsToEmotions(expressions) {
-      // face-api gives: neutral, happy, sad, angry, fearful, disgusted, surprised
-      const happy = expressions.happy || 0;
-      const neutral = expressions.neutral || 0;
-      const sad = expressions.sad || 0;
-      const angry = expressions.angry || 0;
-      const fearful = expressions.fearful || 0;
-      const disgusted = expressions.disgusted || 0;
-      const surprised = expressions.surprised || 0;
+   <script>
+function mapExpressionsToEmotions(expressions) {
+  const happy = expressions.happy || 0;
+  const neutral = expressions.neutral || 0;
+  const sad = expressions.sad || 0;
+  const angry = expressions.angry || 0;
+  const fearful = expressions.fearful || 0;
+  const disgusted = expressions.disgusted || 0;
+  const surprised = expressions.surprised || 0;
 
-      const joy = happy + 0.3 * surprised;
-      const stress = angry + fearful + 0.5 * disgusted + 0.3 * sad;
-      const calm = neutral + 0.2 * (1 - (joy + stress));
+  const joy = happy + 0.3 * surprised;
+  const stress = angry + fearful + 0.5 * disgusted + 0.3 * sad;
+  const calm = neutral + 0.2 * (1 - (joy + stress));
 
-      const clamp = (v) => Math.max(0, Math.min(1, v));
-      const total = joy + stress + calm || 1;
-      return {
-        joy: clamp(joy / total),
-        stress: clamp(stress / total),
-        calm: clamp(calm / total),
-      };
-    }
+  const clamp = (v) => Math.max(0, Math.min(1, v));
+  const total = joy + stress + calm || 1;
 
-    function updateUIFromEmotions({ joy, stress, calm }) {
-      const toPercent = (v) => (v * 100).toFixed(0) + "%";
+  return {
+    joy: clamp(joy / total),
+    stress: clamp(stress / total),
+    calm: clamp(calm / total),
+  };
+}
 
-      barCalm.style.width = toPercent(calm);
-      barJoy.style.width = toPercent(joy);
-      barStress.style.width = toPercent(stress);
+function updateUIFromEmotions({ joy, stress, calm }) {
+  const toPercent = (v) => (v * 100).toFixed(0) + "%";
 
-      const moodPos = 10 + joy * 60 - stress * 20 + calm * 10;
-      moodIndicator.style.left = `${Math.max(5, Math.min(95, moodPos))}%`;
+  barCalm.style.width = toPercent(calm);
+  barJoy.style.width = toPercent(joy);
+  barStress.style.width = toPercent(stress);
 
-      const intensity = Math.max(joy, stress);
-      const score = Math.round((calm * 0.5 + joy * 0.4 - stress * 0.3 + 0.4) * 100);
-      const energy = (0.3 + intensity * 0.7).toFixed(2);
+  const moodPos = 10 + joy * 60 - stress * 20 + calm * 10;
+  moodIndicator.style.left = `${Math.max(5, Math.min(95, moodPos))}%`;
 
-      stabilityValue.textContent = `${Math.round((calm - stress) * 40)}° toward`;
-      intensityValue.textContent = intensity < 0.3 ? "Low" : intensity < 0.6 ? "Medium" : "High";
-      scoreValue.textContent = `${score}/100`;
-      emopulseScore.textContent = `${score}/100`;
-      energyValue.textContent = `${energy} rising`;
+  const intensity = Math.max(joy, stress);
+  const score = Math.round((calm * 0.5 + joy * 0.4 - stress * 0.3 + 0.4) * 100);
+  const energy = (0.3 + intensity * 0.7).toFixed(2);
 
-      let signature = "Calm focused energy";
-      let tags = "#calm #focused #energy #Sunshine with tranquility";
-      let stressLabelText = "Sunshine with tranquility";
-      let stressRiskText = "Stress Risk: 0.21 low";
+  stabilityValue.textContent = `${Math.round((calm - stress) * 40)}° toward`;
+  intensityValue.textContent = intensity < 0.3 ? "Low" : intensity < 0.6 ? "Medium" : "High";
+  scoreValue.textContent = `${score}/100`;
+  emopulseScore.textContent = `${score}/100`;
+  energyValue.textContent = `${energy} rising`;
 
-      if (stress > 0.55) {
-        signature = "Tense elevated field";
-        tags = "#stress #alert #overdrive #Storm in the distance";
-        stressLabelText = "Storm signals detected";
-        stressRiskText = `Stress Risk: ${(0.4 + stress * 0.6).toFixed(2)} elevated`;
-      } else if (joy > 0.55) {
-        signature = "Bright expansive energy";
-        tags = "#joy #expansion #lightness #Sunrise in motion";
-        stressLabelText = "Sunshine with sparkles";
-        stressRiskText = `Stress Risk: ${(0.1 + stress * 0.3).toFixed(2)} low`;
-      } else if (calm > 0.6) {
-        signature = "Deep grounded calm";
-        tags = "#calm #grounded #steady #Ocean with still waves";
-        stressLabelText = "Sunshine with tranquility";
-        stressRiskText = `Stress Risk: ${(0.05 + stress * 0.2).toFixed(2)} very low`;
-      }
+  let signature = "Calm focused energy";
+  let tags = "#calm #focused #energy #Sunshine with tranquility";
+  let stressLabelText = "Sunshine with tranquility";
+  let stressRiskText = "Stress Risk: 0.21 low";
 
-      signatureText.textContent = signature;
-      hashtagsText.textContent = tags;
-      stressLabel.textContent = stressLabelText;
-      stressScoreText.textContent = stressRiskText;
+  if (stress > 0.55) {
+    signature = "Tense elevated field";
+    tags = "#stress #alert #overdrive #Storm in the distance";
+    stressLabelText = "Storm signals detected";
+    stressRiskText = `Stress Risk: ${(0.4 + stress * 0.6).toFixed(2)} elevated`;
+  } else if (joy > 0.55) {
+    signature = "Bright expansive energy";
+    tags = "#joy #expansion #lightness #Sunrise in motion";
+    stressLabelText = "Sunshine with sparkles";
+    stressRiskText = `Stress Risk: ${(0.1 + stress * 0.3).toFixed(2)} low`;
+  } else if (calm > 0.6) {
+    signature = "Deep grounded calm";
+    tags = "#calm #grounded #steady #Ocean with still waves";
+    stressLabelText = "Sunshine with tranquility";
+    stressRiskText = `Stress Risk: ${(0.05 + stress * 0.2).toFixed(2)} very low`;
+  }
 
-      const hueBase = 220;
-      const joyShift = joy * 80;
-      const stressShift = stress * -60;
-      const hue = hueBase + joyShift + stressShift;
-      const sat = 70 + intensity * 20;
-      const light = 40 + joy * 10 - stress * 5;
+  signatureText.textContent = signature;
+  hashtagsText.textContent = tags;
+  stressLabel.textContent = stressLabelText;
+  stressScoreText.textContent = stressRiskText;
 
-      compassSphere.style.background = `
-        radial-gradient(circle at 30% 20%,
-          hsl(${hue + 40}, ${sat}%, ${light + 20}%),
-          hsl(${hue + 10}, ${sat + 10}%, ${light}%),
-          hsl(${hue - 20}, ${sat + 5}%, ${light - 10}%),
-          hsl(${hue - 40}, ${sat}%, ${light - 20}%),
-          #050b1f 100%)
-      `;
+  const hueBase = 220;
+  const joyShift = joy * 80;
+  const stressShift = stress * -60;
+  const hue = hueBase + joyShift + stressShift;
+  const sat = 70 + intensity * 20;
+  const light = 40 + joy * 10 - stress * 5;
 
-      const pulseScale = 1 + intensity * 0.12;
-      const pulseOpacity = 0.2 + intensity * 0.5;
-      compassPulse.style.opacity = pulseOpacity;
-      compassPulse.style.transform = `scale(${pulseScale})`;
-    }
+  compassSphere.style.background = `
+    radial-gradient(circle at 30% 20%,
+      hsl(${hue + 40}, ${sat}%, ${light + 20}%),
+      hsl(${hue + 10}, ${sat + 10}%, ${light}%),
+      hsl(${hue - 20}, ${sat + 5}%, ${light - 10}%),
+      hsl(${hue - 40}, ${sat}%, ${light - 20}%),
+      #050b1f 100%)
+  `;
 
-    async function startEmotionLoop() {
-      if (!modelsLoaded) return;
-      analyzing = true;
+  const pulseScale = 1 + intensity * 0.12;
+  const pulseOpacity = 0.2 + intensity * 0.5;
+  compassPulse.style.opacity = pulseOpacity;
+  compassPulse.style.transform = `scale(${pulseScale})`;
+}
 
-      const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 160, scoreThreshold: 0.5 });
+async function startEmotionLoop() {
+  if (!modelsLoaded) return;
+  analyzing = true;
 
-      async function loop() {
-        if (!analyzing) return;
-        if (video.readyState === 4) {
-          try {
-            const result = await faceapi
-              .detectSingleFace(video, options)
-              .withFaceExpressions();
+  const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 160, scoreThreshold: 0.5 });
 
-            if (result && result.expressions) {
-              const mapped = mapExpressionsToEmotions(result.expressions);
-              updateUIFromEmotions(mapped);
-              statusText.textContent = "Emotions detected in real time.";
-            } else {
-              statusText.textContent = "No face detected. Look at the camera.";
-            }
-          } catch (err) {
-            console.error(err);
-            statusText.textContent = "Error analyzing emotions.";
-          }
+  async function loop() {
+    if (!analyzing) return;
+    if (video.readyState === 4) {
+      try {
+        const result = await faceapi
+          .detectSingleFace(video, options)
+          .withFaceExpressions();
+
+        if (result && result.expressions) {
+          const mapped = mapExpressionsToEmotions(result.expressions);
+          updateUIFromEmotions(mapped);
+          statusText.textContent = "Emotions detected in real time.";
+        } else {
+          statusText.textContent = "No face detected. Look at the camera.";
         }
-        requestAnimationFrame(loop);
+      } catch (err) {
+        console.error(err);
+        statusText.textContent = "Error analyzing emotions.";
       }
-
-      loop();
     }
+    requestAnimationFrame(loop);
+  }
 
-    analyzeBtn.addEventListener("click", () => {
-      const text = (textInput.value || "").toLowerCase();
-      if (!text.trim()) return;
+  loop();
+}
 
-      let joy = 0.3, stress = 0.2, calm = 0.5;
+analyzeBtn.addEventListener("click", () => {
+  const text = (textInput.value || "").toLowerCase();
+  if (!text.trim()) return;
 
-      if (text.includes("happy") || text.includes("joy") || text.includes("excited")) {
-        joy = 0.7; calm = 0.2; stress = 0.1;
-      }
-      if (text.includes("sad") || text.includes("tired") || text.includes("down")) {
-        joy = 0.15; calm = 0.35; stress = 0.5;
-      }
-      if (text.includes("anxious") || text.includes("stress") || text.includes("angry")) {
-        joy = 0.1; calm = 0.2; stress = 0.7;
-      }
-      if (text.includes("calm") || text.includes("peace") || text.includes("focused")) {
-        joy = 0.25; calm = 0.65; stress = 0.1;
-      }
+  let joy = 0.3, stress = 0.2, calm = 0.5;
 
-      updateUIFromEmotions({ joy, stress, calm });
-    });
+  if (text.includes("happy") || text.includes("joy") || text.includes("excited")) {
+    joy = 0.7; calm = 0.2; stress = 0.1;
+  }
+  if (text.includes("sad") || text.includes("tired") || text.includes("down")) {
+    joy = 0.15; calm = 0.35; stress = 0.5;
+  }
+  if (text.includes("anxious") || text.includes("stress") || text.includes("angry")) {
+    joy = 0.1; calm = 0.2; stress = 0.7;
+  }
+  if (text.includes("calm") || text.includes("peace") || text.includes("focused")) {
+    joy = 0.25; calm = 0.65; stress = 0.1;
+  }
 
-    window.addEventListener("load", async () => {
-      await initCamera();
-      await loadModels();
-    });
-  </script>
+  updateUIFromEmotions({ joy, stress, calm });
+});
+
+window.addEventListener("load", async () => {
+  await initCamera();
+  await loadModels();
+});
+</script>
+
 </body>
 </html>
