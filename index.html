@@ -1,56 +1,131 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Emopulse – Emotional Field</title>
+  </style>
+</head>
 
-  <!-- TVARKINGAS CSS IMPORTAS -->
-  <link rel="stylesheet" href="/emopulse.css">
+<body>
+  <div class="app">
+    <div class="left">
+      <div>
+        <h1>Understand your emotional field in real time</h1>
+        <p class="subtitle">
+          Type anything you're feeling or thinking. Using your camera, Emopulse analyzes your emotional field in real time.
+        </p>
+        <div class="input-row">
+          <input id="textInput" placeholder="Type anything you're feeling or thinking..." />
+          <button id="analyzeBtn">Analyze my emotional field</button>
+        </div>
+      </div>
 
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-        "Segoe UI", sans-serif;
-    }
+      <div class="compass-wrapper">
+        <div class="compass-glow"></div>
+        <div class="compass-sphere" id="compassSphere">
+          <div class="compass-inner"></div>
+          <div class="compass-orbit"></div>
+          <div class="compass-orbit"></div>
+          <div class="compass-pulse" id="compassPulse"></div>
+          <div class="compass-label label-ca">Ca</div>
+          <div class="compass-label label-joy">Joy</div>
+          <div class="compass-label label-stress">Stress</div>
+        </div>
+      </div>
 
-    body {
-      background: radial-gradient(circle at top, #0b1b3f 0%, #02030a 55%, #000000 100%);
-      color: #f5f7ff;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+      <div class="metrics-row">
+        <div class="card">
+          <div class="card-title">Emotional Aura</div>
+          <div class="metric-label">Stability</div>
+          <div class="metric-value" id="stabilityValue">12° toward</div>
+          <div class="metric-label">Intensity</div>
+          <div class="metric-value" id="intensityValue">Low</div>
+          <div class="metric-label" style="margin-top:8px;">Score</div>
+          <div class="score-big" id="scoreValue">76/100</div>
+        </div>
 
-    .app {
-      width: 100%;
-      max-width: 1200px;
-      padding: 32px;
-      display: grid;
-      grid-template-columns: minmax(0, 3fr) minmax(0, 2.5fr);
-      gap: 32px;
-    }
+        <div class="card">
+          <div class="card-title">Emotional Signature</div>
+          <div class="metric-value" id="signatureText">Calm focused energy</div>
+          <div class="hashtags" id="hashtagsText">
+            #calm #focused #energy #Sunshine with tranquility
+          </div>
+          <div class="mood-map">
+            Mood Map: Positive → Euphoric → Intense
+            <div class="mood-gradient">
+              <div class="mood-indicator" id="moodIndicator"></div>
+            </div>
+          </div>
+        </div>
 
-    .left, .right {
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-    }
+        <div class="card">
+          <div class="card-title">Stress Risk</div>
+          <div class="stress-row">
+            <div class="sun-icon"></div>
+            <div>
+              <div class="stress-text-main" id="stressLabel">Sunshine with tranquility</div>
+              <div class="stress-text-sub" id="stressScoreText">Stress Risk: 0.21 low</div>
+            </div>
+          </div>
+          <div class="metric-label" style="margin-top:10px;">Emopulse Score</div>
+          <div class="score-big" id="emopulseScore">76/100</div>
+        </div>
+      </div>
 
-    h1 {
-      font-size: 28px;
-      font-weight: 650;
-      letter-spacing: 0.02em;
-    }
+      <div class="card" style="margin-top:8px;">
+        <div class="card-title">Emotional Timeline</div>
+        <div class="metric-label">Energy</div>
+        <div class="metric-value" id="energyValue">0.66 rising</div>
+        <div class="timeline-graph">
+          <div class="timeline-line"></div>
+          <div class="timeline-overlay"></div>
+        </div>
+      </div>
+    </div>
 
-    .subtitle {
-      font-size: 14px;
-      color: #a9b4ff;
-      margin-top: 6px;
-    }
+    <div class="right">
+      <div class="right-top-card">
+        <div class="card-title">Emopulse Camera Scan</div>
+        <p class="subtitle" style="margin-top:0;">
+          Real-time emotion detection using your webcam. No data is stored; analysis happens in your browser.
+        </p>
+        <div class="webcam-row">
+          <video id="video" autoplay muted playsinline></video>
+          <div class="status" id="statusText">Initializing camera and models…</div>
+          <div class="bars">
+            <div>
+              <div class="bar-label">Calm</div>
+              <div class="bar-track">
+                <div class="bar-fill calm" id="barCalm"></div>
+              </div>
+            </div>
+            <div>
+              <div class="bar-label">Joy</div>
+              <div class="bar-track">
+                <div class="bar-fill joy" id="barJoy"></div>
+              </div>
+            </div>
+            <div>
+              <div class="bar-label">Stress</div>
+              <div class="bar-track">
+                <div class="bar-fill stress" id="barStress"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">How it works</div>
+        <p class="subtitle" style="margin-top:0;">
+          Emopulse uses facial expression analysis to estimate emotional tendencies like calm, joy, and stress.
+          These signals drive the compass colors, aura intensity, and mood map position.
+        </p>
+      </div>
+    </div>
+  </div>
+
+.subtitle {
+  font-size: 14px;
+  color: #a9b4ff;
+  margin-top: 6px;
+}
+
 
     .input-row {
       margin-top: 16px;
