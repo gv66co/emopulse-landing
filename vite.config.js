@@ -5,7 +5,6 @@ export default defineConfig({
   publicDir: ".",
   build: {
     outDir: "dist",
-    emptyOutDir: true,
-    copyPublicDir: true
+    emptyOutDir: true
   }
 });
