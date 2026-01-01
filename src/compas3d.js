@@ -1,3 +1,154 @@
+// init (pakeisk savo initCompass3D dalį)
+function initCompass3D() {
+  canvas = document.getElementById('compass3d');
+  if (!canvas) { console.error('Canvas #compass3d not found'); return; }
+
+  scene = new THREE.Scene();
+  scene.background = null;
+
+  camera = new THREE.PerspectiveCamera(45, Math.max(0.1, canvas.clientWidth / Math.max(1, canvas.clientHeight)), 0.1, 1000);
+  camera.position.set(0, 1.6, 3.2);
+
+  try {
+    renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'high-performance' });
+  } catch (e) {
+    console.error('Renderer init failed', e);
+    return;
+  }
+
+  const DPR = Math.min(window.devicePixelRatio || 1, 2);
+  renderer.setPixelRatio(DPR);
+
+  // Use actual CSS size for initial setSize
+  const w = Math.max(1, canvas.clientWidth);
+  const h = Math.max(1, canvas.clientHeight);
+  renderer.setSize(w, h, false);
+
+  // Lights and scene objects
+  addLights();
+
+  // Setup composer AFTER renderer size set
+  setupPostProcessing(w, h);
+
+  // Controls (optional)
+  controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.08;
+
+  // Build scene
+  createCoreSphere();
+  createGlowShell(); // shader init wrapped in try/catch below
+  // ... other creation calls ...
+
+  window.addEventListener('resize', resizeCompass3D, { passive: true });
+
+  console.log('initCompass3D complete');
+}
+
+function setupPostProcessing(width, height) {
+  try {
+    composer = new EffectComposer(renderer);
+    const renderPass = new RenderPass(scene, camera);
+    composer.addPass(renderPass);
+
+    const bloom = new UnrealBloomPass(new THREE.Vector2(width, height), 0.9, 0.6, 0.1);
+    // ensure bloom is last pass; composer will render to screen by default
+    composer.addPass(bloom);
+  } catch (e) {
+    console.error('Postprocessing init failed', e);
+    composer = null; // fallback to renderer.render
+  }
+}
+
+function resizeCompass3D() {
+  if (!canvas || !camera || !renderer) return;
+  const w = Math.max(1, canvas.clientWidth);
+  const h = Math.max(1, canvas.clientHeight);
+  camera.aspect = Math.max(0.1, w / Math.max(1, h));
+  camera.updateProjectionMatrix();
+  renderer.setSize(w, h, false);
+  if (composer) composer.setSize(w, h);
+}
+
+function createGlowShell() {
+  const glowGeo = new THREE.SphereGeometry(0.78, 64, 64);
+  let glowMat;
+  try {
+    glowMat = new THREE.ShaderMaterial({
+      uniforms: THREE.UniformsUtils.clone(GlowShader.uniforms),
+      vertexShader: GlowShader.vertexShader,
+      fragmentShader: GlowShader.fragmentShader,
+      side: THREE.BackSide,
+      blending: THREE.AdditiveBlending,
+      transparent: true,
+      depthWrite: false
+    });
+    // quick compile test (forces shader compile and surfaces errors)
+    const testMesh = new THREE.Mesh(new THREE.BoxGeometry(0.01,0.01,0.01), glowMat);
+    scene.add(testMesh);
+    scene.remove(testMesh);
+  } catch (err) {
+    console.error('Glow shader failed to compile, falling back to MeshBasicMaterial', err);
+    glowMat = new THREE.MeshBasicMaterial({ color: 0x3abff8, transparent: true, opacity: 0.25 });
+  }
+  glowMesh = new THREE.Mesh(glowGeo, glowMat);
+  glowMesh.position.set(0,0,0);
+  scene.add(glowMesh);
+}
+
+// global error catcher to surface hidden errors
+window.addEventListener('error', (e) => {
+  console.error('Global error captured:', e.message, e.filename, e.lineno, e.colno);
+});
+window.addEventListener('unhandledrejection', (ev) => {
+  console.error('Unhandled promise rejection:', ev.reason);
+});
+
+function animateCompass3D() {
+  requestAnimationFrame(animateCompass3D);
+
+  // smooth rotations
+  scene.rotation.y += (targetRotation - scene.rotation.y) * 0.05;
+  if (compassNeedleGroup) {
+    const cur = compassNeedleGroup.rotation.y;
+    compassNeedleGroup.rotation.y += (needleTargetRotation - cur) * 0.08;
+  }
+
+  // update shader viewVector safely
+  if (glowMesh && glowMesh.material && glowMesh.material.uniforms && glowMesh.material.uniforms.viewVector) {
+    const worldPos = new THREE.Vector3();
+    glowMesh.getWorldPosition(worldPos);
+    const viewVec = new THREE.Vector3().subVectors(camera.position, worldPos).normalize();
+    glowMesh.material.uniforms.viewVector.value.copy(viewVec);
+  }
+
+  // animate elements
+  if (coreSphere) {
+    const t = performance.now() * 0.001;
+    const scale = 1 + Math.sin(t * 2.0) * 0.04;
+    coreSphere.scale.set(scale, scale, scale);
+    if (glowMesh) {
+      const glowScale = 1.12 + Math.sin(t * 1.5) * 0.05;
+      glowMesh.scale.set(glowScale, glowScale, glowScale);
+    }
+  }
+  animateRingsAndParticles();
+  animateEmotionalNodes();
+  updateTrajectoryLine();
+
+  // render via composer if available, otherwise fallback
+  try {
+    if (composer) composer.render();
+    else renderer.render(scene, camera);
+  } catch (e) {
+    console.error('Render error, falling back to renderer.render', e);
+    try { renderer.render(scene, camera); } catch (err) { console.error('Renderer render failed', err); }
+  }
+
+  if (controls) controls.update();
+}
+
+
 // compas3d-1.1.js
 // Versija 1.1 — pilnas 3D emocinis kompasas su glow ir UI sinchronizacija.
 // Import three.js
