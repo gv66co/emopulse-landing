@@ -1,742 +1,730 @@
-<!doctype html>
-<html lang="lt">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Emopulse — Emotional Compass 1.1 (Integrated)</title>
-
-  <!-- Integrated CSS: emopulse-1.1 styles -->
+  <meta charset="UTF-8" />
+  <title>Emopulse – Emotional Field</title>
   <style>
-    :root{
-      --bg-0: #03050a;
-      --bg-1: #071022;
-      --panel: rgba(6,18,30,0.6);
-      --muted: #94a3b8;
-      --accent-cool: #3abff8;
-      --accent-warm: #fbbf24;
-      --danger: #f87171;
-      --glass: rgba(255,255,255,0.03);
-      --glass-2: rgba(255,255,255,0.02);
-      --card-radius: 14px;
-      --text: #eaf6ff;
-      --soft: rgba(234,246,255,0.06);
-      --shadow: rgba(2,6,23,0.6);
-      --font-stack: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      --ui-z: 50;
-    }
-    * { box-sizing: border-box; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
-    html,body { height:100%; margin:0; font-family:var(--font-stack); background: linear-gradient(180deg,#02040a 0%, var(--bg-1) 60%); color:var(--text); }
-    .app { display:flex; gap:28px; align-items:center; justify-content:center; height:100vh; padding:28px; overflow:hidden; }
-
-    /* Stage (canvas container) */
-    .stage {
-      width:720px; max-width:62vw; height:720px; max-height:86vh;
-      display:flex; align-items:center; justify-content:center; position:relative; border-radius:20px;
-      background:
-        radial-gradient(1200px 600px at 18% 18%, rgba(58,191,248,0.06), transparent 8%),
-        radial-gradient(800px 400px at 80% 80%, rgba(251,191,36,0.02), transparent 6%),
-        linear-gradient(180deg, rgba(255,255,255,0.02), transparent 30%);
-      box-shadow: 0 10px 40px var(--shadow), inset 0 1px 0 rgba(255,255,255,0.02);
-      overflow:hidden;
-    }
-    .stage::before, .stage::after { content:""; position:absolute; inset:0; pointer-events:none; z-index:0; }
-    .stage::before {
-      background:
-        radial-gradient(600px 300px at 10% 20%, rgba(58,191,248,0.06), transparent 10%),
-        radial-gradient(500px 250px at 85% 75%, rgba(248,150,30,0.03), transparent 8%);
-      opacity:0.9; filter: blur(18px); mix-blend-mode: screen;
-    }
-    .stage::after {
-      background: linear-gradient(90deg, rgba(58,191,248,0.02), rgba(251,191,36,0.01));
-      mix-blend-mode: overlay; opacity:0.6; animation: slowShift 18s linear infinite;
-    }
-    @keyframes slowShift { 0%{transform:translateX(-6%)}50%{transform:translateX(6%)}100%{transform:translateX(-6%)} }
-
-    canvas#compass3d { width:100%; height:100%; display:block; border-radius:16px; position:relative; z-index:1; }
-
-    .stage .brand { position:absolute; left:18px; top:18px; z-index:10; color:var(--muted); font-size:13px; line-height:1; }
-    .stage .brand .name { font-weight:700; color:var(--text); margin-bottom:6px; }
-
-    /* Right panel */
-    .panel {
-      width:360px; max-width:34vw;
-      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      border-radius:var(--card-radius); padding:18px; box-shadow: 0 8px 30px var(--shadow);
-      backdrop-filter: blur(8px) saturate(120%); border: 1px solid rgba(255,255,255,0.03);
-      display:flex; flex-direction:column; gap:12px; z-index:var(--ui-z);
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Segoe UI", sans-serif;
     }
 
-    .header { display:flex; align-items:center; gap:12px; margin-bottom:6px; }
-    .logo-dot { width:44px; height:44px; border-radius:10px; background: linear-gradient(135deg, var(--accent-cool), #6ee7b7); display:flex; align-items:center; justify-content:center; font-weight:700; color:#021124; box-shadow: 0 8px 26px rgba(58,191,248,0.12), inset 0 -6px 18px rgba(255,255,255,0.02); }
-    .title { font-size:15px; font-weight:700; color:var(--text); line-height:1.05; }
-    .subtitle { font-size:12px; color:var(--muted); margin-top:2px; }
-
-    .input-row { margin:14px 0 6px 0; display:flex; gap:8px; align-items:center; }
-    .text-input { flex:1; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.03); background:var(--glass); color:var(--text); outline:none; font-size:13px; transition: box-shadow .18s ease, transform .12s ease; }
-    .text-input:focus { box-shadow: 0 6px 18px rgba(58,191,248,0.08); transform: translateY(-1px); }
-    .btn { padding:10px 12px; border-radius:10px; background: linear-gradient(180deg, var(--accent-cool), #1ea7e8); color:#021124; font-weight:800; border:none; cursor:pointer; box-shadow: 0 8px 26px rgba(58,191,248,0.12); transition: transform .12s ease, box-shadow .12s ease; }
-    .btn:active { transform: translateY(1px); box-shadow: 0 6px 18px rgba(58,191,248,0.08); }
-
-    .camera-indicator { display:flex; align-items:center; gap:8px; margin-top:6px; color:var(--muted); font-size:13px; }
-    .cam-dot { width:10px; height:10px; border-radius:50%; background:#22c55e; box-shadow: 0 0 8px rgba(34,197,94,0.6), 0 0 18px rgba(34,197,94,0.08); transition: background .18s ease, box-shadow .18s ease; }
-
-    .metrics { margin-top:8px; display:grid; gap:12px; }
-    .card { background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005)); border-radius:12px; padding:12px; border:1px solid rgba(255,255,255,0.02); box-shadow: 0 6px 18px rgba(2,6,23,0.35); }
-    .card h4 { margin:0 0 6px 0; font-size:13px; color:#dff6ff; }
-    .muted { color:var(--muted); font-size:13px; }
-
-    .score { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:6px; }
-    .score .big { font-size:22px; font-weight:800; color:var(--text); }
-    .progress { height:8px; border-radius:8px; background:var(--glass-2); overflow:hidden; flex:1; margin-left:12px; }
-    .progress > i { display:block; height:100%; background: linear-gradient(90deg, var(--accent-cool), #6ee7b7); width:0%; transition: width .6s cubic-bezier(.2,.9,.2,1); }
-
-    .moodmap { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
-    .tag { background: rgba(255,255,255,0.03); padding:6px 8px; border-radius:8px; font-size:12px; color:var(--muted); box-shadow: inset 0 -2px 6px rgba(255,255,255,0.01); }
-
-    .timeline { height:56px; background: linear-gradient(90deg, rgba(255,255,255,0.01), transparent); border-radius:8px; margin-top:8px; position:relative; overflow:hidden; }
-    .timeline::after { content:""; position:absolute; left:0; top:0; bottom:0; width:100%; background: linear-gradient(90deg, rgba(58,191,248,0.06), rgba(251,191,36,0.03)); opacity:0.6; mix-blend-mode: screen; }
-
-    footer.note { margin-top:12px; font-size:12px; color:var(--muted); text-align:center; }
-
-    @media (max-width:1000px){
-      .app { flex-direction:column; gap:18px; padding:18px; align-items:stretch; justify-content:flex-start; }
-      .panel { width:100%; max-width:100%; order:2; }
-      .stage { width:100%; height:60vh; max-height:60vh; order:1; border-radius:14px; }
+    body {
+      background: radial-gradient(circle at top, #0b1b3f 0%, #02030a 55%, #000000 100%);
+      color: #f5f7ff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    .title, .score .big, .card h4 { text-shadow: 0 6px 18px rgba(58,191,248,0.06); }
-    .hidden { display:none !important; }
-    .particles-overlay { position:absolute; inset:0; pointer-events:none; z-index:2; background-image: radial-gradient(circle at 10% 20%, rgba(58,191,248,0.06) 0px, transparent 40px), radial-gradient(circle at 80% 75%, rgba(248,150,30,0.03) 0px, transparent 30px); mix-blend-mode: screen; opacity:0.9; filter: blur(6px); }
-    .glow-cool { box-shadow: 0 6px 30px rgba(58,191,248,0.18), 0 0 80px rgba(58,191,248,0.06); }
-    .glow-warm { box-shadow: 0 6px 30px rgba(251,191,36,0.14), 0 0 60px rgba(251,191,36,0.04); }
-    .glow-danger { box-shadow: 0 6px 30px rgba(248,113,113,0.14), 0 0 60px rgba(248,113,113,0.04); }
+    .app {
+      width: 100%;
+      max-width: 1200px;
+      padding: 32px;
+      display: grid;
+      grid-template-columns: minmax(0, 3fr) minmax(0, 2.5fr);
+      gap: 32px;
+    }
+
+    .left, .right {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 650;
+      letter-spacing: 0.02em;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #a9b4ff;
+      margin-top: 6px;
+    }
+
+    .input-row {
+      margin-top: 16px;
+      display: flex;
+      gap: 12px;
+    }
+
+    .input-row input {
+      flex: 1;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid #28305a;
+      background: rgba(4, 8, 24, 0.9);
+      color: #f5f7ff;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .input-row input::placeholder {
+      color: #5f6aa5;
+    }
+
+    .input-row button {
+      padding: 10px 18px;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(135deg, #4f7dff, #9b5bff);
+      color: white;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      box-shadow: 0 0 18px rgba(111, 140, 255, 0.6);
+    }
+
+    .input-row button:active {
+      transform: translateY(1px);
+      box-shadow: 0 0 10px rgba(111, 140, 255, 0.4);
+    }
+
+    .compass-wrapper {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 8px;
+    }
+
+    .compass-glow {
+      position: absolute;
+      width: 70%;
+      height: 70%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(88, 140, 255, 0.4), transparent 60%);
+      filter: blur(18px);
+      opacity: 0.9;
+      transform: translateY(18%);
+    }
+
+    .compass-sphere {
+      position: relative;
+      width: 70%;
+      height: 70%;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 20%, #ffdd99 0%, #ff7b7b 18%, #ff4fa8 32%, #7b5bff 52%, #2b9dff 72%, #050b1f 100%);
+      box-shadow:
+        0 0 40px rgba(120, 180, 255, 0.7),
+        0 0 80px rgba(120, 80, 255, 0.6);
+      overflow: hidden;
+      animation: spin 18s linear infinite;
+    }
+
+    .compass-inner {
+      position: absolute;
+      inset: 10%;
+      border-radius: 50%;
+      background: radial-gradient(circle at 70% 30%, rgba(255, 255, 255, 0.35), transparent 55%);
+      mix-blend-mode: screen;
+      opacity: 0.9;
+    }
+
+    .compass-orbit {
+      position: absolute;
+      inset: -8%;
+      border-radius: 50%;
+      border: 1px solid rgba(120, 180, 255, 0.4);
+      box-shadow: 0 0 18px rgba(120, 180, 255, 0.6);
+      animation: orbit 12s linear infinite;
+    }
+
+    .compass-orbit:nth-child(2) {
+      inset: -14%;
+      border-color: rgba(255, 160, 120, 0.5);
+      box-shadow: 0 0 18px rgba(255, 160, 120, 0.7);
+      animation-duration: 20s;
+      animation-direction: reverse;
+    }
+
+    .compass-label {
+      position: absolute;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #f5f7ff;
+      text-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
+    }
+
+    .label-ca {
+      top: 18%;
+      left: 20%;
+    }
+
+    .label-joy {
+      top: 18%;
+      right: 20%;
+    }
+
+    .label-stress {
+      bottom: 16%;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .compass-pulse {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.18), transparent 60%);
+      mix-blend-mode: screen;
+      animation: pulse 3.5s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .metrics-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 8px;
+    }
+
+    .card {
+      background: radial-gradient(circle at top, rgba(33, 52, 110, 0.7), rgba(5, 9, 26, 0.95));
+      border-radius: 18px;
+      padding: 14px 16px;
+      border: 1px solid rgba(88, 120, 210, 0.5);
+      box-shadow: 0 0 18px rgba(10, 18, 60, 0.9);
+    }
+
+    .card-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: #7f8dff;
+      margin-bottom: 8px;
+    }
+
+    .metric-label {
+      font-size: 11px;
+      color: #9aa4ff;
+      margin-top: 4px;
+    }
+
+    .metric-value {
+      font-size: 13px;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    .score-big {
+      font-size: 20px;
+      font-weight: 650;
+      margin-top: 6px;
+    }
+
+    .hashtags {
+      font-size: 11px;
+      color: #9ad5ff;
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+
+    .stress-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .sun-icon {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #ffe27a, #ffb347);
+      box-shadow: 0 0 12px rgba(255, 210, 120, 0.9);
+    }
+
+    .stress-text-main {
+      font-size: 12px;
+      color: #ffd98a;
+    }
+
+    .stress-text-sub {
+      font-size: 11px;
+      color: #f5f7ff;
+    }
+
+    .timeline-graph {
+      margin-top: 10px;
+      height: 60px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(80, 120, 255, 0.1), rgba(255, 120, 200, 0.18));
+      position: relative;
+      overflow: hidden;
+    }
+
+    .timeline-line {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, #4f7dff, #9b5bff, #ff7bb0);
+      opacity: 0.7;
+      clip-path: path("M0,40 Q20,20 40,30 T80,35 T120,25 T160,30 T200,20 T240,30 T280,25 T320,35 T360,30 T400,20");
+      animation: moveLine 6s linear infinite;
+    }
+
+    .timeline-overlay {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top, rgba(255, 255, 255, 0.2), transparent 60%);
+      mix-blend-mode: screen;
+      opacity: 0.5;
+    }
+
+    .right-top-card {
+      background: radial-gradient(circle at top, rgba(33, 52, 110, 0.7), rgba(5, 9, 26, 0.95));
+      border-radius: 18px;
+      padding: 16px 18px;
+      border: 1px solid rgba(88, 120, 210, 0.5);
+      box-shadow: 0 0 18px rgba(10, 18, 60, 0.9);
+    }
+
+    .webcam-row {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    video {
+      width: 100%;
+      border-radius: 14px;
+      border: 1px solid rgba(88, 120, 210, 0.5);
+      background: #000;
+    }
+
+    .status {
+      font-size: 11px;
+      color: #9aa4ff;
+    }
+
+    .bars {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .bar-label {
+      font-size: 11px;
+      color: #9aa4ff;
+      margin-bottom: 4px;
+    }
+
+    .bar-track {
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(30, 40, 90, 0.9);
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #4f7dff, #9b5bff);
+      transition: width 0.4s ease-out;
+    }
+
+    .bar-fill.stress {
+      background: linear-gradient(90deg, #ff7b7b, #ffb347);
+    }
+
+    .bar-fill.calm {
+      background: linear-gradient(90deg, #4fe3b8, #7fd6ff);
+    }
+
+    .bar-fill.joy {
+      background: linear-gradient(90deg, #ffe27a, #ff9f7b);
+    }
+
+    .mood-map {
+      margin-top: 10px;
+      font-size: 11px;
+      color: #9aa4ff;
+    }
+
+    .mood-gradient {
+      margin-top: 6px;
+      height: 10px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #4fe3b8, #4f7dff, #9b5bff, #ff7bb0, #ff7b7b);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mood-indicator {
+      position: absolute;
+      top: -4px;
+      width: 2px;
+      height: 18px;
+      border-radius: 999px;
+      background: #ffffff;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.9);
+      left: 50%;
+      transform: translateX(-50%);
+      transition: left 0.4s ease-out;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes orbit {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.2; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(1.08); }
+    }
+
+    @keyframes moveLine {
+      from { transform: translateX(-20px); }
+      to { transform: translateX(20px); }
+    }
+
+    @media (max-width: 900px) {
+      .app {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
   </style>
 </head>
 <body>
   <div class="app">
-    <div class="stage" aria-hidden="false">
-      <canvas id="compass3d" aria-label="3D emotional compass"></canvas>
-      <div class="brand" aria-hidden="true">
-        <div class="name">Emopulse</div>
-        <div style="color:var(--muted);font-size:12px">Live Emotional Field · Camera + AI</div>
+    <div class="left">
+      <div>
+        <h1>Understand your emotional field in real time</h1>
+        <p class="subtitle">
+          Type anything you're feeling or thinking. Using your camera, Emopulse analyzes your emotional field in real time.
+        </p>
+        <div class="input-row">
+          <input id="textInput" placeholder="Type anything you're feeling or thinking..." />
+          <button id="analyzeBtn">Analyze my emotional field</button>
+        </div>
       </div>
-      <div class="particles-overlay" aria-hidden="true"></div>
+
+      <div class="compass-wrapper">
+        <div class="compass-glow"></div>
+        <div class="compass-sphere" id="compassSphere">
+          <div class="compass-inner"></div>
+          <div class="compass-orbit"></div>
+          <div class="compass-orbit"></div>
+          <div class="compass-pulse" id="compassPulse"></div>
+          <div class="compass-label label-ca">Ca</div>
+          <div class="compass-label label-joy">Joy</div>
+          <div class="compass-label label-stress">Stress</div>
+        </div>
+      </div>
+
+      <div class="metrics-row">
+        <div class="card">
+          <div class="card-title">Emotional Aura</div>
+          <div class="metric-label">Stability</div>
+          <div class="metric-value" id="stabilityValue">12° toward</div>
+          <div class="metric-label">Intensity</div>
+          <div class="metric-value" id="intensityValue">Low</div>
+          <div class="metric-label" style="margin-top:8px;">Score</div>
+          <div class="score-big" id="scoreValue">76/100</div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Emotional Signature</div>
+          <div class="metric-value" id="signatureText">Calm focused energy</div>
+          <div class="hashtags" id="hashtagsText">
+            #calm #focused #energy #Sunshine with tranquility
+          </div>
+          <div class="mood-map">
+            Mood Map: Positive → Euphoric → Intense
+            <div class="mood-gradient">
+              <div class="mood-indicator" id="moodIndicator"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Stress Risk</div>
+          <div class="stress-row">
+            <div class="sun-icon"></div>
+            <div>
+              <div class="stress-text-main" id="stressLabel">Sunshine with tranquility</div>
+              <div class="stress-text-sub" id="stressScoreText">Stress Risk: 0.21 low</div>
+            </div>
+          </div>
+          <div class="metric-label" style="margin-top:10px;">Emopulse Score</div>
+          <div class="score-big" id="emopulseScore">76/100</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:8px;">
+        <div class="card-title">Emotional Timeline</div>
+        <div class="metric-label">Energy</div>
+        <div class="metric-value" id="energyValue">0.66 rising</div>
+        <div class="timeline-graph">
+          <div class="timeline-line"></div>
+          <div class="timeline-overlay"></div>
+        </div>
+      </div>
     </div>
 
-    <aside class="panel" role="region" aria-label="Emotional metrics panel">
-      <div class="header">
-        <div class="logo-dot">EP</div>
-        <div>
-          <div class="title">Understand your emotional field in real time</div>
-          <div class="subtitle">Type anything you're feeling or thinking. Using our camera and AI analyzes.</div>
-        </div>
-      </div>
-
-      <div class="input-row">
-        <input id="textInput" class="text-input" placeholder="Type anything you're feeling or thinking . ." />
-        <button id="analyzeBtn" class="btn">Analyze my emotional field</button>
-      </div>
-
-      <div class="camera-indicator">
-        <div class="cam-dot" id="camDot"></div>
-        <div id="camText" class="muted">Camera active — reading your field…</div>
-      </div>
-
-      <div class="metrics">
-        <div class="card">
-          <h4>Emotional Aura</h4>
-          <div class="muted">Stability: <strong id="stability">12° toward</strong></div>
-          <div class="muted">Intensity: <strong id="intensity">Low</strong></div>
-          <div class="score" style="margin-top:8px;">
-            <div class="big" id="scoreVal">76</div>
-            <div class="progress" aria-hidden="true"><i id="scoreBar" style="width:76%"></i></div>
-          </div>
-        </div>
-
-        <div class="card">
-          <h4>Emotional signature</h4>
-          <div style="font-weight:600;color:#eaf6ff">Calm focused energy</div>
-          <div class="moodmap" style="margin-top:8px;">
-            <div class="tag">#calm</div>
-            <div class="tag">#focused energy</div>
-            <div class="tag">#sunshine</div>
-          </div>
-        </div>
-
-        <div class="card">
-          <h4>Mood Map</h4>
-          <div class="muted">Positive · Euphoric · Intense</div>
-          <div class="timeline" id="energyGraph"></div>
-        </div>
-
-        <div class="card">
-          <h4>Metrics</h4>
-          <div style="display:flex;justify-content:space-between;align-items:center;">
+    <div class="right">
+      <div class="right-top-card">
+        <div class="card-title">Emopulse Camera Scan</div>
+        <p class="subtitle" style="margin-top:0;">
+          Real-time emotion detection using your webcam. No data is stored; analysis happens in your browser.
+        </p>
+        <div class="webcam-row">
+          <video id="video" autoplay muted playsinline></video>
+          <div class="status" id="statusText">Initializing camera and models…</div>
+          <div class="bars">
             <div>
-              <div class="muted">Energy</div>
-              <div style="font-weight:700;color:#eaf6ff" id="energyVal">0.66 rising</div>
+              <div class="bar-label">Calm</div>
+              <div class="bar-track">
+                <div class="bar-fill calm" id="barCalm"></div>
+              </div>
             </div>
             <div>
-              <div class="muted">Stress risk</div>
-              <div style="font-weight:700;color:#eaf6ff" id="stressVal">0.21 low</div>
+              <div class="bar-label">Joy</div>
+              <div class="bar-track">
+                <div class="bar-fill joy" id="barJoy"></div>
+              </div>
+            </div>
+            <div>
+              <div class="bar-label">Stress</div>
+              <div class="bar-track">
+                <div class="bar-fill stress" id="barStress"></div>
+              </div>
             </div>
           </div>
         </div>
-
-        <div class="card">
-          <h4>Emopulse Score</h4>
-          <div style="font-size:20px;font-weight:700;color:#eaf6ff" id="emopulseScore">76 / 100</div>
-        </div>
-
       </div>
 
-      <footer class="note">Emotional Timeline updates in real time</footer>
-    </aside>
+      <div class="card">
+        <div class="card-title">How it works</div>
+        <p class="subtitle" style="margin-top:0;">
+          Emopulse uses facial expression analysis to estimate emotional tendencies like calm, joy, and stress.
+          These signals drive the compass colors, aura intensity, and mood map position.
+        </p>
+      </div>
+    </div>
   </div>
 
-  <!-- Three.js and examples via CDN (module imports) -->
-  <script type="module">
-    import * as THREE from 'https://unpkg.com/three@0.158.0/build/three.module.js';
-    import { OrbitControls } from 'https://unpkg.com/three@0.158.0/examples/jsm/controls/OrbitControls.js';
-    import { EffectComposer } from 'https://unpkg.com/three@0.158.0/examples/jsm/postprocessing/EffectComposer.js';
-    import { RenderPass } from 'https://unpkg.com/three@0.158.0/examples/jsm/postprocessing/RenderPass.js';
-    import { UnrealBloomPass } from 'https://unpkg.com/three@0.158.0/examples/jsm/postprocessing/UnrealBloomPass.js';
+  <!-- face-api.js from CDN -->
+  <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+  <script>
+    const video = document.getElementById("video");
+    const statusText = document.getElementById("statusText");
+    const barCalm = document.getElementById("barCalm");
+    const barJoy = document.getElementById("barJoy");
+    const barStress = document.getElementById("barStress");
+    const moodIndicator = document.getElementById("moodIndicator");
+    const compassSphere = document.getElementById("compassSphere");
+    const compassPulse = document.getElementById("compassPulse");
+    const stabilityValue = document.getElementById("stabilityValue");
+    const intensityValue = document.getElementById("intensityValue");
+    const scoreValue = document.getElementById("scoreValue");
+    const signatureText = document.getElementById("signatureText");
+    const hashtagsText = document.getElementById("hashtagsText");
+    const stressLabel = document.getElementById("stressLabel");
+    const stressScoreText = document.getElementById("stressScoreText");
+    const emopulseScore = document.getElementById("emopulseScore");
+    const energyValue = document.getElementById("energyValue");
+    const analyzeBtn = document.getElementById("analyzeBtn");
+    const textInput = document.getElementById("textInput");
 
-    /* ------------------------------
-       Integrated compass3d logic (version 1.1)
-       ------------------------------ */
+    let modelsLoaded = false;
+    let analyzing = false;
 
-    let scene, camera, renderer, composer, controls;
-    let canvas = document.getElementById('compass3d');
+    async function initCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = stream;
+        statusText.textContent = "Camera active. Loading emotion models…";
+      } catch (err) {
+        statusText.textContent = "Camera access denied or unavailable.";
+        console.error(err);
+      }
+    }
 
-    let coreSphere, glowMesh;
-    let orbitRings = [];
-    let particles = [];
-    let emotionalNodes = [];
-    let compassNeedleGroup;
-    let targetRotation = 0;
-    let needleTargetRotation = 0;
-    let trajectoryPoints = [];
-    let trajectoryLine;
-    let particleField;
-    let subtleLightDisks = [];
+    async function loadModels() {
+      const MODEL_URL = "https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/weights";
+      try {
+        await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+        await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
+        modelsLoaded = true;
+        statusText.textContent = "Models loaded. Scanning emotions in real time.";
+        startEmotionLoop();
+      } catch (err) {
+        statusText.textContent = "Failed to load emotion models.";
+        console.error(err);
+      }
+    }
 
-    const TRAJECTORY_MAX = 160;
+    function mapExpressionsToEmotions(expressions) {
+      // face-api gives: neutral, happy, sad, angry, fearful, disgusted, surprised
+      const happy = expressions.happy || 0;
+      const neutral = expressions.neutral || 0;
+      const sad = expressions.sad || 0;
+      const angry = expressions.angry || 0;
+      const fearful = expressions.fearful || 0;
+      const disgusted = expressions.disgusted || 0;
+      const surprised = expressions.surprised || 0;
 
-    // default metrics
-    let metricsState = { energy: 0.66, stress: 0.21, score: 76 };
+      const joy = happy + 0.3 * surprised;
+      const stress = angry + fearful + 0.5 * disgusted + 0.3 * sad;
+      const calm = neutral + 0.2 * (1 - (joy + stress));
 
-    function initCompass3D() {
-      if (!canvas) {
-        console.error('Canvas not found');
-        return;
+      const clamp = (v) => Math.max(0, Math.min(1, v));
+      const total = joy + stress + calm || 1;
+      return {
+        joy: clamp(joy / total),
+        stress: clamp(stress / total),
+        calm: clamp(calm / total),
+      };
+    }
+
+    function updateUIFromEmotions({ joy, stress, calm }) {
+      const toPercent = (v) => (v * 100).toFixed(0) + "%";
+
+      barCalm.style.width = toPercent(calm);
+      barJoy.style.width = toPercent(joy);
+      barStress.style.width = toPercent(stress);
+
+      const moodPos = 10 + joy * 60 - stress * 20 + calm * 10;
+      moodIndicator.style.left = `${Math.max(5, Math.min(95, moodPos))}%`;
+
+      const intensity = Math.max(joy, stress);
+      const score = Math.round((calm * 0.5 + joy * 0.4 - stress * 0.3 + 0.4) * 100);
+      const energy = (0.3 + intensity * 0.7).toFixed(2);
+
+      stabilityValue.textContent = `${Math.round((calm - stress) * 40)}° toward`;
+      intensityValue.textContent = intensity < 0.3 ? "Low" : intensity < 0.6 ? "Medium" : "High";
+      scoreValue.textContent = `${score}/100`;
+      emopulseScore.textContent = `${score}/100`;
+      energyValue.textContent = `${energy} rising`;
+
+      let signature = "Calm focused energy";
+      let tags = "#calm #focused #energy #Sunshine with tranquility";
+      let stressLabelText = "Sunshine with tranquility";
+      let stressRiskText = "Stress Risk: 0.21 low";
+
+      if (stress > 0.55) {
+        signature = "Tense elevated field";
+        tags = "#stress #alert #overdrive #Storm in the distance";
+        stressLabelText = "Storm signals detected";
+        stressRiskText = `Stress Risk: ${(0.4 + stress * 0.6).toFixed(2)} elevated`;
+      } else if (joy > 0.55) {
+        signature = "Bright expansive energy";
+        tags = "#joy #expansion #lightness #Sunrise in motion";
+        stressLabelText = "Sunshine with sparkles";
+        stressRiskText = `Stress Risk: ${(0.1 + stress * 0.3).toFixed(2)} low`;
+      } else if (calm > 0.6) {
+        signature = "Deep grounded calm";
+        tags = "#calm #grounded #steady #Ocean with still waves";
+        stressLabelText = "Sunshine with tranquility";
+        stressRiskText = `Stress Risk: ${(0.05 + stress * 0.2).toFixed(2)} very low`;
       }
 
-      scene = new THREE.Scene();
-      scene.background = null;
+      signatureText.textContent = signature;
+      hashtagsText.textContent = tags;
+      stressLabel.textContent = stressLabelText;
+      stressScoreText.textContent = stressRiskText;
 
-      camera = new THREE.PerspectiveCamera(45, Math.max(1, canvas.clientWidth / canvas.clientHeight), 0.1, 1000);
-      camera.position.set(0, 1.6, 3.2);
+      const hueBase = 220;
+      const joyShift = joy * 80;
+      const stressShift = stress * -60;
+      const hue = hueBase + joyShift + stressShift;
+      const sat = 70 + intensity * 20;
+      const light = 40 + joy * 10 - stress * 5;
 
-      renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'high-performance' });
-      renderer.outputEncoding = THREE.sRGBEncoding;
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-      renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
+      compassSphere.style.background = `
+        radial-gradient(circle at 30% 20%,
+          hsl(${hue + 40}, ${sat}%, ${light + 20}%),
+          hsl(${hue + 10}, ${sat + 10}%, ${light}%),
+          hsl(${hue - 20}, ${sat + 5}%, ${light - 10}%),
+          hsl(${hue - 40}, ${sat}%, ${light - 20}%),
+          #050b1f 100%)
+      `;
 
-      addLights();
-      setupPostProcessing();
-
-      controls = new OrbitControls(camera, renderer.domElement);
-      controls.enableDamping = true;
-      controls.dampingFactor = 0.08;
-      controls.minDistance = 1.6;
-      controls.maxDistance = 6;
-      controls.enablePan = false;
-
-      createCoreSphere();
-      createGlowShell();
-      createOrbitRings();
-      createParticles();
-      createEmotionalNodes();
-      createCompassHousing();
-      createCompassNeedle();
-      initTrajectory();
-      createParticleField();
-      createSubtleLightDisks();
-
-      window.addEventListener('resize', resizeCompass3D);
-      animateCompass3D();
+      const pulseScale = 1 + intensity * 0.12;
+      const pulseOpacity = 0.2 + intensity * 0.5;
+      compassPulse.style.opacity = pulseOpacity;
+      compassPulse.style.transform = `scale(${pulseScale})`;
     }
 
-    function addLights() {
-      const ambient = new THREE.AmbientLight(0xffffff, 0.28);
-      scene.add(ambient);
+    async function startEmotionLoop() {
+      if (!modelsLoaded) return;
+      analyzing = true;
 
-      const key = new THREE.DirectionalLight(0xffffff, 0.9);
-      key.position.set(6, 10, 6);
-      scene.add(key);
+      const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 160, scoreThreshold: 0.5 });
 
-      const fill = new THREE.PointLight(0x3abff8, 0.18, 20);
-      fill.position.set(-4, 2, -3);
-      scene.add(fill);
+      async function loop() {
+        if (!analyzing) return;
+        if (video.readyState === 4) {
+          try {
+            const result = await faceapi
+              .detectSingleFace(video, options)
+              .withFaceExpressions();
 
-      const rim = new THREE.PointLight(0xfbbf24, 0.12, 20);
-      rim.position.set(3, -2, 4);
-      scene.add(rim);
-    }
-
-    function setupPostProcessing() {
-      composer = new EffectComposer(renderer);
-      const renderPass = new RenderPass(scene, camera);
-      composer.addPass(renderPass);
-
-      const bloomPass = new UnrealBloomPass(new THREE.Vector2(canvas.clientWidth, canvas.clientHeight), 0.9, 0.6, 0.1);
-      bloomPass.renderToScreen = true;
-      composer.addPass(bloomPass);
-    }
-
-    function resizeCompass3D() {
-      if (!canvas || !camera || !renderer) return;
-      const w = canvas.clientWidth;
-      const h = canvas.clientHeight;
-      camera.aspect = Math.max(0.1, w / Math.max(1, h));
-      camera.updateProjectionMatrix();
-      renderer.setSize(w, h, false);
-      if (composer) composer.setSize(w, h);
-    }
-
-    const GlowShader = {
-      uniforms: {
-        c: { value: 0.4 },
-        p: { value: 2.4 },
-        glowColor: { value: new THREE.Color(0x3abff8) },
-        viewVector: { value: new THREE.Vector3(0, 0, 3) },
-        intensityBoost: { value: 1.0 }
-      },
-      vertexShader: `
-        uniform vec3 viewVector;
-        uniform float c;
-        uniform float p;
-        uniform float intensityBoost;
-        varying float intensity;
-        void main() {
-          vec3 vNormal = normalize(normalMatrix * normal);
-          vec3 vNormel = normalize(normalMatrix * viewVector);
-          intensity = pow(c - dot(vNormal, vNormel), p) * intensityBoost;
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            if (result && result.expressions) {
+              const mapped = mapExpressionsToEmotions(result.expressions);
+              updateUIFromEmotions(mapped);
+              statusText.textContent = "Emotions detected in real time.";
+            } else {
+              statusText.textContent = "No face detected. Look at the camera.";
+            }
+          } catch (err) {
+            console.error(err);
+            statusText.textContent = "Error analyzing emotions.";
+          }
         }
-      `,
-      fragmentShader: `
-        uniform vec3 glowColor;
-        varying float intensity;
-        void main() {
-          vec3 glow = glowColor * intensity;
-          gl_FragColor = vec4(glow, intensity);
-        }
-      `
-    };
-
-    function createCoreSphere() {
-      const sphereGeo = new THREE.SphereGeometry(0.55, 64, 64);
-      const sphereMat = new THREE.MeshStandardMaterial({
-        color: 0x0ea5e9,
-        roughness: 0.35,
-        metalness: 0.65,
-        emissive: 0x0ea5e9,
-        emissiveIntensity: 0.45
-      });
-      coreSphere = new THREE.Mesh(sphereGeo, sphereMat);
-      coreSphere.position.set(0, 0, 0);
-      scene.add(coreSphere);
-    }
-
-    function createGlowShell() {
-      const glowGeo = new THREE.SphereGeometry(0.78, 64, 64);
-      const glowMat = new THREE.ShaderMaterial({
-        uniforms: THREE.UniformsUtils.clone(GlowShader.uniforms),
-        vertexShader: GlowShader.vertexShader,
-        fragmentShader: GlowShader.fragmentShader,
-        side: THREE.BackSide,
-        blending: THREE.AdditiveBlending,
-        transparent: true,
-        depthWrite: false
-      });
-      glowMesh = new THREE.Mesh(glowGeo, glowMat);
-      glowMesh.position.copy(coreSphere.position);
-      scene.add(glowMesh);
-    }
-
-    function createOrbitRings() {
-      const ringMaterial = new THREE.MeshBasicMaterial({ color: 0x94a3b8, transparent: true, opacity: 0.22, side: THREE.DoubleSide });
-      const radii = [0.95, 1.25, 1.55];
-      radii.forEach((r, i) => {
-        const ringGeo = new THREE.RingGeometry(r - 0.01, r + 0.01, 256);
-        const ring = new THREE.Mesh(ringGeo, ringMaterial);
-        ring.rotation.x = Math.PI / 2;
-        scene.add(ring);
-        orbitRings.push(ring);
-      });
-    }
-
-    function createParticles() {
-      const particleGeo = new THREE.SphereGeometry(0.015, 8, 8);
-      const particleMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.85 });
-      for (let i = 0; i < 80; i++) {
-        const p = new THREE.Mesh(particleGeo, particleMat);
-        const radius = 1.8 + Math.random() * 0.9;
-        const angle = Math.random() * Math.PI * 2;
-        p.userData = { radius, angle, speed: 0.002 + Math.random() * 0.006, yOffset: (Math.random() - 0.5) * 0.6 };
-        p.position.set(Math.cos(angle) * radius, p.userData.yOffset, Math.sin(angle) * radius);
-        particles.push(p);
-        scene.add(p);
+        requestAnimationFrame(loop);
       }
+
+      loop();
     }
 
-    function createEmotionalNodes() {
-      const nodeGeo = new THREE.SphereGeometry(0.08, 16, 16);
-      const configs = [
-        { name: 'Ca', color: 0x38bdf8, radius: 1.05, speed: 0.6 },
-        { name: 'Joy', color: 0xf97316, radius: 1.25, speed: 0.45 },
-        { name: 'Stress', color: 0xf87171, radius: 1.45, speed: 0.35 }
-      ];
-      configs.forEach(cfg => {
-        const mat = new THREE.MeshStandardMaterial({ color: cfg.color, emissive: cfg.color, emissiveIntensity: 0.6, roughness: 0.28, metalness: 0.45 });
-        const node = new THREE.Mesh(nodeGeo, mat);
-        node.userData = { angle: Math.random() * Math.PI * 2, radius: cfg.radius, speed: cfg.speed * 0.002, name: cfg.name };
-        node.position.set(Math.cos(node.userData.angle) * node.userData.radius, 0, Math.sin(node.userData.angle) * node.userData.radius);
-        emotionalNodes.push(node);
-        scene.add(node);
-      });
-    }
+    analyzeBtn.addEventListener("click", () => {
+      const text = (textInput.value || "").toLowerCase();
+      if (!text.trim()) return;
 
-    function animateRingsAndParticles() {
-      const t = performance.now() * 0.0003;
-      orbitRings.forEach((ring, i) => ring.rotation.z = t * (0.2 + i * 0.12));
-      particles.forEach(p => {
-        p.userData.angle += p.userData.speed;
-        p.position.x = Math.cos(p.userData.angle) * p.userData.radius;
-        p.position.z = Math.sin(p.userData.angle) * p.userData.radius;
-        p.position.y = p.userData.yOffset + Math.sin(performance.now() * 0.001 + p.userData.angle) * 0.06;
-      });
-    }
+      let joy = 0.3, stress = 0.2, calm = 0.5;
 
-    function animateEmotionalNodes() {
-      emotionalNodes.forEach(node => {
-        node.userData.angle += node.userData.speed;
-        node.position.x = Math.cos(node.userData.angle) * node.userData.radius;
-        node.position.z = Math.sin(node.userData.angle) * node.userData.radius;
-        node.position.y = Math.sin(performance.now() * 0.001 + node.userData.angle) * 0.12;
-        const pulse = 1 + Math.sin(performance.now() * 0.002 + node.userData.angle) * 0.03;
-        node.scale.set(pulse, pulse, pulse);
-      });
-    }
-
-    function createCompassHousing() {
-      const outerGeo = new THREE.TorusGeometry(1.65, 0.06, 16, 200);
-      const outerMat = new THREE.MeshStandardMaterial({ color: 0x111827, metalness: 0.6, roughness: 0.35 });
-      const outer = new THREE.Mesh(outerGeo, outerMat);
-      outer.rotation.x = Math.PI / 2;
-      scene.add(outer);
-
-      const diskGeo = new THREE.CircleGeometry(1.6, 128);
-      const diskMat = new THREE.MeshStandardMaterial({ color: 0x071022, metalness: 0.12, roughness: 0.8, side: THREE.DoubleSide });
-      const disk = new THREE.Mesh(diskGeo, diskMat);
-      disk.rotation.x = Math.PI / 2;
-      disk.position.y = -0.002;
-      scene.add(disk);
-
-      const tickGroup = new THREE.Group();
-      const tickMat = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.2, roughness: 0.6 });
-      for (let i = 0; i < 360; i += 6) {
-        const len = (i % 90 === 0) ? 0.14 : (i % 30 === 0 ? 0.08 : 0.04);
-        const geo = new THREE.BoxGeometry(0.02, len, 0.01);
-        const tick = new THREE.Mesh(geo, tickMat);
-        const rad = THREE.MathUtils.degToRad(i);
-        const r = 1.45;
-        tick.position.set(Math.cos(rad) * r, 0.01, Math.sin(rad) * r);
-        tick.lookAt(0, 0.01, 0);
-        tick.rotateX(Math.PI / 2);
-        tickGroup.add(tick);
+      if (text.includes("happy") || text.includes("joy") || text.includes("excited")) {
+        joy = 0.7; calm = 0.2; stress = 0.1;
       }
-      scene.add(tickGroup);
-
-      const labels = ['N','E','S','W'];
-      const labelAngles = [0,90,180,270];
-      labelAngles.forEach((deg, idx) => {
-        const canvasLabel = document.createElement('canvas');
-        canvasLabel.width = 128; canvasLabel.height = 128;
-        const ctx = canvasLabel.getContext('2d');
-        ctx.clearRect(0,0,128,128);
-        ctx.font = 'bold 72px Arial';
-        ctx.fillStyle = '#ffffff';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(labels[idx], 64, 64);
-        const tex = new THREE.CanvasTexture(canvasLabel);
-        tex.encoding = THREE.sRGBEncoding;
-        tex.needsUpdate = true;
-        const spriteMat = new THREE.SpriteMaterial({ map: tex, transparent: true });
-        const sprite = new THREE.Sprite(spriteMat);
-        const rad = THREE.MathUtils.degToRad(deg);
-        const r = 1.9;
-        sprite.position.set(Math.cos(rad) * r, 0.02, Math.sin(rad) * r);
-        sprite.scale.set(0.42, 0.42, 0.42);
-        scene.add(sprite);
-      });
-    }
-
-    function createCompassNeedle() {
-      compassNeedleGroup = new THREE.Group();
-      const shaftGeo = new THREE.CylinderGeometry(0.02, 0.02, 1.6, 12);
-      const shaftMat = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 0.18, metalness: 0.6, roughness: 0.25 });
-      const shaft = new THREE.Mesh(shaftGeo, shaftMat);
-      shaft.rotation.x = Math.PI / 2;
-      shaft.position.y = 0.01;
-      compassNeedleGroup.add(shaft);
-
-      const headGeo = new THREE.ConeGeometry(0.06, 0.18, 12);
-      const headMatN = new THREE.MeshStandardMaterial({ color: 0xf87171, emissive: 0xf87171, emissiveIntensity: 0.6 });
-      const headN = new THREE.Mesh(headGeo, headMatN);
-      headN.position.set(0, 0.9, 0);
-      headN.rotation.x = Math.PI / 2;
-      compassNeedleGroup.add(headN);
-
-      const headMatS = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 0.18 });
-      const headS = new THREE.Mesh(headGeo, headMatS);
-      headS.position.set(0, -0.9, 0);
-      headS.rotation.x = -Math.PI / 2;
-      compassNeedleGroup.add(headS);
-
-      const hubGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.06, 16);
-      const hubMat = new THREE.MeshStandardMaterial({ color: 0x111827, metalness: 0.8, roughness: 0.2 });
-      const hub = new THREE.Mesh(hubGeo, hubMat);
-      hub.position.set(0, 0.01, 0);
-      compassNeedleGroup.add(hub);
-
-      compassNeedleGroup.position.set(0, 0.02, 0);
-      scene.add(compassNeedleGroup);
-    }
-
-    function updateArrowColor(metrics) {
-      if (!compassNeedleGroup) return;
-      let color = new THREE.Color(0x38bdf8);
-      if (metrics.stress > 0.6) color = new THREE.Color(0xf87171);
-      else if (metrics.energy > 0.7) color = new THREE.Color(0xfbbf24);
-      compassNeedleGroup.children.forEach(part => {
-        if (part.material) {
-          part.material.emissive = color;
-          if (part.geometry && part.geometry.type !== 'ConeGeometry') part.material.color = color;
-        }
-      });
-    }
-
-    function initTrajectory() {
-      const geometry = new THREE.BufferGeometry();
-      const positions = new Float32Array(TRAJECTORY_MAX * 3);
-      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-      const material = new THREE.LineBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.9, linewidth: 2 });
-      trajectoryLine = new THREE.Line(geometry, material);
-      trajectoryLine.frustumCulled = false;
-      scene.add(trajectoryLine);
-    }
-
-    function addTrajectoryPoint({ energy, stress }) {
-      const angle = Math.atan2(stress, energy);
-      const radius = 1.6;
-      const x = Math.cos(angle) * radius;
-      const y = Math.sin(performance.now() * 0.001) * 0.15;
-      const z = Math.sin(angle) * radius;
-      trajectoryPoints.push(new THREE.Vector3(x, y, z));
-      if (trajectoryPoints.length > TRAJECTORY_MAX) trajectoryPoints.shift();
-    }
-
-    function updateTrajectoryLine() {
-      if (!trajectoryLine) return;
-      const positions = trajectoryLine.geometry.attributes.position.array;
-      for (let i = 0; i < TRAJECTORY_MAX; i++) {
-        const p = trajectoryPoints[i];
-        if (p) {
-          positions[i * 3] = p.x;
-          positions[i * 3 + 1] = p.y;
-          positions[i * 3 + 2] = p.z;
-        } else {
-          positions[i * 3] = 0;
-          positions[i * 3 + 1] = 0;
-          positions[i * 3 + 2] = 0;
-        }
+      if (text.includes("sad") || text.includes("tired") || text.includes("down")) {
+        joy = 0.15; calm = 0.35; stress = 0.5;
       }
-      trajectoryLine.geometry.attributes.position.needsUpdate = true;
-      trajectoryLine.material.opacity = Math.min(1, trajectoryPoints.length / TRAJECTORY_MAX);
-    }
-
-    function updateCompassNodes({ energy, stress }) {
-      emotionalNodes.forEach(node => {
-        if (node.userData.name === 'Ca') node.userData.radius = 1.0 + energy * 0.4;
-        if (node.userData.name === 'Joy') node.userData.radius = 1.2 + energy * 0.3;
-        if (node.userData.name === 'Stress') node.userData.radius = 1.4 + stress * 0.6;
-      });
-    }
-
-    function updateCompassGlow(metrics) {
-      if (!glowMesh) return;
-      let color = new THREE.Color(0x3abff8);
-      if (metrics.stress > 0.6) color = new THREE.Color(0xf87171);
-      else if (metrics.energy > 0.7) color = new THREE.Color(0xfbbf24);
-      else if (metrics.energy < 0.3) color = new THREE.Color(0x64748b);
-      glowMesh.material.uniforms.glowColor.value.copy(color);
-      const boost = 0.9 + (metrics.score / 100) * 0.6;
-      glowMesh.material.uniforms.intensityBoost.value = boost;
-    }
-
-    function updateCompassDirection({ energy, stress }) {
-      const angle = Math.atan2(stress, energy);
-      targetRotation = angle;
-    }
-
-    function updateArrowDirection({ energy, stress }) {
-      const angle = Math.atan2(stress, energy);
-      needleTargetRotation = angle;
-    }
-
-    function updateCompass3D(metrics) {
-      if (!metrics) return;
-      metricsState.energy = metrics.energy;
-      metricsState.stress = metrics.stress;
-      metricsState.score = metrics.score !== undefined ? metrics.score : metricsState.score;
-      updateCompassNodes({ energy: metrics.energy, stress: metrics.stress });
-      updateCompassGlow(metrics);
-      updateCompassDirection({ energy: metrics.energy, stress: metrics.stress });
-      updateArrowColor(metrics);
-      updateArrowDirection({ energy: metrics.energy, stress: metrics.stress });
-      addTrajectoryPoint({ energy: metrics.energy, stress: metrics.stress });
-      syncUI(metricsState);
-    }
-
-    function createParticleField() {
-      const geo = new THREE.BufferGeometry();
-      const count = 220;
-      const positions = new Float32Array(count * 3);
-      const colors = new Float32Array(count * 3);
-      for (let i = 0; i < count; i++) {
-        const r = 6 + Math.random() * 6;
-        const theta = Math.random() * Math.PI * 2;
-        const phi = (Math.random() - 0.5) * Math.PI * 0.6;
-        const x = Math.cos(theta) * Math.cos(phi) * r;
-        const y = Math.sin(phi) * r * 0.4;
-        const z = Math.sin(theta) * Math.cos(phi) * r;
-        positions[i * 3] = x; positions[i * 3 + 1] = y; positions[i * 3 + 2] = z;
-        const c = new THREE.Color().setHSL(0.55 + Math.random() * 0.08, 0.8, 0.6);
-        colors[i * 3] = c.r; colors[i * 3 + 1] = c.g; colors[i * 3 + 2] = c.b;
+      if (text.includes("anxious") || text.includes("stress") || text.includes("angry")) {
+        joy = 0.1; calm = 0.2; stress = 0.7;
       }
-      geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-      geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-      const mat = new THREE.PointsMaterial({ size: 0.02, vertexColors: true, transparent: true, opacity: 0.6 });
-      particleField = new THREE.Points(geo, mat);
-      particleField.frustumCulled = false;
-      scene.add(particleField);
-    }
-
-    function createSubtleLightDisks() {
-      const diskGeo = new THREE.CircleGeometry(2.6, 64);
-      const coolMat = new THREE.MeshBasicMaterial({ color: 0x3abff8, transparent: true, opacity: 0.06, blending: THREE.AdditiveBlending });
-      const warmMat = new THREE.MeshBasicMaterial({ color: 0xfbbf24, transparent: true, opacity: 0.03, blending: THREE.AdditiveBlending });
-      const coolDisk = new THREE.Mesh(diskGeo, coolMat);
-      coolDisk.rotation.x = Math.PI / 2; coolDisk.position.set(-1.2, -0.6, -1.2); scene.add(coolDisk); subtleLightDisks.push(coolDisk);
-      const warmDisk = new THREE.Mesh(diskGeo, warmMat);
-      warmDisk.rotation.x = Math.PI / 2; warmDisk.position.set(1.6, -0.8, 1.2); scene.add(warmDisk); subtleLightDisks.push(warmDisk);
-    }
-
-    function animateCompass3D() {
-      requestAnimationFrame(animateCompass3D);
-      scene.rotation.y += (targetRotation - scene.rotation.y) * 0.05;
-      if (compassNeedleGroup) {
-        const current = compassNeedleGroup.rotation.y;
-        compassNeedleGroup.rotation.y += (needleTargetRotation - current) * 0.08;
+      if (text.includes("calm") || text.includes("peace") || text.includes("focused")) {
+        joy = 0.25; calm = 0.65; stress = 0.1;
       }
-      if (glowMesh && glowMesh.material && glowMesh.material.uniforms) {
-        const worldPos = new THREE.Vector3();
-        glowMesh.getWorldPosition(worldPos);
-        const viewVec = new THREE.Vector3().subVectors(camera.position, worldPos).normalize();
-        glowMesh.material.uniforms.viewVector.value.copy(viewVec);
-      }
-      if (coreSphere) {
-        const t = performance.now() * 0.001;
-        const scale = 1 + Math.sin(t * 2.0) * 0.04;
-        coreSphere.scale.set(scale, scale, scale);
-        const glowScale = 1.12 + Math.sin(t * 1.5) * 0.05;
-        if (glowMesh) glowMesh.scale.set(glowScale, glowScale, glowScale);
-      }
-      animateRingsAndParticles();
-      animateEmotionalNodes();
-      updateTrajectoryLine();
-      if (particleField) particleField.rotation.y += 0.0006;
-      if (composer) composer.render(); else renderer.render(scene, camera);
-      if (controls) controls.update();
-    }
 
-    // ---------------- UI sync and simulation ----------------
-    const energyEl = document.getElementById('energyVal');
-    const stressEl = document.getElementById('stressVal');
-    const scoreEl = document.getElementById('scoreVal');
-    const scoreBar = document.getElementById('scoreBar');
-    const emopulseScore = document.getElementById('emopulseScore');
-    const intensityEl = document.getElementById('intensity');
-    const stabilityEl = document.getElementById('stability');
-    const camDot = document.getElementById('camDot');
-    const camText = document.getElementById('camText');
-    const analyzeBtn = document.getElementById('analyzeBtn');
-    const textInput = document.getElementById('textInput');
-
-    function syncUI(state) {
-      energyEl.textContent = state.energy.toFixed(2) + (Math.random() > 0.5 ? ' rising' : ' steady');
-      stressEl.textContent = state.stress.toFixed(2) + (state.stress > 0.6 ? ' high' : ' low');
-      scoreEl.textContent = Math.round(state.score);
-      scoreBar.style.width = Math.round(state.score) + '%';
-      emopulseScore.textContent = Math.round(state.score) + ' / 100';
-      intensityEl.textContent = (state.score > 80 ? 'High' : state.score > 50 ? 'Low' : 'Very Low');
-      stabilityEl.textContent = Math.round((Math.atan2(state.stress, state.energy) * 180 / Math.PI)) + '° toward';
-      const needleColor = state.stress > 0.6 ? 0xf87171 : (state.energy > 0.7 ? 0xfbbf24 : 0x38bdf8);
-      if (compassNeedleGroup) compassNeedleGroup.children.forEach(c => { if (c.material) { c.material.color.setHex(needleColor); c.material.emissive.setHex(needleColor); }});
-    }
-
-    // small simulation loop to vary metrics slightly
-    setInterval(() => {
-      metricsState.energy = Math.min(1, Math.max(0, metricsState.energy + (Math.random()-0.5)*0.02));
-      metricsState.stress = Math.min(1, Math.max(0, metricsState.stress + (Math.random()-0.5)*0.01));
-      metricsState.score = Math.min(100, Math.max(0, metricsState.score + (Math.random()-0.5)*0.6));
-      updateCompass3D(metricsState);
-    }, 900);
-
-    analyzeBtn.addEventListener('click', () => {
-      camDot.style.background = '#fbbf24';
-      camDot.style.boxShadow = '0 0 12px rgba(251,191,36,0.6)';
-      camText.textContent = 'Analyzing…';
-      setTimeout(() => {
-        camDot.style.background = '#22c55e';
-        camDot.style.boxShadow = '0 0 8px rgba(34,197,94,0.6)';
-        camText.textContent = 'Camera active — reading your field…';
-        metricsState.energy = Math.min(1, Math.max(0, metricsState.energy + (Math.random()-0.5)*0.12));
-        metricsState.stress = Math.min(1, Math.max(0, metricsState.stress + (Math.random()-0.5)*0.12));
-        metricsState.score = Math.round((1 - metricsState.stress) * 100 * 0.85 + metricsState.energy * 100 * 0.15);
-        updateCompass3D(metricsState);
-      }, 1200);
+      updateUIFromEmotions({ joy, stress, calm });
     });
 
-    textInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') analyzeBtn.click(); });
-
-    // auto-init on DOMContentLoaded
-    document.addEventListener('DOMContentLoaded', () => {
-      // small delay to allow CSS sizing to settle
-      setTimeout(() => {
-        initCompass3D();
-        updateCompass3D(metricsState);
-      }, 60);
+    window.addEventListener("load", async () => {
+      await initCamera();
+      await loadModels();
     });
-
-    // expose update function to window for debugging if needed
-    window.updateCompass3D = updateCompass3D;
-    window.setMetrics = (e,s,sc) => { metricsState.energy = e; metricsState.stress = s; metricsState.score = sc; updateCompass3D(metricsState); };
-
   </script>
 </body>
 </html>
