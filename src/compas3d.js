@@ -1,15 +1,17 @@
 import * as THREE from 'three';
+// Jei nori interaktyvumo, atkomentuok žemiau ir įtrauk examples modulį į bundler'į
+// import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
-let scene, camera, renderer;
+let scene, camera, renderer, controls;
 let canvas;
 
 let coreSphere, glowMesh;
 let orbitRings = [];
 let particles = [];
 let emotionalNodes = [];
-let arrowMesh;
+let compassNeedleGroup;
 let targetRotation = 0;
-let arrowTargetRotation = 0;
+let needleTargetRotation = 0;
 let trajectoryPoints = [];
 let trajectoryLine;
 
@@ -29,7 +31,7 @@ export function initCompass3D() {
     0.1,
     1000
   );
-  camera.position.set(0, 0, 3.2);
+  camera.position.set(0, 1.6, 3.2);
 
   renderer = new THREE.WebGLRenderer({
     canvas: canvas,
@@ -37,8 +39,25 @@ export function initCompass3D() {
     antialias: true
   });
 
-  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
+
+  // Apšvietimas
+  const ambient = new THREE.AmbientLight(0xffffff, 0.35);
+  scene.add(ambient);
+  const dir = new THREE.DirectionalLight(0xffffff, 0.7);
+  dir.position.set(5, 10, 7);
+  scene.add(dir);
+  const point = new THREE.PointLight(0xffffff, 0.15);
+  point.position.set(-5, -3, -5);
+  scene.add(point);
+
+  // Optional: OrbitControls
+  // controls = new OrbitControls(camera, renderer.domElement);
+  // controls.enableDamping = true;
+  // controls.dampingFactor = 0.07;
+  // controls.minDistance = 1.5;
+  // controls.maxDistance = 6;
 
   window.addEventListener('resize', resizeCompass3D);
 
@@ -79,7 +98,7 @@ const GlowShader = {
 
     void main() {
       vec3 glow = glowColor * intensity;
-      gl_FragColor = vec4(glow, 1.0);
+      gl_FragColor = vec4(glow, intensity);
     }
   `
 };
@@ -105,7 +124,8 @@ export function createCoreSphere() {
     fragmentShader: GlowShader.fragmentShader,
     side: THREE.BackSide,
     blending: THREE.AdditiveBlending,
-    transparent: true
+    transparent: true,
+    depthWrite: false
   });
 
   glowMesh = new THREE.Mesh(glowGeo, glowMat);
@@ -126,7 +146,8 @@ export function createOrbitRings() {
   const ringMaterial = new THREE.MeshBasicMaterial({
     color: 0x94a3b8,
     transparent: true,
-    opacity: 0.35
+    opacity: 0.25,
+    side: THREE.DoubleSide
   });
 
   const radii = [0.95, 1.25, 1.55];
@@ -171,20 +192,6 @@ export function createParticles() {
   }
 }
 
-export function animateRingsAndParticles() {
-  const t = performance.now() * 0.0003;
-
-  orbitRings.forEach((ring, i) => {
-    ring.rotation.z = t * (0.2 + i * 0.15);
-  });
-
-  particles.forEach((p) => {
-    p.userData.angle += p.userData.speed;
-    p.position.x = Math.cos(p.userData.angle) * p.userData.radius;
-    p.position.z = Math.sin(p.userData.angle) * p.userData.radius;
-  });
-}
-
 export function createEmotionalNodes() {
   const nodeGeo = new THREE.SphereGeometry(0.08, 16, 16);
 
@@ -223,6 +230,20 @@ export function createEmotionalNodes() {
   });
 }
 
+export function animateRingsAndParticles() {
+  const t = performance.now() * 0.0003;
+
+  orbitRings.forEach((ring, i) => {
+    ring.rotation.z = t * (0.2 + i * 0.15);
+  });
+
+  particles.forEach((p) => {
+    p.userData.angle += p.userData.speed;
+    p.position.x = Math.cos(p.userData.angle) * p.userData.radius;
+    p.position.z = Math.sin(p.userData.angle) * p.userData.radius;
+  });
+}
+
 export function animateEmotionalNodes() {
   emotionalNodes.forEach((node) => {
     node.userData.angle += node.userData.speed;
@@ -232,43 +253,124 @@ export function animateEmotionalNodes() {
   });
 }
 
-export function createEmotionArrow() {
-  const arrowGroup = new THREE.Group();
+/* ---------- Kompaso korpusas, žymėjimai ir adatėlė ---------- */
 
-  const shaftGeo = new THREE.CylinderGeometry(0.03, 0.03, 0.9, 16);
-  const shaftMat = new THREE.MeshStandardMaterial({
-    color: 0x38bdf8,
-    emissive: 0x38bdf8,
-    emissiveIntensity: 0.4,
+function createCompassHousing() {
+  // pagrindinis žiedas
+  const outerGeo = new THREE.TorusGeometry(1.65, 0.06, 16, 200);
+  const outerMat = new THREE.MeshStandardMaterial({
+    color: 0x1f2937,
     metalness: 0.6,
-    roughness: 0.3
+    roughness: 0.4
   });
-  const shaft = new THREE.Mesh(shaftGeo, shaftMat);
-  shaft.position.y = 0.45;
+  const outer = new THREE.Mesh(outerGeo, outerMat);
+  outer.rotation.x = Math.PI / 2;
+  scene.add(outer);
 
-  const headGeo = new THREE.ConeGeometry(0.09, 0.25, 16);
-  const headMat = new THREE.MeshStandardMaterial({
-    color: 0x38bdf8,
-    emissive: 0x38bdf8,
-    emissiveIntensity: 0.6,
-    metalness: 0.7,
+  // vidinis diskas (tamsesnis)
+  const diskGeo = new THREE.CircleGeometry(1.6, 64);
+  const diskMat = new THREE.MeshStandardMaterial({
+    color: 0x0b1220,
+    metalness: 0.2,
+    roughness: 0.7,
+    side: THREE.DoubleSide
+  });
+  const disk = new THREE.Mesh(diskGeo, diskMat);
+  disk.rotation.x = Math.PI / 2;
+  disk.position.y = -0.001;
+  scene.add(disk);
+
+  // tick marks aplink žiedą
+  const tickGroup = new THREE.Group();
+  const tickMat = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.2, roughness: 0.6 });
+  for (let i = 0; i < 360; i += 10) {
+    const len = (i % 90 === 0) ? 0.12 : (i % 30 === 0 ? 0.08 : 0.04);
+    const geo = new THREE.BoxGeometry(0.02, len, 0.01);
+    const tick = new THREE.Mesh(geo, tickMat);
+    const rad = THREE.MathUtils.degToRad(i);
+    const r = 1.45;
+    tick.position.set(Math.cos(rad) * r, 0.01, Math.sin(rad) * r);
+    tick.lookAt(0, 0.01, 0);
+    tick.rotateX(Math.PI / 2);
+    tickGroup.add(tick);
+  }
+  scene.add(tickGroup);
+
+  // N/E/S/W etiketės (CanvasTexture)
+  const labels = ['N', 'E', 'S', 'W'];
+  const labelAngles = [0, 90, 180, 270];
+  labelAngles.forEach((deg, idx) => {
+    const canvasLabel = document.createElement('canvas');
+    canvasLabel.width = 128;
+    canvasLabel.height = 128;
+    const ctx = canvasLabel.getContext('2d');
+    ctx.fillStyle = 'rgba(0,0,0,0)';
+    ctx.fillRect(0, 0, 128, 128);
+    ctx.font = 'bold 72px Arial';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(labels[idx], 64, 64);
+
+    const tex = new THREE.CanvasTexture(canvasLabel);
+    tex.needsUpdate = true;
+    const spriteMat = new THREE.SpriteMaterial({ map: tex, transparent: true });
+    const sprite = new THREE.Sprite(spriteMat);
+    const rad = THREE.MathUtils.degToRad(deg);
+    const r = 1.9;
+    sprite.position.set(Math.cos(rad) * r, 0.02, Math.sin(rad) * r);
+    sprite.scale.set(0.4, 0.4, 0.4);
+    scene.add(sprite);
+  });
+}
+
+export function createCompassNeedle() {
+  // grupė, kuri sukasi aplink Y ašį (kompaso kryptis)
+  compassNeedleGroup = new THREE.Group();
+
+  // adatėlės shaft (plonas cilindras)
+  const shaftGeo = new THREE.CylinderGeometry(0.02, 0.02, 1.6, 12);
+  const shaftMat = new THREE.MeshStandardMaterial({
+    color: 0xffffff,
+    emissive: 0xffffff,
+    emissiveIntensity: 0.2,
+    metalness: 0.6,
     roughness: 0.25
   });
-  const head = new THREE.Mesh(headGeo, headMat);
-  head.position.y = 0.95;
+  const shaft = new THREE.Mesh(shaftGeo, shaftMat);
+  shaft.rotation.x = Math.PI / 2;
+  shaft.position.y = 0.01;
+  compassNeedleGroup.add(shaft);
 
-  arrowGroup.add(shaft);
-  arrowGroup.add(head);
+  // adatos galvutė (raudona šiaurė)
+  const headGeo = new THREE.ConeGeometry(0.06, 0.18, 12);
+  const headMatN = new THREE.MeshStandardMaterial({ color: 0xf87171, emissive: 0xf87171, emissiveIntensity: 0.6 });
+  const headN = new THREE.Mesh(headGeo, headMatN);
+  headN.position.set(0, 0.9, 0);
+  headN.rotation.x = Math.PI / 2;
+  compassNeedleGroup.add(headN);
 
-  arrowGroup.position.set(0, 0, 0);
-  arrowGroup.rotation.x = Math.PI / 2;
+  // pietinė galvutė (balta)
+  const headMatS = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 0.2 });
+  const headS = new THREE.Mesh(headGeo, headMatS);
+  headS.position.set(0, -0.9, 0);
+  headS.rotation.x = -Math.PI / 2;
+  compassNeedleGroup.add(headS);
 
-  arrowMesh = arrowGroup;
-  scene.add(arrowMesh);
+  // centrinis stovas
+  const hubGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.06, 16);
+  const hubMat = new THREE.MeshStandardMaterial({ color: 0x111827, metalness: 0.8, roughness: 0.2 });
+  const hub = new THREE.Mesh(hubGeo, hubMat);
+  hub.position.set(0, 0.01, 0);
+  compassNeedleGroup.add(hub);
+
+  // pozicija ir rotacija: grupė sukasi aplink Y ašį
+  compassNeedleGroup.position.set(0, 0.02, 0);
+  scene.add(compassNeedleGroup);
 }
 
 export function updateArrowColor(metrics) {
-  if (!arrowMesh) return;
+  if (!compassNeedleGroup) return;
 
   let color = new THREE.Color(0x38bdf8);
 
@@ -278,9 +380,16 @@ export function updateArrowColor(metrics) {
     color = new THREE.Color(0xfbbf24);
   }
 
-  arrowMesh.children.forEach((part) => {
-    part.material.color = color;
-    part.material.emissive = color;
+  compassNeedleGroup.children.forEach((part) => {
+    if (part.material) {
+      if (part.geometry.type === 'ConeGeometry') {
+        // keep north red and south white; only change emissive for effect
+        part.material.emissive = color;
+      } else {
+        part.material.emissive = color;
+        part.material.color = color;
+      }
+    }
   });
 }
 
@@ -367,6 +476,8 @@ export function updateCompassGlow(metrics) {
   }
 
   glowMesh.material.uniforms.glowColor.value = color;
+  // jei reikia, priverstinai atnaujinti medžiagą:
+  // glowMesh.material.needsUpdate = true;
 }
 
 export function updateCompassDirection({ energy, stress }) {
@@ -376,7 +487,7 @@ export function updateCompassDirection({ energy, stress }) {
 
 export function updateArrowDirection({ energy, stress }) {
   const angle = Math.atan2(stress, energy);
-  arrowTargetRotation = angle;
+  needleTargetRotation = angle;
 }
 
 export function updateCompass3D(metrics) {
@@ -413,23 +524,40 @@ export function initCompass() {
   createOrbitRings();
   createParticles();
   createEmotionalNodes();
-  createEmotionArrow();
+  createCompassHousing();
+  createCompassNeedle();
   initTrajectory();
 }
+
+/* ---------- Animacijos ciklas ---------- */
 
 function animateCompass3D() {
   requestAnimationFrame(animateCompass3D);
 
+  // scene rotacija (lėtas poslinkis)
   scene.rotation.y += (targetRotation - scene.rotation.y) * 0.05;
 
-  if (arrowMesh) {
-    arrowMesh.rotation.z += (arrowTargetRotation - arrowMesh.rotation.z) * 0.08;
+  // adatėlės sukimas: grupė sukasi aplink Y ašį
+  if (compassNeedleGroup) {
+    // sklandus sukimasis
+    const current = compassNeedleGroup.rotation.y;
+    compassNeedleGroup.rotation.y += (needleTargetRotation - current) * 0.08;
+  }
+
+  // atnaujinti glow shader viewVector
+  if (glowMesh && glowMesh.material && glowMesh.material.uniforms) {
+    const worldPos = new THREE.Vector3();
+    glowMesh.getWorldPosition(worldPos);
+    const viewVec = new THREE.Vector3().subVectors(camera.position, worldPos).normalize();
+    glowMesh.material.uniforms.viewVector.value.copy(viewVec);
   }
 
   if (coreSphere) animateCoreSphere();
   animateRingsAndParticles();
   animateEmotionalNodes();
   updateTrajectoryLine();
+
+  // if (controls) controls.update();
 
   renderer.render(scene, camera);
 }
