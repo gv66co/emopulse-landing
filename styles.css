@@ -1,378 +1,218 @@
-/* ================================
-   GLOBAL
-================================ */
+/* emopulse-1.1.css
+   Stilius pritaikytas HTML 1.1: tamsus fonas, neon glow, 3D scena, dešinė panelė.
+   Įdėk <link rel="stylesheet" href="emopulse-1.1.css"> į savo HTML <head>.
+*/
 
-body.emopulse-cosmic {
-  margin: 0;
-  padding: 0;
-  font-family: 'Inter', sans-serif;
-  background: radial-gradient(ellipse at top, #0a0f1c 0%, #020617 100%);
-  color: #e5e7eb;
-  overflow-x: hidden;
-  transition: background 0.4s ease, color 0.4s ease;
+:root{
+  --bg-0: #03050a;
+  --bg-1: #071022;
+  --panel: rgba(6,18,30,0.6);
+  --muted: #94a3b8;
+  --accent-cool: #3abff8;
+  --accent-warm: #fbbf24;
+  --danger: #f87171;
+  --glass: rgba(255,255,255,0.03);
+  --glass-2: rgba(255,255,255,0.02);
+  --card-radius: 14px;
+  --text: #eaf6ff;
+  --soft: rgba(234,246,255,0.06);
+  --shadow: rgba(2,6,23,0.6);
+  --font-stack: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
 }
 
-/* DARK / LIGHT MODE */
-body.light-mode {
-  background: #f8fafc;
-  color: #0f172a;
+/* Reset */
+* { box-sizing: border-box; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+html,body { height:100%; margin:0; font-family:var(--font-stack); background: linear-gradient(180deg, #02040a 0%, var(--bg-1) 60%); color:var(--text); }
+
+/* App layout */
+.app {
+  display:flex;
+  gap:28px;
+  align-items:center;
+  justify-content:center;
+  height:100vh;
+  padding:28px;
+  overflow:hidden;
 }
 
-/* ================================
-   PARALLAX STARFIELD
-================================ */
+/* Stage (canvas container) */
+.stage {
+  width:720px;
+  max-width:62vw;
+  height:720px;
+  max-height:86vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+  border-radius:20px;
+  background:
+    radial-gradient(800px 400px at 18% 18%, rgba(58,191,248,0.06), transparent 8%),
+    radial-gradient(600px 300px at 80% 80%, rgba(251,191,36,0.02), transparent 6%),
+    linear-gradient(180deg, rgba(255,255,255,0.02), transparent 30%);
+  box-shadow: 0 10px 40px var(--shadow), inset 0 1px 0 rgba(255,255,255,0.02);
+  overflow:hidden;
+}
 
-.cosmic-bg-stars {
-  position: fixed;
+/* Decorative animated background layers for deep neon feel */
+.stage::before,
+.stage::after {
+  content: "";
+  position: absolute;
   inset: 0;
-  background: url('https://grainy-gradients.vercel.app/noise.svg');
-  opacity: 0.22;
   pointer-events: none;
-  z-index: 0;
-  animation: starParallax 40s linear infinite;
+  mix-blend-mode: screen;
+}
+.stage::before {
+  background:
+    radial-gradient(600px 300px at 10% 20%, rgba(58,191,248,0.06), transparent 10%),
+    radial-gradient(500px 250px at 85% 75%, rgba(248,150,30,0.03), transparent 8%);
+  opacity: 0.9;
+  transform: translateZ(0);
+  filter: blur(18px);
+}
+.stage::after {
+  background:
+    linear-gradient(90deg, rgba(58,191,248,0.02), rgba(251,191,36,0.01));
+  mix-blend-mode: overlay;
+  opacity: 0.6;
+  animation: slowShift 18s linear infinite;
+}
+@keyframes slowShift {
+  0% { transform: translateX(-6%); }
+  50% { transform: translateX(6%); }
+  100% { transform: translateX(-6%); }
 }
 
-@keyframes starParallax {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(-600px); }
+/* Canvas sizing */
+canvas#compass3d {
+  width:100%;
+  height:100%;
+  display:block;
+  border-radius:16px;
+  position:relative;
+  z-index:1;
 }
 
-/* ================================
-   HEADER
-================================ */
-
-.cosmic-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 28px 48px;
-  position: relative;
-  z-index: 10;
+/* subtle vignette */
+.stage .vignette {
+  position:absolute; inset:0; border-radius:20px; pointer-events:none;
+  background: radial-gradient(60% 60% at 50% 45%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.45) 100%);
+  z-index:5;
 }
 
-.cosmic-logo {
-  display: flex;
-  align-items: center;
-  font-size: 22px;
-  font-weight: 700;
-  color: #22d3ee;
+/* Right panel */
+.panel {
+  width:360px;
+  max-width:34vw;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border-radius:var(--card-radius);
+  padding:18px;
+  box-shadow: 0 8px 30px var(--shadow);
+  backdrop-filter: blur(8px) saturate(120%);
+  border: 1px solid rgba(255,255,255,0.03);
+  display:flex;
+  flex-direction:column;
+  gap:12px;
 }
 
-.cosmic-logo-mark {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #22d3ee;
-  margin-right: 10px;
-  box-shadow: 0 0 12px #22d3ee;
+/* Header */
+.header { display:flex; align-items:center; gap:12px; margin-bottom:6px; }
+.logo-dot {
+  width:44px; height:44px; border-radius:10px;
+  background: linear-gradient(135deg, var(--accent-cool), #6ee7b7);
+  display:flex; align-items:center; justify-content:center; font-weight:700; color:#021124;
+  box-shadow: 0 8px 26px rgba(58,191,248,0.12), inset 0 -6px 18px rgba(255,255,255,0.02);
+}
+.title { font-size:15px; font-weight:700; color:var(--text); line-height:1.05; }
+.subtitle { font-size:12px; color:var(--muted); margin-top:2px; }
+
+/* Input row */
+.input-row { margin:14px 0 6px 0; display:flex; gap:8px; align-items:center; }
+.text-input {
+  flex:1;
+  padding:10px 12px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.03);
+  background:var(--glass);
+  color:var(--text);
+  outline:none;
+  font-size:13px;
+  transition: box-shadow .18s ease, transform .12s ease;
+}
+.text-input:focus { box-shadow: 0 6px 18px rgba(58,191,248,0.08); transform: translateY(-1px); }
+.btn {
+  padding:10px 12px;
+  border-radius:10px;
+  background: linear-gradient(180deg, var(--accent-cool), #1ea7e8);
+  color:#021124;
+  font-weight:800;
+  border:none;
+  cursor:pointer;
+  box-shadow: 0 8px 26px rgba(58,191,248,0.12);
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.btn:active { transform: translateY(1px); box-shadow: 0 6px 18px rgba(58,191,248,0.08); }
+
+/* Camera indicator */
+.camera-indicator { display:flex; align-items:center; gap:8px; margin-top:6px; color:var(--muted); font-size:13px; }
+.cam-dot {
+  width:10px; height:10px; border-radius:50%;
+  background:#22c55e;
+  box-shadow: 0 0 8px rgba(34,197,94,0.6), 0 0 18px rgba(34,197,94,0.08);
+  transition: background .18s ease, box-shadow .18s ease;
 }
 
-.cosmic-nav a {
-  margin-left: 28px;
-  color: #94a3b8;
-  text-decoration: none;
-  font-size: 15px;
-  transition: 0.2s;
+/* Metrics grid */
+.metrics { margin-top:8px; display:grid; gap:12px; }
+.card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));
+  border-radius:12px;
+  padding:12px;
+  border:1px solid rgba(255,255,255,0.02);
+  box-shadow: 0 6px 18px rgba(2,6,23,0.35);
+}
+.card h4 { margin:0 0 6px 0; font-size:13px; color:#dff6ff; }
+.muted { color:var(--muted); font-size:13px; }
+
+/* Score block */
+.score { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:6px; }
+.score .big { font-size:22px; font-weight:800; color:var(--text); }
+.progress { height:8px; border-radius:8px; background:var(--glass-2); overflow:hidden; flex:1; margin-left:12px; }
+.progress > i { display:block; height:100%; background: linear-gradient(90deg, var(--accent-cool), #6ee7b7); width:0%; transition: width .6s cubic-bezier(.2,.9,.2,1); }
+
+/* Mood tags */
+.moodmap { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+.tag { background: rgba(255,255,255,0.03); padding:6px 8px; border-radius:8px; font-size:12px; color:var(--muted); box-shadow: inset 0 -2px 6px rgba(255,255,255,0.01); }
+
+/* Timeline placeholder */
+.timeline { height:56px; background: linear-gradient(90deg, rgba(255,255,255,0.01), transparent); border-radius:8px; margin-top:8px; position:relative; overflow:hidden; }
+.timeline::after {
+  content:"";
+  position:absolute; left:0; top:0; bottom:0; width:100%;
+  background: linear-gradient(90deg, rgba(58,191,248,0.06), rgba(251,191,36,0.03));
+  opacity:0.6; mix-blend-mode: screen;
 }
 
-.cosmic-nav a.active,
-.cosmic-nav a:hover {
-  color: #22d3ee;
+/* Metrics small layout */
+.card .muted + .muted { margin-top:6px; }
+
+/* Footer note */
+footer.note { margin-top:12px; font-size:12px; color:var(--muted); text-align:center; }
+
+/* Responsive */
+@media (max-width:1000px){
+  .app { flex-direction:column; gap:18px; padding:18px; align-items:stretch; justify-content:flex-start; }
+  .panel { width:100%; max-width:100%; order:2; }
+  .stage { width:100%; height:60vh; max-height:60vh; order:1; border-radius:14px; }
 }
 
-/* ================================
-   HERO
-================================ */
+/* Small polish: subtle glow for important elements */
+.title, .score .big, .card h4 { text-shadow: 0 6px 18px rgba(58,191,248,0.06); }
+.logo-dot { transform: translateZ(0); }
 
-.cosmic-hero {
-  display: flex;
-  justify-content: space-between;
-  padding: 60px 48px;
-  align-items: center;
-}
+/* Accessibility focus */
+.text-input:focus, .btn:focus { outline: 2px solid rgba(58,191,248,0.12); outline-offset:2px; }
 
-.cosmic-hero-text h1 {
-  font-size: 42px;
-  margin: 0 0 10px;
-  color: #e0f2fe;
-}
-
-.cosmic-hero-text p {
-  font-size: 18px;
-  color: #94a3b8;
-  margin-bottom: 20px;
-}
-
-.cosmic-cta {
-  padding: 12px 28px;
-  background: #22d3ee;
-  border: none;
-  border-radius: 8px;
-  color: #0f172a;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.cosmic-cta:hover {
-  background: #38e0ff;
-}
-
-/* ================================
-   CAMERA PANEL
-================================ */
-
-.cosmic-camera-panel {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.cosmic-camera-video {
-  width: 320px;
-  height: 220px;
-  border-radius: 12px;
-  object-fit: cover;
-  border: 2px solid #1e293b;
-  box-shadow: 0 0 20px rgba(34, 211, 238, 0.2);
-}
-
-.cosmic-camera-status {
-  margin-top: 10px;
-  font-size: 14px;
-  color: #22d3ee;
-}
-
-/* ================================
-   CENTER BLOCK
-================================ */
-
-.cosmic-center {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 40px;
-  position: relative;
-}
-
-/* COMPASS LOADING ANIMATION */
-#compass3d {
-  width: 480px;
-  height: 480px;
-  display: block;
-  margin: 0 auto;
-  filter: drop-shadow(0 0 20px rgba(34, 211, 238, 0.4));
-  animation: compassFadeIn 1.4s ease forwards;
-  opacity: 0;
-}
-
-@keyframes compassFadeIn {
-  0% { opacity: 0; transform: scale(0.92); }
-  100% { opacity: 1; transform: scale(1); }
-}
-
-/* ================================
-   METRICS
-================================ */
-
-.cosmic-metrics {
-  display: flex;
-  justify-content: center;
-  margin-top: 30px;
-  gap: 40px;
-}
-
-.cosmic-metric-label {
-  font-size: 14px;
-  color: #94a3b8;
-}
-
-.cosmic-metric-value {
-  font-size: 26px;
-  font-weight: 700;
-  color: #e0f2fe;
-  margin-top: 4px;
-}
-
-/* ================================
-   INPUT + AI BOX
-================================ */
-
-.cosmic-input-area {
-  margin: 60px auto;
-  width: 600px;
-  text-align: center;
-}
-
-.cosmic-input {
-  width: 100%;
-  padding: 14px 18px;
-  border-radius: 10px;
-  border: 1px solid #334155;
-  background: #0f172a;
-  color: #e2e8f0;
-  font-size: 16px;
-  margin-bottom: 14px;
-}
-
-.cosmic-analyze-btn {
-  padding: 12px 28px;
-  background: #22d3ee;
-  border: none;
-  border-radius: 8px;
-  color: #0f172a;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.cosmic-analyze-btn:hover {
-  background: #38e0ff;
-}
-
-/* AI BOX */
-.cosmic-ai-box {
-  margin-top: 30px;
-  padding: 20px;
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid #1e293b;
-  border-radius: 12px;
-  backdrop-filter: blur(8px);
-}
-
-/* AI TYPING EFFECT */
-.cosmic-ai-text {
-  font-size: 20px;
-  color: #e0f2fe;
-  margin-bottom: 14px;
-  overflow: hidden;
-  white-space: nowrap;
-  border-right: 2px solid #22d3ee;
-  width: 0;
-  animation: typing 2.2s steps(40) forwards, cursorBlink 0.7s infinite;
-}
-
-@keyframes typing {
-  from { width: 0; }
-  to { width: 100%; }
-}
-
-@keyframes cursorBlink {
-  0% { border-color: #22d3ee; }
-  50% { border-color: transparent; }
-  100% { border-color: #22d3ee; }
-}
-
-.cosmic-ai-tags {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.cosmic-ai-tag {
-  background: #1e293b;
-  padding: 6px 12px;
-  border-radius: 8px;
-  color: #22d3ee;
-  font-size: 13px;
-}
-
-/* ================================
-   TIMELINE + PULSE
-================================ */
-
-.cosmic-graphs {
-  display: flex;
-  justify-content: center;
-  gap: 40px;
-  margin: 60px 0;
-}
-
-.cosmic-graph-block {
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid #1e293b;
-  padding: 20px;
-  border-radius: 12px;
-  width: 420px;
-  backdrop-filter: blur(8px);
-}
-
-.cosmic-graph-block h3 {
-  margin-top: 0;
-  color: #22d3ee;
-}
-
-/* ================================
-   BANNERS
-================================ */
-
-.cosmic-banners {
-  display: flex;
-  justify-content: center;
-  gap: 40px;
-  margin-bottom: 80px;
-}
-
-.cosmic-banner {
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid #1e293b;
-  padding: 20px;
-  border-radius: 12px;
-  width: 260px;
-  backdrop-filter: blur(8px);
-}
-
-.cosmic-banner-title {
-  font-size: 16px;
-  color: #22d3ee;
-  margin-bottom: 6px;
-}
-
-.cosmic-banner-main {
-  font-size: 18px;
-  color: #e0f2fe;
-  margin-bottom: 6px;
-}
-
-.cosmic-banner-sub {
-  font-size: 14px;
-  color: #94a3b8;
-}
-
-/* ================================
-   RESPONSIVE
-================================ */
-
-@media (max-width: 900px) {
-  .cosmic-hero {
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .cosmic-center {
-    flex-direction: column;
-  }
-
-  #compass3d {
-    width: 360px;
-    height: 360px;
-  }
-
-  .cosmic-metrics {
-    gap: 20px;
-  }
-
-  .cosmic-graphs {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .cosmic-banners {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .cosmic-input-area {
-    width: 90%;
-  }
-}
+/* Utility */
+.hidden { display:none !important; }
