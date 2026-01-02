@@ -5,11 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Emopulse – Emotional Field Analyzer</title>
 
+  <!-- Main CSS -->
   <link rel="stylesheet" href="/emopulse.css" />
 
   <!-- Face API -->
   <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+
+  <!-- Three.js (būtina 3D kompasui) -->
+  <script type="module">
+    import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
+    window.THREE = THREE;
+  </script>
 </head>
+
 <body>
   <div class="app">
     <!-- 3D Compass -->
@@ -71,7 +79,7 @@
     </div>
   </div>
 
-  <!-- JS files -->
+  <!-- JS files (turi būti po Three.js ir face-api.js) -->
   <script src="/compas3d.js"></script>
   <script src="/app.js"></script>
   <script src="/live.js"></script>
