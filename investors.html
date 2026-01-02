@@ -4,8 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Emopulse — Investors</title>
-    <link rel="stylesheet" href="/styles.css" />
+
+    <!-- Jei tavo CSS failas vadinasi emopulse.css, naudok šitą -->
+    <link rel="stylesheet" href="/emopulse.css" />
   </head>
+
   <body class="bg">
     <header class="topbar">
       <div class="brand">
@@ -54,7 +57,7 @@
       <aside class="panel">
         <div class="panelTitle">Deck rules</div>
         <div class="bullets">
-          <div class="bullet">Uses your slide images from <code>/public/slides/</code></div>
+          <div class="bullet">Uses your slide images from <code>/slides/</code></div>
           <div class="bullet">Team slide must be the single image where it already says “Arvid Pak”</div>
           <div class="bullet">No overlays added, no extra people</div>
         </div>
@@ -65,13 +68,13 @@
       <div>© 2026 emo1 (Emopulse). All rights reserved.</div>
     </footer>
 
-    <!-- 🔥 PRIDĖTA: Three.js CDN -->
+    <!-- Three.js CDN -->
     <script type="module">
       import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
       window.THREE = THREE;
     </script>
 
-    <!-- Tavo originalus skriptas -->
-    <script type="module" src="/src/investors.js?v=1"></script>
+    <!-- Tavo 3D carousel logika -->
+    <script type="module" src="/investors.js?v=1"></script>
   </body>
 </html>
