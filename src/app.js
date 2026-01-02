@@ -1,6 +1,8 @@
 
-import * as faceapi from "face-api.js";
 import { initCompass3D, updateCompass3D } from "./compas3d.js";
+
+// Naudosime face-api.js iš CDN (index.html), todėl čia:
+const faceapi = window.faceapi;
 
 const video = document.getElementById("cam");
 const camStatus = document.getElementById("camStatus");
