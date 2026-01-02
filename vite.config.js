@@ -2,10 +2,10 @@
 import { defineConfig } from "vite";
 
 export default defineConfig({
-  root: ".",
-  publicDir: "public",
+  root: ".",            // Projekto šaknis
+  publicDir: "public",  // Statiniai failai (pvz., modeliai)
   build: {
-    outDir: "dist",
-    emptyOutDir: true
+    outDir: "dist",     // Galutiniai failai bus dist
+    emptyOutDir: true   // Išvalo dist prieš build
   }
 });
