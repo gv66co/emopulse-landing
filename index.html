@@ -29,20 +29,24 @@
         </div>
       </div>
 
+      <!-- Camera -->
       <video id="cam" autoplay muted playsinline></video>
-      <canvas id="overlay"></canvas>
+      <canvas id="overlay" width="520" height="360"></canvas>
       <div id="camStatus" class="camera-indicator">
         <div class="cam-dot"></div> Initializing camera…
       </div>
 
+      <!-- Aura -->
       <canvas id="auraCanvas" width="320" height="320"></canvas>
 
+      <!-- Controls -->
       <div class="input-row">
         <input id="textInput" class="text-input" placeholder="Type your feeling..." />
         <button id="analyzeBtn" class="btn">Analyze</button>
         <button id="soundBtn" class="btn">Sound: On</button>
       </div>
 
+      <!-- Metrics -->
       <div class="metrics">
         <div class="card"><h4>Score</h4><div id="score">0 / 100</div></div>
         <div class="card"><h4>Energy</h4><div id="energy">0.00 rising</div></div>
@@ -51,12 +55,14 @@
         <div class="card"><h4>Intensity</h4><div id="intensity">Low</div></div>
       </div>
 
+      <!-- AI Insight -->
       <div class="card">
         <h4>AI Insight</h4>
         <p id="aiText">Waiting for analysis...</p>
         <p id="aiTags">#calm #focus</p>
       </div>
 
+      <!-- Timeline & Pulse -->
       <canvas id="timeline" width="320" height="60"></canvas>
       <canvas id="pulse" width="320" height="60"></canvas>
     </div>
@@ -65,4 +71,3 @@
   <script type="module" src="/src/app.js"></script>
 </body>
 </html>
-``
