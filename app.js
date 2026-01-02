@@ -1,4 +1,5 @@
-import { initCompass3D, updateCompass3D } from "/compas3d.js";
+import { initCompass3D, updateCompass3D } from "/compas3d-v2.js";
+
 
 // Face API iš CDN
 const faceapi = window.faceapi;
