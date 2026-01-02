@@ -1,12 +1,17 @@
 const THREE = window.THREE;
 
-
+// DOM
 const canvas = document.getElementById("deck3d");
 const label = document.getElementById("slideLabel");
 const btnPrev = document.getElementById("prev");
 const btnNext = document.getElementById("next");
 const btnPause = document.getElementById("pause");
 
+if (!canvas) {
+  console.error("Canvas #deck3d not found.");
+}
+
+// Slides
 const SLIDES = [
   { name: "About us", src: "/slides/01-about.png" },
   { name: "Problem", src: "/slides/02-problem.png" },
@@ -15,10 +20,7 @@ const SLIDES = [
   { name: "Market", src: "/slides/05-market.png" },
   { name: "Competition", src: "/slides/06-competition.png" },
   { name: "Financials", src: "/slides/07-financials.png" },
-
-  // TEAM — only Arvid Pak slide image
   { name: "Team", src: "/slides/08-team-arvid.png" },
-
   { name: "Summary", src: "/slides/09-summary.png" },
   { name: "Thank you", src: "/slides/10-thankyou.png" }
 ];
@@ -34,32 +36,44 @@ let timer = null;
 let drag = { active: false, x: 0, y: 0 };
 let orbit = { yaw: 0, pitch: 0 };
 
+// Init
 init().catch((e) => {
   console.error(e);
-  label.textContent = "Carousel failed. Check console.";
+  if (label) label.textContent = "Carousel failed. Check console.";
 });
 
 async function init() {
-  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer = new THREE.WebGLRenderer({
+    canvas,
+    antialias: true,
+    alpha: true
+  });
+
   renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.setClearColor(0x000000, 0);
 
   scene = new THREE.Scene();
 
   camera = new THREE.PerspectiveCamera(42, 16 / 9, 0.1, 100);
   camera.position.set(0, 0.1, 5.2);
 
+  // Lighting
   scene.add(new THREE.AmbientLight(0xffffff, 0.85));
 
   const dir = new THREE.DirectionalLight(0xffffff, 0.8);
   dir.position.set(2, 3, 3);
   scene.add(dir);
 
+  // Group
   group = new THREE.Group();
   scene.add(group);
 
+  // Load slides
   await loadSlides();
   layoutCards();
   updateLabel();
+
   resize();
   window.addEventListener("resize", resize);
 
@@ -81,8 +95,11 @@ function bindUI() {
   });
 
   const wrap = canvas.parentElement;
+
   wrap.addEventListener("mouseenter", () => stopAutoRotate());
-  wrap.addEventListener("mouseleave", () => { if (!isPaused) startAutoRotate(); });
+  wrap.addEventListener("mouseleave", () => {
+    if (!isPaused) startAutoRotate();
+  });
 
   wrap.addEventListener("pointerdown", (e) => {
     drag.active = true;
@@ -93,13 +110,16 @@ function bindUI() {
 
   wrap.addEventListener("pointermove", (e) => {
     if (!drag.active) return;
+
     const dx = e.clientX - drag.x;
     const dy = e.clientY - drag.y;
+
     drag.x = e.clientX;
     drag.y = e.clientY;
 
     orbit.yaw += dx * 0.003;
     orbit.pitch += dy * 0.002;
+
     orbit.pitch = clamp(orbit.pitch, -0.35, 0.35);
   });
 
@@ -110,7 +130,11 @@ function bindUI() {
     "wheel",
     (e) => {
       e.preventDefault();
-      camera.position.z = clamp(camera.position.z + e.deltaY * 0.002, 3.2, 7.5);
+      camera.position.z = clamp(
+        camera.position.z + e.deltaY * 0.002,
+        3.2,
+        7.5
+      );
     },
     { passive: false }
   );
@@ -148,15 +172,16 @@ function makeCard(tex) {
   const w = 3.6;
   const h = 2.025;
 
-  const geo = new THREE.PlaneGeometry(w, h, 1, 1);
+  const geo = new THREE.PlaneGeometry(w, h);
   const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true });
   const mesh = new THREE.Mesh(geo, mat);
 
-  const frameGeo = new THREE.PlaneGeometry(w + 0.08, h + 0.08, 1, 1);
+  // Neon frame
+  const frameGeo = new THREE.PlaneGeometry(w + 0.12, h + 0.12);
   const frameMat = new THREE.MeshBasicMaterial({
-    color: 0x1b2a4a,
+    color: 0x0a1224,
     transparent: true,
-    opacity: 0.55
+    opacity: 0.65
   });
   const frame = new THREE.Mesh(frameGeo, frameMat);
   frame.position.z = -0.02;
@@ -224,22 +249,4 @@ function animate() {
     if (!t) continue;
 
     c.position.lerp(t.position, 0.10);
-    c.rotation.x += (t.rotation.x - c.rotation.x) * 0.10;
-    c.rotation.y += (t.rotation.y - c.rotation.y) * 0.10;
-    c.rotation.z += (t.rotation.z - c.rotation.z) * 0.10;
-  }
-
-  renderer.render(scene, camera);
-}
-
-function resize() {
-  const w = canvas.clientWidth;
-  const h = canvas.clientHeight;
-  renderer.setSize(w, h, false);
-  camera.aspect = w / h;
-  camera.updateProjectionMatrix();
-}
-
-function clamp(v, a, b) {
-  return Math.max(a, Math.min(b, v));
-}
+    c.rotation.x += (t.rotation
