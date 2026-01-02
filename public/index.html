@@ -1,23 +1,27 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="lt">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Emopulse – realaus laiko emocijų analizatorius" />
   <title>Emopulse – Emotional Field Analyzer</title>
+
+  <!-- Favicon (užkirs kelią 404 konsolėje) -->
+  <link rel="icon" href="/favicon.ico" type="image/x-icon" />
 
   <!-- Main CSS -->
   <link rel="stylesheet" href="./emopulse.css" />
 
   <!-- Face API -->
-  <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js" defer></script>
 </head>
 
 <body>
   <div class="app">
     <!-- 3D Compass -->
-    <div class="stage">
-      <canvas id="compass3d"></canvas>
-      <div class="vignette"></div>
+    <div class="stage" aria-hidden="false">
+      <canvas id="compass3d" width="640" height="360" role="img" aria-label="3D emocijų kompasas"></canvas>
+      <div class="vignette" aria-hidden="true"></div>
       <div class="brand">
         <div class="name">Emopulse</div>
         <div class="subtitle">Real-time Emotional Compass</div>
@@ -25,9 +29,9 @@
     </div>
 
     <!-- Right Panel -->
-    <div class="panel">
+    <div class="panel" role="region" aria-label="Valdymo skydelis">
       <div class="header">
-        <div class="logo-dot">E</div>
+        <div class="logo-dot" aria-hidden="true">E</div>
         <div>
           <div class="title">Emopulse</div>
           <div class="subtitle">Analyze your emotional field</div>
@@ -35,29 +39,29 @@
       </div>
 
       <!-- Camera -->
-      <video id="cam" autoplay muted playsinline></video>
-      <canvas id="overlay" width="520" height="360"></canvas>
-      <div id="camStatus" class="camera-indicator">
-        <div class="cam-dot"></div> Initializing camera…
+      <video id="cam" autoplay muted playsinline width="520" height="360" aria-label="Kamera"></video>
+      <canvas id="overlay" width="520" height="360" aria-hidden="true"></canvas>
+      <div id="camStatus" class="camera-indicator" role="status" aria-live="polite">
+        <div class="cam-dot" aria-hidden="true"></div> Initializing camera…
       </div>
 
       <!-- Aura -->
-      <canvas id="auraCanvas" width="320" height="320"></canvas>
+      <canvas id="auraCanvas" width="320" height="320" role="img" aria-label="Aura vizualizacija"></canvas>
 
       <!-- Controls -->
       <div class="input-row">
-        <input id="textInput" class="text-input" placeholder="Type your feeling..." />
-        <button id="analyzeBtn" class="btn">Analyze</button>
-        <button id="soundBtn" class="btn">Sound: On</button>
+        <input id="textInput" class="text-input" placeholder="Type your feeling..." aria-label="Įveskite jausmą" />
+        <button id="analyzeBtn" class="btn" type="button">Analyze</button>
+        <button id="soundBtn" class="btn" type="button" aria-pressed="true">Sound: On</button>
       </div>
 
       <!-- Metrics -->
-      <div class="metrics">
-        <div class="card"><h4>Score</h4><div id="score">0 / 100</div></div>
-        <div class="card"><h4>Energy</h4><div id="energy">0.00 rising</div></div>
-        <div class="card"><h4>Stress</h4><div id="stress">0.00 low</div></div>
-        <div class="card"><h4>Stability</h4><div id="stability">0° toward Joy</div></div>
-        <div class="card"><h4>Intensity</h4><div id="intensity">Low</div></div>
+      <div class="metrics" role="list">
+        <div class="card" role="listitem"><h4>Score</h4><div id="score">0 / 100</div></div>
+        <div class="card" role="listitem"><h4>Energy</h4><div id="energy">0.00 rising</div></div>
+        <div class="card" role="listitem"><h4>Stress</h4><div id="stress">0.00 low</div></div>
+        <div class="card" role="listitem"><h4>Stability</h4><div id="stability">0° toward Joy</div></div>
+        <div class="card" role="listitem"><h4>Intensity</h4><div id="intensity">Low</div></div>
       </div>
 
       <!-- AI Insight -->
@@ -68,13 +72,15 @@
       </div>
 
       <!-- Timeline & Pulse -->
-      <canvas id="timeline" width="320" height="60"></canvas>
-      <canvas id="pulse" width="320" height="60"></canvas>
+      <canvas id="timeline" width="320" height="60" aria-hidden="true"></canvas>
+      <canvas id="pulse" width="320" height="60" aria-hidden="true"></canvas>
     </div>
   </div>
 
-  <!-- VIENINTELIS SCRIPT TAGAS -->
-  <script type="module" src="./app.js"></script>
-  <script type="module" src="./compas3d-v2.js"></script>
+  <!-- VIENINTELIS SCRIPT TAGAS: importuojami abu moduliai iš vieno tago -->
+  <script type="module">
+    import './app.js';
+    import './compas3d-v2.js';
+  </script>
 </body>
 </html>
