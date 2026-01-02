@@ -1,13 +1,14 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Emopulse – Emotional Field Analyzer</title>
+
   <link rel="stylesheet" href="/emopulse.css" />
-  <!-- Face API iš CDN (kad išvengtume Vite bundling klaidų) -->
-  https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js</script>
+
+  <!-- Face API -->
+  <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 </head>
 <body>
   <div class="app">
@@ -70,7 +71,9 @@
     </div>
   </div>
 
-  <!-- Vite entry point -->
-  <script type="module" src="/src/app.js"></script>
+  <!-- JS files -->
+  <script src="/compas3d.js"></script>
+  <script src="/app.js"></script>
+  <script src="/live.js"></script>
 </body>
 </html>
