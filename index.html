@@ -1,229 +1,91 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Emopulse – Real-Time Emotional Field</title>
-
-  <!-- Face API script (būtinas vėliau JS veikimui) -->
-  <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
-
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #050b1f;
-      color: #f5f7ff;
-    }
-
-    .app {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      padding: 20px;
-    }
-
-    h1 {
-      font-size: 20px;
-      color: #ffffff;
-    }
-
-    .subtitle {
-      font-size: 14px;
-      color: #a9b4ff;
-      margin-top: 6px;
-    }
-
-    /* Input row */
-    .input-row {
-      margin-top: 16px;
-      display: flex;
-      gap: 12px;
-    }
-
-    .input-row input {
-      flex: 1;
-      padding: 10px 14px;
-      border-radius: 999px;
-      border: 1px solid #28305a;
-      background: rgba(4, 8, 24, 0.9);
-      color: #f5f7ff;
-      font-size: 13px;
-      outline: none;
-    }
-
-    .input-row input::placeholder {
-      color: #5f6aa5;
-    }
-
-    .input-row button {
-      padding: 10px 18px;
-      border-radius: 999px;
-      border: none;
-      background: linear-gradient(135deg, #4f7dff, #9b5bff);
-      color: white;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      box-shadow: 0 0 18px rgba(111, 140, 255, 0.6);
-    }
-
-    .input-row button:active {
-      transform: translateY(1px);
-      box-shadow: 0 0 10px rgba(111, 140, 255, 0.4);
-    }
-
-    /* Compass */
-    .compass-wrapper {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-top: 8px;
-    }
-
-    .compass-glow {
-      position: absolute;
-      width: 70%;
-      height: 70%;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(88, 140, 255, 0.4), transparent 60%);
-      filter: blur(18px);
-      opacity: 0.9;
-      transform: translateY(18%);
-    }
-
-    .compass-sphere {
-      position: relative;
-      width: 70%;
-      height: 70%;
-      border-radius: 50%;
-      background: radial-gradient(circle at 30% 20%, #ffdd99 0%, #ff7b7b 18%, #ff4fa8 32%, #7b5bff 52%, #2b9dff 72%, #050b1f 100%);
-      box-shadow: 0 0 40px rgba(120, 180, 255, 0.7), 0 0 80px rgba(120, 80, 255, 0.6);
-      overflow: hidden;
-      animation: spin 18s linear infinite;
-    }
-
-    .compass-label {
-      position: absolute;
-      font-size: 12px;
-      font-weight: 600;
-      text-transform: uppercase;
-      color: #f5f7ff;
-      text-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
-    }
-
-    .label-ca { top: 18%; left: 20%; }
-    .label-joy { top: 18%; right: 20%; }
-    .label-stress { bottom: 16%; left: 50%; transform: translateX(-50%); }
-
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-
-    /* Cards */
-    .metrics-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      margin-top: 8px;
-    }
-
-    .card {
-      background: radial-gradient(circle at top, rgba(33, 52, 110, 0.7), rgba(5, 9, 26, 0.95));
-      border-radius: 18px;
-      padding: 14px 16px;
-      border: 1px solid rgba(88, 120, 210, 0.5);
-      box-shadow: 0 0 18px rgba(10, 18, 60, 0.9);
-    }
-
-    .card-title {
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.16em;
-      color: #7f8dff;
-      margin-bottom: 8px;
-    }
-
-    .score-big {
-      font-size: 20px;
-      font-weight: 650;
-      margin-top: 6px;
-    }
-
-    video {
-      width: 100%;
-      border-radius: 14px;
-      border: 1px solid rgba(88, 120, 210, 0.5);
-      background: #000;
-    }
-
-    @media (max-width: 900px) {
-      .app {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
+  <title>Emopulse – Emotional Field Analyzer</title>
+  <link rel="stylesheet" href="/emopulse.css" />
 </head>
 <body>
   <div class="app">
-    <!-- Kairė pusė -->
-    <div class="left">
-      <h1>Understand your emotional field in real time</h1>
-      <p class="subtitle">Type anything you're feeling or thinking. Using your camera, Emopulse analyzes your emotional field in real time.</p>
-
-      <div class="input-row">
-        <input id="textInput" placeholder="Type anything you're feeling or thinking..." />
-        <button id="analyzeBtn">Analyze my emotional field</button>
-      </div>
-
-      <div class="compass-wrapper">
-        <div class="compass-glow"></div>
-        <div class="compass-sphere" id="compassSphere">
-          <div class="compass-label label-ca">Ca</div>
-          <div class="compass-label label-joy">Joy</div>
-          <div class="compass-label label-stress">Stress</div>
-        </div>
-      </div>
-
-      <div class="metrics-row">
-        <div class="card">
-          <div class="card-title">Emotional Aura</div>
-          <div id="stabilityValue">12° toward</div>
-          <div id="intensityValue">Low</div>
-          <div class="score-big" id="scoreValue">76/100</div>
-        </div>
-
-        <div class="card">
-          <div class="card-title">Emotional Signature</div>
-          <div id="signatureText">Calm focused energy</div>
-          <div id="hashtagsText">#calm #focused #energy</div>
-        </div>
-
-        <div class="card">
-          <div class="card-title">Stress Risk</div>
-          <div id="stressLabel">Sunshine with tranquility</div>
-          <div id="stressScoreText">Stress Risk: 0.21 low</div>
-        </div>
+    <!-- 3D Compass Stage -->
+    <div class="stage">
+      <canvas id="compass3d"></canvas>
+      <div class="vignette"></div>
+      <div class="brand">
+        <div class="name">Emopulse</div>
+        <div class="subtitle">Real-time Emotional Compass</div>
       </div>
     </div>
 
-    <!-- Dešinė pusė -->
-    <div class="right">
-      <div class="card">
-        <div class="card-title">Emopulse Camera Scan</div>
-        <p class="subtitle">Real-time emotion detection using your webcam. No data is stored; analysis happens in your browser.</p>
-        <video id="video" autoplay muted playsinline></video>
-        <div id="statusText">Initializing camera and models…</div>
+    <!-- Right Panel -->
+    <div class="panel">
+      <div class="header">
+        <div class="logo-dot">E</div>
+        <div>
+          <div class="title">Emopulse</div>
+          <div class="subtitle">Analyze your emotional field</div>
+        </div>
       </div>
+
+      <!-- Camera -->
+      <video id="cam" autoplay muted playsinline></video>
+      <canvas id="overlay"></canvas>
+      <div id="camStatus" class="camera-indicator">
+        <div class="cam-dot"></div> Initializing camera…
+      </div>
+
+      <!-- Aura -->
+      <canvas id="auraCanvas" width="320" height="320"></canvas>
+
+      <!-- Controls -->
+      <div class="input-row">
+        <input id="textInput" class="text-input" placeholder="Type your feeling..." />
+        <button id="analyzeBtn" class="btn">Analyze</button>
+        <button id="soundBtn" class="btn">Sound: On</button>
+      </div>
+
+      <!-- Metrics -->
+      <div class="metrics">
+        <div class="card">
+          <h4>Score</h4>
+          <div id="score">0 / 100</div>
+          <div id="score2">0/100</div>
+        </div>
+        <div class="card">
+          <h4>Energy</h4>
+          <div id="energy">0.00 rising</div>
+        </div>
+        <div class="card">
+          <h4>Stress</h4>
+          <div id="stress">0.00 low</div>
+        </div>
+        <div class="card">
+          <h4>Stability</h4>
+          <div id="stability">0° toward Joy</div>
+        </div>
+        <div class="card">
+          <h4>Intensity</h4>
+          <div id="intensity">Low</div>
+        </div>
+      </div>
+
+      <!-- AI Insight -->
+      <div class="card">
+        <h4>AI Insight</h4>
+        <p id="aiText">Waiting for analysis...</p>
+        <p id="aiTags">#calm #focus</p>
+      </div>
+
+      <!-- Timeline & Pulse -->
+      <canvas id="timeline" width="320" height="60"></canvas>
+      <canvas id="pulse" width="320" height="60"></canvas>
     </div>
   </div>
 
-  <!-- Čia vėliau įkelsime JS -->
-  <script src="app.js"></script>
+  <!-- Vite entry point -->
+  <script type="module" src="/src/app.js"></script>
 </body>
 </html>
