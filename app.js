@@ -1,6 +1,5 @@
 import { initCompass3D, updateCompass3D } from "/compas3d-v2.js";
 
-
 // Face API iš CDN
 const faceapi = window.faceapi;
 
@@ -115,7 +114,11 @@ function updateUI(m) {
   aiTagsEl.textContent =
     m.score > 75 ? "#focus #calm #momentum" : "#grounded #clarity #steady";
 
-  updateCompass3D(m);
+  // 🔥 KONVERTUOJAM EMOCIJAS Į KAMPĄ (kompasui)
+  const angle = (m.energy - m.stress) * Math.PI; // nuo -180° iki +180°
+
+  updateCompass3D(angle);
+
   pushHistory(m);
   drawTimeline();
   drawPulse(m);
