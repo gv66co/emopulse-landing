@@ -2,14 +2,14 @@ import { initCompass3D, updateCompass3D } from './compas3d-v2.js';
 import { FaceLandmarker, FilesetResolver, DrawingUtils } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3";
 
 async function setupAI() {
-    initCompass3D(); // Paleidžiame 3D Branduolį
+    initCompass3D(); // Paleidžiame 3D Branduolį centre
 
     const video = document.getElementById('cam');
     const canvasElement = document.getElementById('face-mesh-canvas');
     const canvasCtx = canvasElement.getContext('2d');
     const drawingUtils = new DrawingUtils(canvasCtx);
 
-    // 1. Krovimas iš CDN (ištaiso 404 klaidas)
+    // Naudojame CDN, kad išvengtume 404 klaidų
     const filesetResolver = await FilesetResolver.forVisionTasks(
         "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm"
     );
@@ -23,31 +23,27 @@ async function setupAI() {
         runningMode: "VIDEO"
     });
 
-    // 2. Kameros paleidimas
     const stream = await navigator.mediaDevices.getUserMedia({ 
         video: { width: 1280, height: 720 } 
     });
     video.srcObject = stream;
 
     video.addEventListener('loadeddata', () => {
-        // FUNKCIJA: Sutvarkome drobės dydį pagal tai, kaip video atrodo ekrane
+        // FUNKCIJA: Užtikrina, kad tinklelis būtų TIKSLIAI ant vaizdo
         const resizeCanvas = () => {
             canvasElement.width = video.offsetWidth;
             canvasElement.height = video.offsetHeight;
         };
-
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
         
         function predict() {
             const results = faceLandmarker.detectForVideo(video, performance.now());
-
-            // Išvalome drobę prieš kiekvieną nupiešimą
             canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
 
             if (results.faceLandmarks && results.faceLandmarks.length > 0) {
+                // Piešiame tinklelį
                 for (const landmarks of results.faceLandmarks) {
-                    // Piešiame tinklelį (sumažintas ryškumas iki #00f2ff22, kad neatrodytų perkrauta)
                     drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_TESSELATION, { 
                         color: "#00f2ff22", 
                         lineWidth: 1 
@@ -57,39 +53,43 @@ async function setupAI() {
                 if (results.faceBlendshapes && results.faceBlendshapes.length > 0) {
                     const shapes = results.faceBlendshapes[0].categories;
                     
-                    // Emocijų skaičiavimas
+                    // Ištraukiame biometrinius duomenis
                     const smile = shapes.find(s => s.categoryName === "mouthSmileLeft")?.score || 0;
                     const stress = shapes.find(s => s.categoryName === "browDownLeft")?.score || 0;
                     const energy = shapes.find(s => s.categoryName === "eyeWideLeft")?.score || 0;
                     
-                    // --- UI ATNAUJINIMAS ---
-                    
-                    // Neural Drift (simuliuojame nedidelį svyravimą dėl gyvumo)
-                    const drift = (0.842 + (Math.random() * 0.005)).toFixed(3);
-                    const driftElem = document.getElementById('neural-drift-val');
-                    if(driftElem) driftElem.innerText = "+" + drift;
+                    // --- Atnaujiname tavo HTML elementus ---
 
-                    // Emopulse Score
-                    const scoreElem = document.getElementById('scoreValue');
-                    if(scoreElem) scoreElem.innerText = Math.round(70 + (smile * 20) - (stress * 10));
+                    // 1. Emopulse Score
+                    const score = Math.round(70 + (smile * 25) - (stress * 15));
+                    document.getElementById('scoreValue').innerText = score;
 
-                    // Energy
-                    const energyElem = document.getElementById('energy');
-                    if(energyElem) energyElem.innerText = (0.60 + (energy * 0.4)).toFixed(2);
-                    
-                    // Stress Risk vizualas
+                    // 2. Energy
+                    document.getElementById('energy').innerText = (0.50 + (energy * 0.5)).toFixed(2);
+
+                    // 3. Stress Risk (su spalvos keitimu)
                     const stressText = document.getElementById('stress-lvl');
-                    const aiMsg = document.getElementById('aiText');
-
-                    if (stress > 0.25) {
-                        if(stressText) { stressText.innerText = "Elevated"; stressText.style.color = "#f87171"; }
-                        if(aiMsg) aiMsg.innerText = "Elevated Stress Detected";
+                    if (stress > 0.3) {
+                        stressText.innerText = "Elevated";
+                        stressText.className = "val stress-high"; // Pridėk šią klasę CSS raudonai spalvai
+                        stressText.style.color = "#f87171";
                     } else {
-                        if(stressText) { stressText.innerText = "Low"; stressText.style.color = "#4ade80"; }
-                        if(aiMsg) aiMsg.innerText = "System Synchronized";
+                        stressText.innerText = "Low";
+                        stressText.className = "val stress-low";
+                        stressText.style.color = "#4ade80";
                     }
 
-                    // 3. Judiname 3D adatą (šypsena suka į dešinę, stresas į kairę)
+                    // 4. Neural Drift (dinamiškas skaičius)
+                    const driftVal = (0.840 + (Math.random() * 0.005)).toFixed(3);
+                    document.getElementById('neural-drift-val').innerText = "+" + driftVal;
+
+                    // 5. AI Summary tekstas
+                    const aiMsg = document.getElementById('aiText');
+                    if (stress > 0.3) aiMsg.innerText = "Neural turbulence detected. High stress risk.";
+                    else if (smile > 0.2) aiMsg.innerText = "Coherence optimal. Flow state active.";
+                    else aiMsg.innerText = "System synchronized. Monitoring field...";
+
+                    // 6. Judiname 3D Core (Compass)
                     updateCompass3D((smile - stress) * 1.5);
                 }
             }
