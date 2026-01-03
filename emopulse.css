@@ -1,30 +1,69 @@
-/* Fiksuojame kameros konteinerį, kad jis neviršytų panelės ribų */
-.camera-panel .cam-container {
+:root {
+    --bg: #010307;
+    --panel: rgba(10, 15, 25, 0.95);
+    --cyan: #00f2ff;
+    --text: #ffffff;
+}
+
+* { box-sizing: border-box; }
+body { 
+    background-color: var(--bg) !important; 
+    color: var(--text); 
+    margin: 0; 
+    font-family: 'JetBrains Mono', monospace; 
+    height: 100vh; 
+    overflow: hidden; 
+}
+
+.pro-container { display: flex; flex-direction: column; height: 100vh; padding: 20px; }
+
+.top-bar { display: flex; justify-content: space-between; margin-bottom: 20px; }
+.logo { font-size: 1.5rem; font-weight: bold; letter-spacing: 4px; }
+.cyan { color: var(--cyan); }
+.online-status { color: #00ff88; text-shadow: 0 0 10px #00ff88; }
+
+.pro-grid {
+    display: grid;
+    grid-template-columns: 350px 1fr 350px;
+    gap: 20px;
+    flex: 1;
+    align-items: start;
+}
+
+.panel {
+    background: var(--panel);
+    border: 1px solid rgba(0, 242, 255, 0.2);
+    border-radius: 15px;
+    padding: 20px;
+}
+
+.cam-container {
     position: relative;
     width: 100%;
-    max-width: 480px; /* Galite koreguoti pagal poreikį */
-    aspect-ratio: 16 / 9;
-    background: #000;
-    border: 1px solid var(--cyan);
-    border-radius: 12px;
+    aspect-ratio: 4/3;
+    border-radius: 10px;
     overflow: hidden;
 }
 
-/* Vaizdo įrašas turi užpildyti tik savo rėmelį */
-#cam {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* Tai užtikrina, kad vaizdas neišsitemptų */
-    display: block;
+#cam { width: 100%; height: 100%; object-fit: cover; }
+#face-mesh-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
+.main-visual { height: 100%; display: flex; align-items: center; justify-content: center; }
+#compass3d { width: 100%; height: 500px; }
+
+.pro-footer {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-top: 20px;
 }
 
-/* SVARBIAUSIA: Tinklelis turi būti tiksliai ant kameros vaizdo */
-#face-mesh-canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none; /* Leidžia spausti elementus po drobė */
-    z-index: 10;
-}
+.stat-card { background: var(--panel); padding: 15px; border-radius: 10px; border-left: 3px solid var(--cyan); }
+.label { font-size: 10px; color: rgba(255,255,255,0.5); letter-spacing: 1px; }
+.val { font-size: 1.2rem; font-weight: bold; margin-top: 5px; }
+.val-large { font-size: 2rem; color: var(--cyan); margin: 10px 0; }
+
+.progress-bar { width: 100%; height: 4px; background: rgba(0,242,255,0.1); border-radius: 2px; }
+.fill { width: 80%; height: 100%; background: var(--cyan); box-shadow: 0 0 10px var(--cyan); }
+
+.tag { background: rgba(0,242,255,0.1); color: var(--cyan); padding: 4px 10px; border-radius: 4px; font-size: 10px; margin-right: 5px; }
