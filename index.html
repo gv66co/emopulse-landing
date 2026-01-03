@@ -2,95 +2,98 @@
 <html lang="lt">
 <head>
     <meta charset="UTF-8">
-    <title>EMOPULSE - NEURAL INTERFACE V5</title>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_landmarker@0.10.0"></script>
+    <title>EMOPULSE V5 - NEURAL CORE</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Inter:wght@100;300;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_landmarker@0.10.0"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@100;300;600&display=swap" rel="stylesheet">
     
     <style>
-        :root { --neon: #00f2ff; --stress: #ff3e3e; --glass: rgba(0, 10, 20, 0.7); }
-        body, html { margin: 0; padding: 0; background: #000; overflow: hidden; font-family: 'Inter', sans-serif; color: white; }
+        :root { --neon: #00f2ff; --glass: rgba(0, 10, 20, 0.8); }
+        body, html { margin: 0; padding: 0; background: #000; overflow: hidden; font-family: 'Inter', sans-serif; color: white; height: 100vh; }
 
-        /* Futuristinis Layout pagal tavo nuotrauką */
-        #ui-container {
-            position: absolute; inset: 0; z-index: 10; pointer-events: none;
-            display: grid; grid-template-columns: 400px 1fr 400px;
-            grid-template-rows: 80px 1fr 250px; padding: 40px; gap: 20px;
+        /* 3D Fonas */
+        canvas#three-bg { position: absolute; inset: 0; z-index: 1; }
+
+        /* Pagrindinis UI sluoksnis */
+        #ui-interface {
+            position: relative; z-index: 10; height: 100vh;
+            display: grid; grid-template-columns: 380px 1fr 380px;
+            grid-template-rows: 80px 1fr 200px; padding: 30px; gap: 20px;
+            pointer-events: none;
         }
 
-        .header { grid-column: 1 / 4; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0, 242, 255, 0.2); }
-        .logo { font-family: 'Orbitron'; letter-spacing: 10px; font-size: 22px; color: var(--neon); text-shadow: 0 0 15px var(--neon); }
-
         .panel { 
-            background: var(--glass); backdrop-filter: blur(30px); 
-            border: 1px solid rgba(255,255,255,0.1); border-radius: 25px; 
+            background: var(--glass); backdrop-filter: blur(20px); 
+            border: 1px solid rgba(0, 242, 255, 0.15); border-radius: 20px; 
             padding: 25px; pointer-events: auto;
         }
 
-        /* Kameros vaizdas su Face Mesh */
-        .video-wrap { position: relative; width: 100%; height: 220px; border-radius: 20px; overflow: hidden; border: 1px solid var(--neon); }
-        #webcam { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); filter: brightness(0.8) contrast(1.2); }
-        canvas#output_canvas { position: absolute; inset: 0; width: 100%; height: 100%; transform: scaleX(-1); }
+        .header { grid-column: 1 / 4; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-family: 'Orbitron'; letter-spacing: 8px; font-size: 24px; color: var(--neon); }
 
-        /* Apatinės kortelės */
-        .bottom-grid { grid-column: 1 / 4; grid-row: 3; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-        .card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; padding: 20px; }
-        .label { font-size: 10px; letter-spacing: 2px; opacity: 0.5; text-transform: uppercase; }
-        .value { font-family: 'Orbitron'; font-size: 24px; color: var(--neon); margin-top: 10px; }
+        /* Kameros blokas */
+        .cam-container { position: relative; width: 100%; height: 200px; border-radius: 15px; overflow: hidden; border: 1px solid var(--neon); margin-bottom: 20px; }
+        #webcam { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        #face-canvas { position: absolute; inset: 0; width: 100%; height: 100%; transform: scaleX(-1); }
 
-        /* Emocinis Summary */
-        .summary-box { border-left: 4px solid var(--neon); }
-        .tag { display: inline-block; padding: 4px 10px; background: rgba(0, 242, 255, 0.1); border-radius: 10px; font-size: 11px; margin: 2px; color: var(--neon); }
+        /* Skaičiai ir rodikliai */
+        .stat-label { font-size: 10px; letter-spacing: 2px; opacity: 0.5; text-transform: uppercase; }
+        .stat-value { font-family: 'Orbitron'; font-size: 28px; color: var(--neon); }
+
+        /* Apatinis tinklelis (kaip tavo nuotraukose) */
+        .bottom-shelf { grid-column: 1 / 4; grid-row: 3; display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+        .mini-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 15px; padding: 20px; }
+
+        .tag { display: inline-block; padding: 4px 10px; background: rgba(0, 242, 255, 0.1); border-radius: 8px; font-size: 11px; margin: 3px; color: var(--neon); }
     </style>
 </head>
 <body>
 
-    <div id="ui-container">
+    <canvas id="three-bg"></canvas>
+
+    <div id="ui-interface">
         <div class="header">
-            <div class="logo">EMOPULSE</div>
-            <div style="font-size: 12px; opacity: 0.6;">SYSTEM STATUS: <span style="color:var(--neon)">ANALYZING</span></div>
+            <div class="logo">EMOPULSE V5</div>
+            <div style="font-size: 11px;">SYSTEM STATUS: <span style="color:var(--neon)">SYNCHRONIZED</span></div>
         </div>
 
         <div class="panel">
-            <div class="video-wrap">
-                <video id="webcam" autoplay playsinline></video>
-                <canvas id="output_canvas"></canvas>
+            <div class="cam-container">
+                <video id="webcam" autoplay playsinline muted></video>
+                <canvas id="face-canvas"></canvas>
             </div>
-            <div style="margin-top: 30px;">
-                <div class="label">Neural Drift</div>
-                <div class="value" id="drift_val">+0.000</div>
-                <div style="width: 100%; height: 2px; background: rgba(255,255,255,0.1); margin-top: 10px;">
-                    <div id="drift_bar" style="width: 50%; height: 100%; background: var(--neon); box-shadow: 0 0 10px var(--neon);"></div>
-                </div>
+            <div class="stat-label">Neural Drift</div>
+            <div class="stat-value" id="drift-display">+0.842</div>
+            <div style="width: 100%; height: 3px; background: rgba(255,255,255,0.1); margin-top: 10px;">
+                <div id="drift-bar" style="width: 70%; height: 100%; background: var(--neon); box-shadow: 0 0 10px var(--neon);"></div>
             </div>
         </div>
 
-        <div id="three-container"></div>
-
-        <div class="panel summary-box">
-            <div class="label">Emotional Summary</div>
-            <div id="status_text" style="font-size: 22px; margin: 15px 0;">Skenuojamas veidas...</div>
-            <div id="tags_container">
-                <span class="tag">#neutral</span>
+        <div></div> <div class="panel" style="border-left: 4px solid var(--neon);">
+            <div class="stat-label">Emotional Summary</div>
+            <div id="summary-text" style="font-size: 20px; margin: 15px 0; font-weight: 300;">Analyzing facial features...</div>
+            <div id="tags">
+                <span class="tag">#monitoring</span>
+                <span class="tag">#biometric</span>
             </div>
         </div>
 
-        <div class="bottom-grid">
-            <div class="card">
-                <div class="label">Emopulse Score</div>
-                <div class="value">76 <small style="font-size: 12px; opacity:0.5">/100</small></div>
+        <div class="bottom-shelf">
+            <div class="mini-card">
+                <div class="stat-label">Emopulse Score</div>
+                <div class="stat-value">76<small style="font-size: 12px; opacity:0.4">/100</small></div>
             </div>
-            <div class="card">
-                <div class="label">Energy</div>
-                <div class="value" id="energy_val">0,66 <small style="font-size: 12px; color:var(--neon)">rising</small></div>
+            <div class="mini-card">
+                <div class="stat-label">Energy</div>
+                <div class="stat-value">0,66 <small style="font-size: 10px; color:var(--neon)">rising</small></div>
             </div>
-            <div class="card">
-                <div class="label">Stress Risk</div>
-                <div class="value" id="stress_val" style="color: #44ff44;">Low</div>
+            <div class="mini-card">
+                <div class="stat-label">Stress Risk</div>
+                <div class="stat-value" id="stress-lvl" style="color: #44ff44;">Low</div>
             </div>
-            <div class="card">
-                <div class="label">Stability</div>
-                <div class="value">112° <small style="font-size: 10px; opacity:0.5">toward Calm</small></div>
+            <div class="mini-card">
+                <div class="stat-label">Stability</div>
+                <div class="stat-value">112° <small style="font-size: 10px; opacity:0.4">toward Calm</small></div>
             </div>
         </div>
     </div>
@@ -98,83 +101,110 @@
     <script type="module">
         import { FaceLandmarker, FilesetResolver, DrawingUtils } from "https://cdn.jsdelivr.net/npm/@mediapipe/face_landmarker@0.10.0";
 
-        let faceLandmarker;
-        let video = document.getElementById("webcam");
-        const canvasElement = document.getElementById("output_canvas");
-        const canvasCtx = canvasElement.getContext("2d");
+        // --- 1. THREE.JS KONFIGŪRACIJA (Fonas ir Branduolys) ---
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('three-bg'), antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        camera.position.z = 15;
 
-        // Inicializuojame MediaPipe veido sekimą
-        async function setupFaceMesh() {
-            const filesetResolver = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/face_landmarker@0.10.0/wasm");
-            faceLandmarker = await FaceLandmarker.createFromOptions(filesetResolver, {
+        // Centrinis branduolys
+        const coreGeo = new THREE.IcosahedronGeometry(3, 15);
+        const coreMat = new THREE.MeshPhongMaterial({ color: 0x000000, emissive: 0x00f2ff, wireframe: true, transparent: true, opacity: 0.3 });
+        const core = new THREE.Mesh(coreGeo, coreMat);
+        scene.add(core);
+
+        const light = new THREE.PointLight(0x00f2ff, 2, 50);
+        light.position.set(10, 10, 10);
+        scene.add(light);
+
+        // --- 2. MEDIAPIPE FACE MESH (Funkcionalumas) ---
+        let faceLandmarker;
+        const video = document.getElementById("webcam");
+        const canvasFace = document.getElementById("face-canvas");
+        const ctxFace = canvasFace.getContext("2d");
+
+        async function initAI() {
+            const files = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/face_landmarker@0.10.0/wasm");
+            faceLandmarker = await FaceLandmarker.createFromOptions(files, {
                 baseOptions: { modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task`, delegate: "GPU" },
                 outputFaceBlendshapes: true,
-                runningMode: "VIDEO",
-                numFaces: 1
+                runningMode: "VIDEO"
             });
-            startCamera();
+            startVideo();
         }
 
-        function startCamera() {
-            navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
-                video.srcObject = stream;
-                video.addEventListener("loadeddata", predictWebcam);
+        function startVideo() {
+            navigator.mediaDevices.getUserMedia({ video: true }).then(s => {
+                video.srcObject = s;
+                video.addEventListener("loadeddata", runDetection);
             });
         }
 
-        async function predictWebcam() {
-            canvasElement.width = video.videoWidth;
-            canvasElement.height = video.videoHeight;
-            
-            let lastVideoTime = -1;
-            async function render() {
-                if (video.currentTime !== lastVideoTime) {
-                    const results = faceLandmarker.detectForVideo(video, performance.now());
-                    canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+        async function runDetection() {
+            canvasFace.width = video.videoWidth;
+            canvasFace.height = video.videoHeight;
+
+            async function detect() {
+                const results = faceLandmarker.detectForVideo(video, performance.now());
+                ctxFace.clearRect(0, 0, canvasFace.width, canvasFace.height);
+
+                if (results.faceLandmarks && results.faceLandmarks[0]) {
+                    const drawingUtils = new DrawingUtils(ctxFace);
+                    // Piešiame tinklą ant veido
+                    drawingUtils.drawConnectors(results.faceLandmarks[0], FaceLandmarker.FACE_LANDMARKS_TESSELATION, { color: "#00f2ff33", lineWidth: 1 });
                     
-                    if (results.faceLandmarks) {
-                        const drawingUtils = new DrawingUtils(canvasCtx);
-                        for (const landmarks of results.faceLandmarks) {
-                            // Piešiame futuristinį tinklą ant veido
-                            drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_TESSELATION, { color: "#00f2ff33", lineWidth: 1 });
-                            drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_RIGHT_EYE, { color: "#00f2ff" });
-                            drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_LEFT_EYE, { color: "#00f2ff" });
-                        }
-
-                        // EMOCIJŲ ANALIZĖ pagal veido raumenis
-                        if (results.faceBlendshapes && results.faceBlendshapes[0]) {
-                            analyzeEmotions(results.faceBlendshapes[0].categories);
-                        }
+                    // Emocijų logika pagal raumenis
+                    if (results.faceBlendshapes[0]) {
+                        updateBiometrics(results.faceBlendshapes[0].categories);
                     }
                 }
-                requestAnimationFrame(render);
+                requestAnimationFrame(detect);
             }
-            render();
+            detect();
         }
 
-        function analyzeEmotions(shapes) {
-            // Surandame pagrindines formas (pvz. šypsena, antakių kėlimas)
-            const smile = shapes.find(s => s.categoryName === "browInnerUp")?.score || 0;
+        function updateBiometrics(shapes) {
             const stress = shapes.find(s => s.categoryName === "browDownLeft")?.score || 0;
-            
-            const driftEl = document.getElementById('drift_val');
-            const statusEl = document.getElementById('status_text');
-            const stressEl = document.getElementById('stress_val');
+            const smile = shapes.find(s => s.categoryName === "mouthSmileLeft")?.score || 0;
 
-            if (stress > 0.3) {
-                statusEl.innerText = "Elevated Stress Detected";
-                driftEl.innerText = "+" + (stress * 5).toFixed(3);
-                stressEl.innerText = "HIGH";
+            const summary = document.getElementById('summary-text');
+            const stressEl = document.getElementById('stress-lvl');
+            const driftVal = document.getElementById('drift-display');
+
+            if (stress > 0.2) {
+                summary.innerText = "Elevated Stress Detected";
+                stressEl.innerText = "High";
                 stressEl.style.color = "#ff3e3e";
-            } else {
-                statusEl.innerText = "Calm Focused Energy";
-                driftEl.innerText = "+0.842";
+                driftVal.innerText = "+" + (stress * 10).toFixed(3);
+            } else if (smile > 0.2) {
+                summary.innerText = "Positive Flow State";
                 stressEl.innerText = "Low";
                 stressEl.style.color = "#44ff44";
+                driftVal.innerText = "+0.241";
+            } else {
+                summary.innerText = "Calm Focused Energy";
+                stressEl.innerText = "Low";
+                stressEl.style.color = "#44ff44";
+                driftVal.innerText = "+0.842";
             }
         }
 
-        setupFaceMesh();
+        function animate() {
+            requestAnimationFrame(animate);
+            core.rotation.y += 0.005;
+            core.rotation.x += 0.002;
+            renderer.render(scene, camera);
+        }
+
+        initAI();
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
     </script>
 </body>
 </html>
