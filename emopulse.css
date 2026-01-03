@@ -1,18 +1,16 @@
 :root {
     --bg: #02040a;
-    --card: rgba(13, 17, 23, 0.9);
-    --accent: #3abff8;
-    --border: rgba(255, 255, 255, 0.05);
+    --card: rgba(13, 17, 23, 0.8);
+    --blue: #3abff8;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-    background: var(--bg);
-    color: #fff;
-    font-family: 'Inter', sans-serif;
+body, html {
+    margin: 0;
     height: 100vh;
-    overflow: hidden;
+    overflow: hidden; /* Panaikina scrollbar'ą */
+    background: var(--bg);
+    color: white;
+    font-family: 'Inter', sans-serif;
 }
 
 .app-container {
@@ -20,88 +18,60 @@ body {
     flex-direction: column;
     height: 100vh;
     padding: 20px;
-    gap: 20px;
+    gap: 15px;
 }
 
-/* --- NAV --- */
-.top-nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 50px;
-}
-.logo-text { font-size: 1.4rem; font-weight: 800; letter-spacing: 1px; }
-.pro { color: var(--accent); }
-.nav-links { display: flex; gap: 25px; align-items: center; color: #7d8590; }
-.nav-links a { color: inherit; text-decoration: none; font-size: 0.9rem; }
-.nav-links a.active { color: #fff; font-weight: bold; }
-
-/* --- MAIN CONTENT (3 STULPELIAI) --- */
-.main-content {
+.content-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr 0.8fr;
+    grid-template-columns: 1.2fr 0.8fr;
+    flex: 1;
     gap: 20px;
-    flex: 1; /* Užpildo visą likusią vietą virš footerio */
-    min-height: 0;
+    min-height: 0; /* Svarbu: leidžia turiniui neviršyti ekrano */
 }
 
-/* Kairė */
-.left-col { display: flex; flex-direction: column; gap: 20px; }
-.visual-engine { 
-    flex: 1; 
-    background: radial-gradient(circle, rgba(58, 191, 248, 0.05) 0%, transparent 80%);
-    border: 1px solid var(--border);
+/* Kameros ovalas */
+.video-circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 2px solid var(--blue);
+    overflow: hidden;
+}
+
+#cam {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Užtikriname, kad kairė pusė užpildytų erdvę */
+.left-section {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.canvas-wrapper {
+    flex: 1;
+    background: var(--card);
     border-radius: 20px;
     position: relative;
 }
-.engine-label { position: absolute; bottom: 15px; left: 20px; font-size: 0.7rem; color: var(--accent); opacity: 0.6; }
 
-.drift-panel {
-    height: 150px;
-    background: var(--card);
-    border-radius: 20px;
-    display: flex;
-    align-items: center;
-    padding: 20px;
-    gap: 20px;
-}
-.video-container {
-    width: 100px; height: 100px;
-    border-radius: 50%; /* Ovalas */
-    border: 2px solid var(--accent);
-    overflow: hidden;
-}
-#cam { width: 100%; height: 100%; object-fit: cover; }
-
-/* Centras */
-.mid-col { display: flex; flex-direction: column; justify-content: center; gap: 30px; }
-.hero-text h1 { font-size: 2.5rem; line-height: 1.1; }
-.input-area textarea {
-    width: 100%; height: 100px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 15px; color: #fff; margin-bottom: 15px;
-}
-.analyze-btn {
-    width: 100%; padding: 15px;
-    background: #0f172a; border: 1px solid var(--accent);
-    color: var(--accent); border-radius: 8px; cursor: pointer;
+#compass3d {
+    width: 100% !important;
+    height: 100% !important;
 }
 
-/* Dešinė */
-.right-col { display: flex; flex-direction: column; gap: 20px; }
-.info-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 20px; flex: 1; }
-.card-header { color: var(--accent); margin-bottom: 15px; font-size: 0.9rem; text-transform: uppercase; }
-
-/* --- APAČIA --- */
 .bottom-metrics {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
+    height: 160px;
     gap: 15px;
-    height: 180px;
 }
-.metric-box { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 20px; }
-.m-label { font-size: 0.75rem; color: #7d8590; text-transform: uppercase; }
-.m-value { display: block; font-size: 2rem; font-weight: 800; color: var(--accent); margin-top: 10px; }
-.accent { color: var(--accent); }
+
+.metric-box {
+    background: var(--card);
+    border-radius: 15px;
+    padding: 15px;
+}
