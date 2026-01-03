@@ -1,169 +1,192 @@
-/* =========================================
-   EMOPULSE PRO – CORE DESIGN SYSTEM
-   ========================================= */
+// =========================================
+// EMOPULSE PRO – CORE ENGINE
+// =========================================
 
-:root {
-    /* Spalvų paletė */
-    --bg-dark: #020408;
-    --bg-gradient: radial-gradient(circle at 15% 15%, #0a1a3a 0%, #020408 100%);
-    --accent-blue: #3abff8;
-    --accent-purple: #7b5cff;
-    --accent-gold: #fbbf24;
-    --text-main: #f8fafc;
-    --text-muted: #94a3b8;
+const video = document.getElementById("cam");
+const auraCanvas = document.getElementById("auraCanvas");
+const auraCtx = auraCanvas.getContext("2d");
+const aiTextEl = document.getElementById("aiText");
+const scoreValueEl = document.getElementById("scoreValue");
+const energyEl = document.getElementById("energy");
+const stressEl = document.getElementById("stress");
+const scoreEl = document.getElementById("score");
+const aiTagsEl = document.getElementById("aiTags");
+const stressIconEl = document.getElementById("stressIcon");
+
+// Charts setup
+const timelineCanvas = document.getElementById("timelineCanvas");
+const pulseCanvas = document.getElementById("pulseCanvas");
+const timelineCtx = timelineCanvas?.getContext("2d");
+const pulseCtx = pulseCanvas?.getContext("2d");
+
+let modelsReady = false;
+let history = new Array(60).fill(50);
+let lastInsight = "";
+let lastVoiceTrigger = 0;
+
+// Natasha AI Voice Engine
+function natashaSpeak(text) {
+    const now = Date.now();
+    // Neleidžiame kalbėti dažniau nei kas 8 sekundes, kad nebūtų įkyru
+    if (window.speechSynthesis.speaking || now - lastVoiceTrigger < 8000) return;
     
-    /* Panelės ir stiklo efektai */
-    --panel-bg: rgba(15, 23, 42, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.08);
-    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+    const msg = new SpeechSynthesisUtterance(text);
+    msg.lang = 'en-US';
+    msg.rate = 0.92;
+    msg.pitch = 1.05;
+    window.speechSynthesis.speak(msg);
+    lastVoiceTrigger = now;
 }
 
-* {
-    box-sizing: border-box;
-    -webkit-font-smoothing: antialiased;
-}
+/* ---------------------------------------------------------
+   INITIALIZATION
+--------------------------------------------------------- */
+async function init() {
+    try {
+        const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights/';
+        await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+        await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
+        
+        modelsReady = true;
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { width: 640, height: 480, facingMode: "user" } 
+        });
+        video.srcObject = stream;
 
-body {
-    margin: 0;
-    padding: 0;
-    background: var(--bg-gradient);
-    color: var(--text-main);
-    font-family: 'Inter', -apple-system, sans-serif;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-/* Pagrindinis Konteineris */
-.app-container {
-    display: grid;
-    grid-template-columns: 1.2fr 0.8fr;
-    grid-template-rows: auto auto;
-    gap: 25px;
-    max-width: 1400px;
-    width: 95%;
-    padding: 20px;
-}
-
-/* =========================================
-   KOMPONENTŲ STILIUS
-   ========================================= */
-
-.emo-panel {
-    background: var(--panel-bg);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--glass-border);
-    border-radius: 24px;
-    padding: 30px;
-    box-shadow: var(--glass-shadow);
-    transition: transform 0.3s ease, border-color 0.3s ease;
-}
-
-.emo-panel:hover {
-    border-color: rgba(58, 191, 248, 0.3);
-}
-
-/* Kameros ir Scenos Skiltis */
-.stage-3d {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 16 / 10;
-    background: #000;
-    border-radius: 20px;
-    overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-#cam {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transform: scaleX(-1); /* Veidrodinis vaizdas natūralumui */
-}
-
-/* Tekstų hierarchija */
-.hero-title {
-    font-size: 2.8rem;
-    font-weight: 800;
-    margin: 0 0 10px 0;
-    letter-spacing: -1.5px;
-    background: linear-gradient(to right, #fff, var(--accent-blue));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.signature-text {
-    font-size: 1.25rem;
-    line-height: 1.6;
-    color: var(--text-main);
-    font-weight: 300;
-    margin-bottom: 20px;
-    border-left: 3px solid var(--accent-purple);
-    padding-left: 20px;
-}
-
-/* Metrikų kortelės (Apačioje) */
-.bottom-metrics {
-    grid-column: 1 / span 2;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-}
-
-.metric-box {
-    text-align: left;
-}
-
-.metric-box h4 {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    margin: 0 0 15px 0;
-}
-
-.metric-value {
-    font-size: 2.2rem;
-    font-weight: 700;
-    color: var(--accent-blue);
-    font-variant-numeric: tabular-nums;
-}
-
-/* Statuso indikatoriai ir Tags */
-.tag-container {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-.tag {
-    font-size: 0.7rem;
-    padding: 4px 12px;
-    border-radius: 100px;
-    background: rgba(123, 92, 255, 0.15);
-    color: var(--accent-purple);
-    border: 1px solid rgba(123, 92, 255, 0.3);
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-/* Canvas grafikai */
-canvas.mini-chart {
-    width: 100%;
-    height: 60px;
-    margin-top: 15px;
-    opacity: 0.8;
-}
-
-/* Responsyvumas */
-@media (max-width: 1024px) {
-    .app-container {
-        grid-template-columns: 1fr;
-    }
-    .bottom-metrics {
-        grid-column: 1;
-        grid-template-columns: 1fr;
+        video.onloadedmetadata = () => {
+            auraCanvas.width = video.videoWidth;
+            auraCanvas.height = video.videoHeight;
+            loop();
+        };
+    } catch (err) {
+        aiTextEl.innerText = "System Error: Camera access required.";
     }
 }
+
+/* ---------------------------------------------------------
+   MAIN ANALYSIS LOOP
+--------------------------------------------------------- */
+async function loop() {
+    if (modelsReady && video.readyState === 4) {
+        const det = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 160 }))
+                                 .withFaceExpressions();
+        
+        if (det) {
+            const ex = det.expressions;
+            
+            // Emocinė logika (Subalansuota)
+            const joy = ex.happy;
+            const stress = (ex.angry + ex.fearful + ex.sad * 0.5);
+            const calm = ex.neutral;
+            
+            // Coherence Score (0-100)
+            const score = Math.round((calm * 60 + joy * 40 - stress * 50 + 20));
+            const finalScore = Math.min(100, Math.max(0, score));
+            
+            // UI rodmenų atnaujinimas
+            updateUI({
+                score: finalScore,
+                energy: (joy + stress * 0.4 + 0.1).toFixed(2),
+                stress: stress.toFixed(2),
+                box: det.detection.box,
+                emotion: { joy, stress, calm }
+            });
+        } else {
+            // Jei veidas neaptiktas
+            aiTextEl.innerText = "Searching for field resonance...";
+            auraCtx.clearRect(0, 0, auraCanvas.width, auraCanvas.height);
+        }
+    }
+    requestAnimationFrame(loop);
+}
+
+/* ---------------------------------------------------------
+   UI & VISUALS
+--------------------------------------------------------- */
+function updateUI(m) {
+    scoreValueEl.innerText = m.score;
+    scoreEl.innerText = m.score + "%";
+    energyEl.innerText = m.energy;
+    stressEl.innerText = m.stress;
+    
+    // Dinaminės įžvalgos ir Natasha
+    let insight = "";
+    if (m.score > 75) {
+        insight = "Exceptional coherence. Your field is optimized for strategic vision.";
+        aiTagsEl.innerHTML = '<span class="tag">#VISIONARY</span><span class="tag">#PEAK</span>';
+        stressIconEl.innerText = "☀️";
+        natashaSpeak("I detect peak operational harmony. You are in a flow state.");
+    } else if (m.stress > 0.4) {
+        insight = "High stress load. Physiological stability is compromised.";
+        aiTagsEl.innerHTML = '<span class="tag">#STRESS_ALERT</span><span class="tag">#RECOVERY</span>';
+        stressIconEl.innerText = "⛈️";
+        natashaSpeak("Warning. Your stress markers are rising. Please re-center.");
+    } else {
+        insight = "Field is harmonized. Stability levels are within optimal parameters.";
+        aiTagsEl.innerHTML = '<span class="tag">#STABLE</span><span class="tag">#CALM</span>';
+        stressIconEl.innerText = "☁️";
+    }
+    
+    if (aiTextEl.innerText !== insight) aiTextEl.innerText = insight;
+
+    drawAura(m.box, m.emotion);
+    drawCharts(m.score, m.energy);
+}
+
+function drawAura(box, e) {
+    auraCtx.clearRect(0, 0, auraCanvas.width, auraCanvas.height);
+    
+    // Spalva pagal būseną
+    let color = "58, 191, 248"; // Default Blue
+    if (e.joy > 0.5) color = "251, 191, 36"; // Gold
+    if (e.stress > 0.4) color = "248, 113, 113"; // Red
+
+    // Braižome "kvėpuojantį" rėmelį
+    const glow = Math.sin(Date.now() * 0.005) * 5;
+    auraCtx.strokeStyle = `rgba(${color}, 0.6)`;
+    auraCtx.lineWidth = 4;
+    auraCtx.shadowBlur = 15 + glow;
+    auraCtx.shadowColor = `rgba(${color}, 0.8)`;
+    
+    // Apvalintas rėmelis aplink veidą
+    const r = 20; // border radius
+    auraCtx.beginPath();
+    auraCtx.roundRect(box.x, box.y, box.width, box.height, [r]);
+    auraCtx.stroke();
+}
+
+function drawCharts(score, energy) {
+    history.push(score);
+    history.shift();
+
+    // Timeline grafikas
+    if (timelineCtx) {
+        timelineCtx.clearRect(0, 0, timelineCanvas.width, timelineCanvas.height);
+        timelineCtx.beginPath();
+        timelineCtx.strokeStyle = "#7b5cff";
+        timelineCtx.lineWidth = 2;
+        history.forEach((val, i) => {
+            const x = (i / (history.length - 1)) * timelineCanvas.width;
+            const y = timelineCanvas.height - (val / 100) * timelineCanvas.height;
+            i === 0 ? timelineCtx.moveTo(x, y) : timelineCtx.lineTo(x, y);
+        });
+        timelineCtx.stroke();
+    }
+
+    // Pulse grafikas (Sinusoidė pagal energiją)
+    if (pulseCtx) {
+        pulseCtx.clearRect(0, 0, pulseCanvas.width, pulseCanvas.height);
+        pulseCtx.beginPath();
+        pulseCtx.strokeStyle = "#3abff8";
+        const speed = Date.now() * 0.01;
+        const amp = 5 + energy * 15;
+        for (let x = 0; x < pulseCanvas.width; x++) {
+            const y = 30 + Math.sin(x * 0.1 + speed) * amp;
+            x === 0 ? pulseCtx.moveTo(x, y) : pulseCtx.lineTo(x, y);
+        }
+        pulseCtx.stroke();
+    }
+}
+
+// Start system
+init();
