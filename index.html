@@ -2,10 +2,61 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Emopulse Live – AI Interface</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Emopulse PRO – Advanced Emotional AI</title>
     <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #020408;
+            --bg-gradient: radial-gradient(circle at 20% 30%, #0a162f 0%, #020408 100%);
+            --accent-blue: #3abff8;
+            --accent-purple: #7b5cff;
+            --text-main: #ffffff;
+            --text-muted: #64748b;
+            --panel-bg: rgba(6, 12, 24, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            margin: 0; background: var(--bg-gradient); color: var(--text-main);
+            font-family: 'Inter', sans-serif; min-height: 100vh; overflow-x: hidden;
+        }
+
+        .app-container {
+            display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 30px;
+            max-width: 1400px; margin: 0 auto; padding: 40px;
+        }
+
+        /* VIZUALINĖ DALIS */
+        .stage-3d {
+            position: relative; width: 100%; aspect-ratio: 16/9;
+            background: #000; border-radius: 24px; overflow: hidden;
+            border: 1px solid var(--glass-border); box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        #cam { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        .aura-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+
+        /* SKYDELIAI */
+        .status-card, .metric-box, .drift-panel {
+            background: var(--panel-bg); backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border); border-radius: 20px; padding: 25px;
+        }
+
+        .hero-title { font-size: 3rem; font-weight: 800; margin: 0; letter-spacing: -2px; }
+        .signature-text { font-size: 1.4rem; color: var(--accent-blue); min-height: 60px; margin: 20px 0; }
+
+        /* METRIKOS APAČIOJE */
+        .bottom-metrics {
+            grid-column: 1 / span 2; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+        }
+
+        .metric-value { font-size: 2.5rem; font-weight: 700; display: block; margin-bottom: 10px; }
+        canvas.mini-chart { width: 100%; height: 60px; border-bottom: 1px solid var(--glass-border); }
+
+        .tag { background: rgba(58, 191, 248, 0.1); color: var(--accent-blue); 
+               padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; margin-right: 5px; }
+    </style>
 </head>
 <body>
 
@@ -13,48 +64,139 @@
     <div class="visual-section">
         <div class="stage-3d">
             <video id="cam" autoplay muted playsinline></video>
-            <canvas id="auraCanvas" class="aura-layer" width="320" height="320"></canvas>
+            <canvas id="auraCanvas" class="aura-layer"></canvas>
         </div>
-        
-        <div class="drift-panel">
-            <div class="drift-circle" id="auraIndicator"></div>
-            <div>
-                <h3 id="camStatus">Initializing field...</h3>
-                <div class="tags" id="aiTags"></div>
-            </div>
+        <div class="drift-panel" style="margin-top: 20px; display: flex; align-items: center; gap: 20px;">
+            <div id="statusDot" style="width: 15px; height: 15px; border-radius: 50%; background: #3abff8; box-shadow: 0 0 10px #3abff8;"></div>
+            <div id="camStatus">System Live – Analyzing Field Resonance</div>
         </div>
     </div>
 
     <div class="info-section">
-        <h1 class="hero-title">Aura <span style="color:var(--accent-blue)">Sync</span></h1>
-        <p class="hero-subtitle">Real-time emotional resonance monitoring.</p>
-        
+        <h1 class="hero-title">EMOPULSE <span style="color:var(--accent-purple)">AI</span></h1>
         <div class="status-card">
-            <h3>Natasha's Insight</h3>
-            <div class="signature-text" id="aiText">Establishing baseline...</div>
-            <div class="metric-value" id="scoreValue">0</div>
+            <div id="aiTags" style="margin-bottom: 15px;"></div>
+            <div class="signature-text" id="aiText">Awaiting biometric data...</div>
+            <div style="font-size: 0.9rem; color: var(--text-muted);">COHERENCE SCORE</div>
+            <div class="metric-value" id="scoreValue" style="color: var(--accent-purple);">0</div>
         </div>
     </div>
 
     <div class="bottom-metrics">
         <div class="metric-box">
-            <h4>Energy Level</h4>
-            <div class="metric-value" id="energy">0.00</div>
-            <canvas id="pulse" class="mini-chart"></canvas>
+            <h4>PHYSIOLOGICAL ENERGY</h4>
+            <span class="metric-value" id="energy">0.00</span>
+            <canvas id="pulseCanvas" class="mini-chart"></canvas>
         </div>
         <div class="metric-box">
-            <h4>Stress Index</h4>
-            <div class="metric-value" id="stress">0.00</div>
-            <div id="stressIcon" style="font-size: 2rem;">☀️</div>
+            <h4>STRESS RESPONSE</h4>
+            <span class="metric-value" id="stress">0.00</span>
+            <div id="stressIcon" style="font-size: 2.5rem;">☀️</div>
         </div>
         <div class="metric-box">
-            <h4>Stability Score</h4>
-            <div class="metric-value" id="score">0 / 100</div>
-            <canvas id="timeline" class="mini-chart"></canvas>
+            <h4>FIELD STABILITY</h4>
+            <span class="metric-value" id="score">0%</span>
+            <canvas id="timelineCanvas" class="mini-chart"></canvas>
         </div>
     </div>
 </div>
 
-<script type="module" src="app.js"></script>
+<script>
+    const video = document.getElementById('cam');
+    const aiTextEl = document.getElementById('aiText');
+    const scoreValueEl = document.getElementById('scoreValue');
+    const energyEl = document.getElementById('energy');
+    const stressEl = document.getElementById('stress');
+    const scoreEl = document.getElementById('score');
+    const aiTagsEl = document.getElementById('aiTags');
+    const auraCanvas = document.getElementById('auraCanvas');
+    const auraCtx = auraCanvas.getContext('2d');
+
+    let history = new Array(50).fill(0);
+    let modelsReady = false;
+    let lastSpoken = "";
+
+    function natashaSpeak(text) {
+        if (window.speechSynthesis.speaking || text === lastSpoken) return;
+        const msg = new SpeechSynthesisUtterance(text);
+        msg.lang = 'en-US'; msg.rate = 0.9;
+        window.speechSynthesis.speak(msg);
+        lastSpoken = text;
+    }
+
+    async function init() {
+        const URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights/';
+        await faceapi.nets.tinyFaceDetector.loadFromUri(URL);
+        await faceapi.nets.faceExpressionNet.loadFromUri(URL);
+        modelsReady = true;
+        
+        const stream = await navigator.mediaDevices.getUserMedia({ video: {} });
+        video.srcObject = stream;
+        
+        // Match canvas size to video
+        video.onloadedmetadata = () => {
+            auraCanvas.width = video.offsetWidth;
+            auraCanvas.height = video.offsetHeight;
+            loop();
+        };
+    }
+
+    async function loop() {
+        if (modelsReady && video.readyState === 4) {
+            const det = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions()).withFaceExpressions();
+            
+            if (det) {
+                const ex = det.expressions;
+                const joy = ex.happy;
+                const stress = (ex.angry + ex.fearful + ex.sad);
+                const calm = ex.neutral;
+
+                const score = Math.round((calm * 50 + joy * 50 - stress * 30) + 20);
+                const energy = (joy + stress * 0.5).toFixed(2);
+                
+                // Update UI
+                scoreValueEl.innerText = score;
+                scoreEl.innerText = score + "%";
+                energyEl.innerText = energy;
+                stressEl.innerText = stress.toFixed(2);
+                
+                // AI Insights
+                if (joy > 0.5) {
+                    aiTextEl.innerText = "High resonance detected. Your creative field is expanding.";
+                    aiTagsEl.innerHTML = '<span class="tag">#VISIONARY</span><span class="tag">#PEAK</span>';
+                    natashaSpeak("Your energy is radiant today.");
+                } else if (stress > 0.4) {
+                    aiTextEl.innerText = "Field interference detected. Please re-center your focus.";
+                    aiTagsEl.innerHTML = '<span class="tag">#STRESS_ALERT</span><span class="tag">#RECOVERY</span>';
+                    natashaSpeak("Warning. Stress levels are rising. Take a breath.");
+                } else {
+                    aiTextEl.innerText = "Field is stable. Optimal state for strategic analysis.";
+                    aiTagsEl.innerHTML = '<span class="tag">#STABLE</span><span class="tag">#FLOW</span>';
+                }
+
+                drawAura(det.detection.box, {joy, stress, calm});
+                updateCharts(score, energy);
+            }
+        }
+        requestAnimationFrame(loop);
+    }
+
+    function drawAura(box, e) {
+        auraCtx.clearRect(0, 0, auraCanvas.width, auraCanvas.height);
+        const color = e.joy > 0.4 ? '58, 191, 248' : e.stress > 0.4 ? '248, 113, 113' : '123, 92, 255';
+        auraCtx.strokeStyle = `rgba(${color}, 0.5)`;
+        auraCtx.lineWidth = 5;
+        auraCtx.strokeRect(box.x, box.y, box.width, box.height);
+        // Čia galima pridėti sudėtingesnius auros efektus
+    }
+
+    function updateCharts(s, e) {
+        history.push(s);
+        history.shift();
+        // Čia galima įdėti Canvas piešimo logiką grafikams
+    }
+
+    init();
+</script>
 </body>
 </html>
