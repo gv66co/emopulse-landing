@@ -1,4 +1,4 @@
-// Naudojame tiesioginį importą iš CDN visiems moduliams
+// Using direct imports for stability in module mode
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
 import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js";
 
@@ -6,51 +6,55 @@ let scene, camera, renderer, controls, group;
 let slides = [];
 let currentIndex = 0;
 let isPaused = false;
+let targetRotationY = 0;
 
-// Skaidrių sąrašas (SVARBU: patikrinkite, ar plėtiniai .png, ar .jpg)
+// Slide list with professional English titles
 const SLIDES_DATA = [
-    { name: "About us", src: "./slides/01-about.png" },
-    { name: "Problem", src: "./slides/02-problem.png" },
-    { name: "Solution", src: "./slides/03-solution.png" },
-    { name: "Product overview", src: "./slides/04-product.png" },
-    { name: "Market", src: "./slides/05-market.png" },
-    { name: "Competition", src: "./slides/06-competition.png" },
-    { name: "Financials", src: "./slides/07-financials.png" },
-    { name: "Team", src: "./slides/08-team-arvid.png" },
-    { name: "Summary", src: "./slides/09-summary.png" },
-    { name: "Thank you", src: "./slides/10-thankyou.png" }
+    { name: "Executive Vision", src: "./slides/01-about.png" },
+    { name: "Market Problem", src: "./slides/02-problem.png" },
+    { name: "The Emopulse Solution", src: "./slides/03-solution.png" },
+    { name: "Core Technology", src: "./slides/04-product.png" },
+    { name: "Market Opportunity", src: "./slides/05-market.png" },
+    { name: "Strategic Competition", src: "./slides/06-competition.png" },
+    { name: "Financial Projections", src: "./slides/07-financials.png" },
+    { name: "Founding Team", src: "./slides/08-team-arvid.png" },
+    { name: "Growth Roadmap", src: "./slides/09-summary.png" },
+    { name: "Capital Invitation", src: "./slides/10-thankyou.png" }
 ];
 
 async function init() {
     const canvas = document.getElementById('deck3d');
     if (!canvas) return;
 
-    // --- SCENE ---
+    // --- SCENE SETUP ---
     scene = new THREE.Scene();
     
     camera = new THREE.PerspectiveCamera(45, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
-    camera.position.set(0, 1, 12);
+    camera.position.set(0, 1.5, 10);
 
     renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
     renderer.setSize(canvas.clientWidth, canvas.clientHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
 
-    // --- CONTROLS ---
+    // --- ORBIT CONTROLS ---
     controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.autoRotate = true;
     controls.autoRotateSpeed = 0.5;
+    controls.enableZoom = false; // Prevents breaking the layout
 
-    // --- GROUP ---
+    // --- CAROUSEL GROUP ---
     group = new THREE.Group();
     scene.add(group);
 
-    // --- LOADING ---
+    // --- ASSET LOADING ---
     const loader = new THREE.TextureLoader();
-    const radius = 6;
+    const radius = 6.5;
 
     SLIDES_DATA.forEach((data, i) => {
         loader.load(data.src, (texture) => {
+            texture.colorSpace = THREE.SRGBColorSpace;
             const geometry = new THREE.PlaneGeometry(4, 2.25);
             const material = new THREE.MeshBasicMaterial({ 
                 map: texture, 
@@ -69,14 +73,14 @@ async function init() {
             
             if (i === 0) updateLabel(0);
         }, undefined, (err) => {
-            console.error(`Nepavyko užkrauti skaidrės: ${data.src}`);
+            console.warn(`Asset load failed: ${data.src}`);
         });
     });
 
-    // --- LIGHTS ---
-    scene.add(new THREE.AmbientLight(0xffffff, 1.2));
+    // --- LIGHTING ---
+    scene.add(new THREE.AmbientLight(0xffffff, 1.5));
 
-    // --- UI EVENTS ---
+    // --- EVENT LISTENERS ---
     document.getElementById('next')?.addEventListener('click', () => navigate(1));
     document.getElementById('prev')?.addEventListener('click', () => navigate(-1));
     document.getElementById('pause')?.addEventListener('click', togglePause);
@@ -87,14 +91,16 @@ async function init() {
 
 function navigate(dir) {
     currentIndex = (currentIndex + dir + SLIDES_DATA.length) % SLIDES_DATA.length;
-    const targetRotation = -(currentIndex / SLIDES_DATA.length) * Math.PI * 2;
-    group.rotation.y = targetRotation;
+    // Calculate rotation to bring the current slide to the front
+    targetRotationY = -(currentIndex / SLIDES_DATA.length) * Math.PI * 2;
     updateLabel(currentIndex);
 }
 
 function updateLabel(idx) {
     const labelEl = document.getElementById('slideLabel');
-    if (labelEl) labelEl.textContent = `${idx + 1}/${SLIDES_DATA.length} — ${SLIDES_DATA[idx].name}`;
+    if (labelEl) {
+        labelEl.innerHTML = `<span style="color: #3abff8;">${idx + 1}/${SLIDES_DATA.length}</span> — ${SLIDES_DATA[idx].name}`;
+    }
 }
 
 function togglePause() {
@@ -106,6 +112,7 @@ function togglePause() {
 
 function onWindowResize() {
     const canvas = document.getElementById('deck3d');
+    if (!canvas) return;
     camera.aspect = canvas.clientWidth / canvas.clientHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(canvas.clientWidth, canvas.clientHeight);
@@ -113,9 +120,14 @@ function onWindowResize() {
 
 function animate() {
     requestAnimationFrame(animate);
+
+    // Smooth transition to target slide (Interpolation)
+    if (!isPaused && !controls.isDragging) {
+        group.rotation.y += (targetRotationY - group.rotation.y) * 0.05;
+    }
+
     controls.update();
     renderer.render(scene, camera);
 }
 
-// Paleidžiame modulį
 init();
