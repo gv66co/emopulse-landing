@@ -2,102 +2,87 @@
 <html lang="lt">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Emopulse PRO - Full Terminal</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>EMOPULSE PRO - FINAL REPAIR</title>
     <style>
-        /* --- 1. STILIUS (CSS) --- */
-        :root { --cyan: #3abff8; --bg: #010307; --panel: rgba(10, 15, 25, 0.95); --border: rgba(58, 191, 248, 0.2); }
-        
+        :root { --blue: #3abff8; --bg: #010307; --panel: rgba(10, 15, 25, 0.98); }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; height: 100vh; overflow: hidden; }
+        body { background: var(--bg); color: white; font-family: sans-serif; height: 100vh; overflow: hidden; }
+        .app { display: flex; flex-direction: column; height: 100vh; padding: 15px; gap: 15px; }
+        
+        /* Viršutinė juosta su veikiančiu laikrodžiu */
+        header { display: flex; justify-content: space-between; align-items: center; padding: 5px; }
+        .logo { font-size: 1.5rem; font-weight: bold; }
+        .logo span { color: var(--blue); }
+        #live-clock { font-family: monospace; font-size: 1.2rem; background: rgba(58, 191, 248, 0.1); padding: 5px 15px; border-radius: 5px; border: 1px solid var(--blue); }
 
-        .pro-container { display: flex; flex-direction: column; height: 100vh; padding: 15px; gap: 15px; }
-
-        /* Headeris */
-        .pro-header { display: flex; justify-content: space-between; align-items: center; height: 40px; }
-        .logo { font-size: 1.4rem; font-weight: 900; }
-        .logo span { color: var(--cyan); }
-        .nav { display: flex; gap: 20px; align-items: center; color: #64748b; }
-        #live-clock { color: white; font-family: monospace; font-size: 1.1rem; border: 1px solid var(--border); padding: 2px 10px; border-radius: 5px; }
-
-        /* Pagrindinis tinklelis */
-        .pro-grid {
+        /* Pagrindinis vaizdas */
+        .main-grid {
             display: grid;
-            flex: 1;
-            grid-template-areas: "visual hero" "camera risk";
+            grid-template-areas: "vis hero" "cam risk";
             grid-template-columns: 1.2fr 0.8fr;
             grid-template-rows: 1fr 160px;
-            gap: 15px;
-            min-height: 0;
+            gap: 15px; flex: 1; min-height: 0;
         }
+        .panel { background: var(--panel); border: 1px solid rgba(58, 191, 248, 0.2); border-radius: 15px; padding: 20px; position: relative; overflow: hidden; }
+        .area-vis { grid-area: vis; display: flex; flex-direction: column; }
+        .area-hero { grid-area: hero; display: flex; flex-direction: column; justify-content: center; gap: 15px; }
+        .area-cam { grid-area: cam; display: flex; align-items: center; gap: 20px; }
+        .area-risk { grid-area: risk; }
 
-        .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 20px; padding: 15px; position: relative; overflow: hidden; }
-
-        .visual-area { grid-area: visual; }
-        .hero-area { grid-area: hero; display: flex; flex-direction: column; justify-content: center; gap: 15px; }
-        .camera-area { grid-area: camera; display: flex; align-items: center; gap: 20px; }
-        .risk-area { grid-area: risk; }
-
-        /* Elementai */
-        #visual-container { width: 100%; height: 100%; }
-        h1 { font-size: 2.2rem; line-height: 1.1; }
-        textarea { width: 100%; height: 70px; background: #0f172a; border: 1px solid var(--border); border-radius: 10px; color: white; padding: 10px; resize: none; }
-        .btn { padding: 12px; background: transparent; border: 1px solid var(--cyan); color: var(--cyan); border-radius: 8px; cursor: pointer; font-weight: bold; }
-
-        /* Kamera */
-        .oval-cam { width: 100px; height: 100px; border-radius: 50%; border: 2px solid var(--cyan); overflow: hidden; flex-shrink: 0; }
+        /* Kamera ir Objektai */
+        .cam-circle { width: 110px; height: 110px; border-radius: 50%; border: 3px solid var(--blue); overflow: hidden; flex-shrink: 0; background: #000; }
         #cam { width: 100%; height: 100%; object-fit: cover; }
-
+        #visual-container { flex: 1; width: 100%; background: radial-gradient(circle, #0a101f 0%, #010307 100%); border-radius: 10px; position: relative; }
+        
         /* Baneriai apačioje */
-        .pro-footer { display: grid; grid-template-columns: repeat(4, 1fr); height: 110px; gap: 15px; }
-        .stat-card { background: var(--panel); border: 1px solid var(--border); border-radius: 15px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; text-align: center; }
-        .stat-card span { font-size: 0.7rem; color: #64748b; text-transform: uppercase; }
-        .val { font-size: 1.6rem; font-weight: 800; color: var(--cyan); }
+        footer { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; height: 100px; }
+        .stat-card { background: var(--panel); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 15px; text-align: center; }
+        .stat-card span { font-size: 0.75rem; color: #666; text-transform: uppercase; }
+        .val { font-size: 1.6rem; color: var(--blue); font-weight: bold; margin-top: 5px; }
+
+        textarea { width: 100%; height: 80px; background: #000; border: 1px solid #333; border-radius: 10px; color: white; padding: 10px; resize: none; }
+        button { padding: 12px; background: var(--blue); border: none; border-radius: 5px; cursor: pointer; font-weight: bold; color: black; }
     </style>
 </head>
 <body>
 
-    <div class="pro-container">
-        <header class="pro-header">
+    <div class="app">
+        <header>
             <div class="logo">EMOPULSE <span>PRO</span></div>
-            <div class="nav">
-                <a href="#" style="color:white; text-decoration:none;">Live Terminal</a>
-                <div id="live-clock">00:00:00</div>
-            </div>
+            <div id="live-clock">00:00:00</div>
         </header>
 
-        <main class="pro-grid">
-            <section class="panel visual-area">
+        <main class="main-grid">
+            <section class="panel area-vis">
+                <div style="color: var(--blue); font-size: 0.7rem; margin-bottom: 10px;">NEURAL CORE: ONLINE</div>
                 <div id="visual-container">
-                    <canvas id="compass3d"></canvas>
+                    <canvas id="compass3d" style="width:100%; height:100%;"></canvas>
                 </div>
             </section>
 
-            <section class="panel hero-area">
-                <h1>Understand your emotional field</h1>
-                <textarea placeholder="Kaip jautiesi šiuo metu?"></textarea>
-                <button class="btn">ANALYZE FIELD</button>
-                <div style="font-size: 0.8rem; color: #64748b;">AI Status: <span style="color: var(--cyan);">Ready</span></div>
+            <section class="panel area-hero">
+                <h2>Decode Your Resonance</h2>
+                <textarea id="userInput" placeholder="Kaip jautiesi šiuo metu?"></textarea>
+                <button onclick="simulateAnalysis()">ANALYZE FIELD</button>
             </section>
 
-            <section class="panel camera-area">
-                <div class="oval-cam">
+            <section class="panel area-cam">
+                <div class="cam-circle">
                     <video id="cam" autoplay muted playsinline></video>
                 </div>
                 <div>
                     <h3 style="font-size: 0.9rem;">Emotional Drift</h3>
-                    <p style="color: var(--cyan);">Stability: 112°</p>
+                    <p style="color: var(--blue);">Stability: <span id="stab">112°</span></p>
                 </div>
             </section>
 
-            <section class="panel risk-area">
-                <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 10px;">STRESS RISK</div>
-                <canvas id="stressChart"></canvas>
+            <section class="panel area-risk">
+                <div style="font-size: 0.8rem; color: #666;">STRESS RISK</div>
+                <div style="font-size: 2rem; margin-top: 10px; font-weight: bold;">0.56</div>
             </section>
         </main>
 
-        <footer class="pro-footer">
+        <footer>
             <div class="stat-card"><span>Mood Map</span><div class="val" id="mood-val">Positive</div></div>
             <div class="stat-card"><span>Timeline</span><div class="val" id="time-val">Steady</div></div>
             <div class="stat-card"><span>Score</span><div class="val" id="score-val">76</div></div>
@@ -106,32 +91,37 @@
     </div>
 
     <script>
-        // 1. Veikiantis laikrodis
-        function updateTime() {
+        // 1. LAIKRODIS (Pataisyta, kad visada veiktų)
+        function updateClock() {
             const now = new Date();
-            document.getElementById('live-clock').innerText = now.toTimeString().split(' ')[0];
+            document.getElementById('live-clock').textContent = now.toTimeString().split(' ')[0];
         }
-        setInterval(updateTime, 1000);
-        updateTime();
+        setInterval(updateClock, 1000);
+        updateClock();
 
-        // 2. Kameros paleidimas
-        async function startCamera() {
-            const video = document.getElementById('cam');
+        // 2. KAMERA
+        async function initCamera() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                video.srcObject = stream;
+                document.getElementById('cam').srcObject = stream;
             } catch (err) {
-                console.error("Kamera nerasta arba neleidžiama:", err);
+                console.error("Kameros klaida:", err);
             }
         }
-        startCamera();
+        initCamera();
 
-        // 3. Banerių atnaujinimas (kad nebūtų tušti)
+        // 3. BANERIŲ UŽPILDYMAS (Kad nebūtų tušti)
         function updateStats() {
-            document.getElementById('score-val').innerText = Math.floor(70 + Math.random() * 10);
-            document.getElementById('energy-val').innerText = (0.6 + Math.random() * 0.1).toFixed(2);
+            document.getElementById('score-val').textContent = Math.floor(70 + Math.random() * 10);
+            document.getElementById('energy-val').textContent = (0.6 + Math.random() * 0.1).toFixed(2);
         }
         setInterval(updateStats, 3000);
+
+        function simulateAnalysis() {
+            const btn = document.querySelector('button');
+            btn.textContent = "Analyzing...";
+            setTimeout(() => { btn.textContent = "ANALYZE FIELD"; }, 2000);
+        }
     </script>
 </body>
 </html>
