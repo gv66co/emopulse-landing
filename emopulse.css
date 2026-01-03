@@ -1,6 +1,6 @@
 :root {
     --bg-dark: #02040a;
-    --card-bg: rgba(13, 17, 23, 0.4);
+    --card-bg: rgba(13, 17, 23, 0.6);
     --accent-blue: #3abff8;
     --text-main: #ffffff;
     --text-muted: #7d8590;
@@ -16,24 +16,24 @@ body {
     min-height: 100vh;
     display: flex;
     justify-content: center;
-    padding: 40px 20px;
+    overflow-x: hidden;
 }
 
-/* Pagrindinis konteineris - 3 stulpeliai */
 .app-container {
     width: 100%;
     max-width: 1200px;
+    padding: 40px 20px;
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr; /* Trys lygūs stulpeliai */
+    grid-template-columns: 1.2fr 0.8fr; /* Kairė pusė platesnė */
     grid-template-areas: 
-        "header header header"
-        "visual visual info"
-        "drift drift summary"
-        "footer footer footer";
+        "header header"
+        "visual info"
+        "drift summary"
+        "footer footer";
     gap: 30px;
 }
 
-/* 1. Viršus (Logo ir Nav) */
+/* --- HEADER --- */
 .top-nav {
     grid-area: header;
     display: flex;
@@ -42,36 +42,52 @@ body {
     margin-bottom: 20px;
 }
 
-/* 2. Kairė ir Centras (3D modelis ir Antraštė) */
+.logo-group { font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+
+/* --- KAIRĖ: 3D MODELIS --- */
 .visual-section {
     grid-area: visual;
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
+    min-height: 400px;
 }
 
-.stage-3d {
-    width: 100%;
-    height: 400px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: radial-gradient(circle, rgba(58, 191, 248, 0.08) 0%, transparent 70%);
-}
+#compass3d { width: 100% !important; height: 100% !important; max-width: 500px; }
 
-/* 3. Dešinė (Tekstai ir Input) */
+/* --- DEŠINĖ: TEKSTAI --- */
 .info-section {
     grid-area: info;
     display: flex;
     flex-direction: column;
     gap: 20px;
+    padding-top: 20px;
 }
 
 .hero-title { font-size: 2.8rem; font-weight: 700; line-height: 1.1; }
-.hero-subtitle { color: var(--accent-blue); font-size: 1rem; }
+.hero-subtitle { color: var(--accent-blue); font-size: 1.1rem; margin-bottom: 10px; }
 
-/* 4. Vidurinė eilė (Emotional Drift ir Summary) */
+.input-box {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    color: var(--text-muted);
+    min-height: 100px;
+}
+
+.analyze-btn {
+    background: #0f172a;
+    border: 1px solid var(--border);
+    color: var(--accent-blue);
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+/* --- VIDURINĖ DALIS: DRIFT IR SUMMARY --- */
 .drift-panel {
     grid-area: drift;
     background: var(--card-bg);
@@ -80,7 +96,7 @@ body {
     padding: 25px;
     display: flex;
     align-items: center;
-    gap: 30px;
+    gap: 25px;
 }
 
 .video-container {
@@ -91,6 +107,8 @@ body {
     overflow: hidden;
 }
 
+#cam { width: 100%; height: 100%; object-fit: cover; }
+
 .status-card {
     grid-area: summary;
     background: var(--card-bg);
@@ -99,22 +117,25 @@ body {
     padding: 25px;
 }
 
-/* 5. Apačia (Metrikų tinklelis - 3 stulpeliai) */
+/* --- APAČIA: KORTELĖS --- */
 .bottom-metrics {
     grid-area: footer;
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: repeat(3, 1fr);
     gap: 20px;
 }
 
 .metric-box {
     background: var(--card-bg);
     border: 1px solid var(--border);
-    border-radius: 15px;
+    border-radius: 16px;
     padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
-.metric-value { font-size: 2.2rem; font-weight: 700; color: #fff; margin: 10px 0; }
-.metric-sub { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; }
+.metric-value { font-size: 2.2rem; font-weight: 700; }
+.metric-sub { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
 
-canvas { width: 100% !important; height: 80px !important; }
+canvas.mini-chart { width: 100% !important; height: 60px !important; }
