@@ -2,220 +2,234 @@
 <html lang="lt">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EMOPULSE PRO - NEURAL INTERFACE V3</title>
+    <title>EMOPULSE PRO - LIVE NEURAL TERMINAL</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
     <style>
-        :root { 
-            --cyan: #3abff8; 
-            --bg: #01050a; 
-            --glass: rgba(10, 20, 40, 0.7);
-            --glow: 0 0 25px rgba(58, 191, 248, 0.5);
+        /* TAVO STILIŲ PAGRINDAS + KOSMINĖS GELMĖS MODIFIKACIJOS */
+        :root {
+            --deep-bg: #020617;
+            --accent-cyan: #3a8dff;
+            --accent-joy: #ff9f1c;
+            --accent-stress: #ff3b3b;
+            --glass: rgba(15, 23, 42, 0.8);
         }
 
-        body { 
-            background: var(--bg); 
-            color: #fff; 
-            font-family: 'Inter', sans-serif; 
-            margin: 0; 
-            overflow: hidden; 
+        body {
+            background: var(--deep-bg);
+            color: #f8fafc;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            /* Sukuriamas tavo nuotraukoje matomas vinjetės efektas */
+            background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+        }
+
+        /* Pagrindinis tinklelis (Layout) */
+        .terminal-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            grid-template-rows: 1fr 180px;
             height: 100vh;
+            gap: 24px;
+            padding: 32px;
+            box-sizing: border-box;
+        }
+
+        /* 3D NAVIGATORIUS - GELMĖS EFEKTAS */
+        .viewport-3d {
+            grid-column: 1;
+            grid-row: 1;
+            position: relative;
+            background: var(--glass);
+            border-radius: 32px;
+            border: 1px solid rgba(58, 141, 255, 0.2);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+
+        /* ANALIZĖS PANELĖ */
+        .analysis-panel {
+            grid-column: 2;
+            grid-row: 1;
             display: flex;
             flex-direction: column;
-        }
-
-        /* Pagrindinis tinklelis */
-        .dashboard {
-            display: grid;
-            grid-template-columns: 1.5fr 0.5fr;
-            grid-template-rows: 1fr 200px;
             gap: 20px;
-            padding: 20px;
-            flex: 1;
-            z-index: 10;
         }
 
-        .panel {
+        .camera-aura-box {
+            height: 280px;
             background: var(--glass);
-            border: 1px solid rgba(58, 191, 248, 0.2);
             border-radius: 24px;
-            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             position: relative;
-            overflow: hidden;
-            box-shadow: inset 0 0 30px rgba(58, 191, 248, 0.05);
         }
 
-        /* Centrinis 3D Kompasas */
-        .main-viewer { grid-column: 1; grid-row: 1; display: flex; align-items: center; justify-content: center; }
-        #canvas-container { width: 100%; height: 100%; cursor: crosshair; }
-
-        /* Kamera ir Aura */
-        .side-panel { grid-column: 2; grid-row: 1; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        .camera-wrap {
-            position: relative;
-            width: 200px;
-            height: 200px;
-            margin-bottom: 30px;
-        }
-        #video-feed {
-            width: 100%;
-            height: 100%;
+        #webcam {
+            width: 180px;
+            height: 180px;
             border-radius: 50%;
             object-fit: cover;
-            border: 2px solid var(--cyan);
-            box-shadow: var(--glow);
-            z-index: 5;
-            position: relative;
+            border: 2px solid var(--accent-cyan);
+            z-index: 2;
         }
-        .aura-field {
+
+        /* GYVOJI AURA (DRIFT) */
+        .aura-glow {
             position: absolute;
-            inset: -20px;
+            width: 240px;
+            height: 240px;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(58, 191, 248, 0.3) 0%, transparent 70%);
-            animation: drift 4s infinite ease-in-out;
-            z-index: 1;
+            background: radial-gradient(circle, var(--accent-cyan) 0%, transparent 70%);
+            filter: blur(30px);
+            opacity: 0.5;
+            animation: auraDrift 5s infinite alternate ease-in-out;
         }
 
-        /* Statistiniai duomenys */
-        .bottom-bar { grid-column: 1 / span 2; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-        .stat-box { padding: 20px; border-top: 1px solid var(--cyan); }
-        .label { font-size: 0.75rem; color: var(--cyan); text-transform: uppercase; letter-spacing: 2px; }
-        .value { font-size: 2rem; font-weight: 800; margin-top: 5px; text-shadow: var(--glow); }
-
-        @keyframes drift {
-            0%, 100% { transform: scale(1) translate(0,0); opacity: 0.4; }
-            50% { transform: scale(1.2) translate(5px, -5px); opacity: 0.7; }
+        /* DUOMENŲ KORTELĖS APAČIOJE */
+        .metrics-row {
+            grid-column: 1 / span 2;
+            display: flex;
+            gap: 20px;
         }
 
-        /* Overlay tekstas */
-        .hud-text {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            font-family: monospace;
-            color: var(--cyan);
-            pointer-events: none;
+        .metric-card {
+            flex: 1;
+            background: var(--glass);
+            border-radius: 20px;
+            padding: 24px;
+            border-top: 4px solid var(--accent-cyan);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
+
+        .value-large {
+            font-size: 32px;
+            font-weight: 800;
+            margin-top: 8px;
+        }
+
+        @keyframes auraDrift {
+            from { transform: scale(1) translate(-5px, -5px); opacity: 0.4; }
+            to { transform: scale(1.1) translate(5px, 5px); opacity: 0.6; }
+        }
+
+        canvas { width: 100% !important; height: 100% !important; }
     </style>
 </head>
 <body>
 
-    <div class="hud-text">NEURAL_CORE_V3.1 // STATUS: ACTIVE</div>
-
-    <div class="dashboard">
-        <section class="panel main-viewer">
-            <div id="canvas-container"></div>
+    <div class="terminal-grid">
+        <section class="viewport-3d" id="three-container">
+            <div style="position: absolute; top: 20px; left: 20px; color: var(--accent-cyan); letter-spacing: 2px; font-size: 12px;">NEURAL_NAVIGATOR_V3.CORE</div>
         </section>
 
-        <section class="panel side-panel">
-            <div class="camera-wrap">
-                <div class="aura-field" id="aura"></div>
-                <video id="video-feed" autoplay muted playsinline></video>
+        <section class="analysis-panel">
+            <div class="camera-aura-box">
+                <div class="aura-glow" id="aura-field"></div>
+                <video id="webcam" autoplay muted playsinline></video>
             </div>
-            <div style="width: 100%;">
-                <div class="label">Current Emotion</div>
-                <div id="emotion-label" class="value" style="color: #3abff8;">CALM</div>
-                <div id="emotion-score" style="font-size: 0.9rem; opacity: 0.6;">Scanning Field...</div>
+
+            <div class="metric-card" style="border-color: var(--accent-joy);">
+                <div style="opacity: 0.6; font-size: 12px; text-transform: uppercase;">Real-time Resonance</div>
+                <div class="value-large" id="res-text">Calm Focused</div>
+                <div style="color: var(--accent-joy); font-size: 14px; margin-top: 5px;">#calm #focused #energy</div>
             </div>
         </section>
 
-        <footer class="bottom-bar">
-            <div class="panel stat-box">
-                <div class="label">Emotional Stability</div>
-                <div class="value" id="stab-val">112°</div>
+        <footer class="metrics-row">
+            <div class="metric-card">
+                <div style="opacity: 0.6; font-size: 12px;">EMOPULSE SCORE</div>
+                <div class="value-large" id="score-val">76<span style="font-size: 16px; opacity: 0.5;"> / 100</span></div>
             </div>
-            <div class="panel stat-box">
-                <div class="label">Stress Risk</div>
-                <div class="value" id="stress-val">0.21</div>
+            <div class="metric-card">
+                <div style="opacity: 0.6; font-size: 12px;">STRESS RISK</div>
+                <div class="value-large" id="stress-val" style="color: var(--accent-stress);">0,21</div>
             </div>
-            <div class="panel stat-box">
-                <div class="label">Resonance</div>
-                <div class="value" id="res-val">Focus</div>
-            </div>
-            <div class="panel stat-box">
-                <div class="label">Neural Energy</div>
-                <div class="value" id="energy-val">0.66</div>
+            <div class="metric-card">
+                <div style="opacity: 0.6; font-size: 12px;">NEURAL ENERGY</div>
+                <div class="value-large" id="energy-val">0.66</div>
             </div>
         </footer>
     </div>
 
     <script>
-        // --- 1. THREE.JS KOSMINIS KOMPASAS ---
-        const container = document.getElementById('canvas-container');
+        // --- 1. REALISTIŠKAS 3D MODELIS (Three.js) ---
+        const container = document.getElementById('three-container');
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        
         renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
         container.appendChild(renderer.domElement);
 
-        // Sukuriame kinetinį kompasą
-        const group = new THREE.Group();
-        scene.add(group);
+        // Sukuriamas "Kosminis Branduolys" (Orbital Compass)
+        const coreGroup = new THREE.Group();
+        scene.add(coreGroup);
 
-        const createRing = (r, detail, color) => {
-            const geo = new THREE.IcosahedronGeometry(r, detail);
-            const mat = new THREE.MeshBasicMaterial({ color: color, wireframe: true, transparent: true, opacity: 0.3 });
-            return new THREE.Mesh(geo, mat);
+        // Pagrindinė sfera (Glow sphere)
+        const coreGeo = new THREE.SphereGeometry(1.5, 64, 64);
+        const coreMat = new THREE.MeshBasicMaterial({ 
+            color: 0x3a8dff, 
+            transparent: true, 
+            opacity: 0.15,
+            wireframe: false 
+        });
+        const coreSphere = new THREE.Mesh(coreGeo, coreMat);
+        coreGroup.add(coreSphere);
+
+        // Orbitaliniai žiedai (kaip tavo nuotraukoje)
+        const ringMat = new THREE.MeshBasicMaterial({ color: 0x3a8dff, transparent: true, opacity: 0.4, side: THREE.DoubleSide });
+        const createOrbit = (radius, rx, ry) => {
+            const ringGeo = new THREE.TorusGeometry(radius, 0.01, 16, 100);
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.rotation.x = rx;
+            ring.rotation.y = ry;
+            return ring;
         };
 
-        const outer = createRing(2.5, 1, 0x3abff8);
-        const inner = createRing(1.8, 1, 0xffffff);
-        const core = new THREE.Mesh(new THREE.SphereGeometry(0.5, 32, 32), new THREE.MeshBasicMaterial({ color: 0x3abff8 }));
-        
-        group.add(outer, inner, core);
-        camera.position.z = 6;
+        const r1 = createOrbit(2.2, Math.PI/2, 0.5);
+        const r2 = createOrbit(2.4, 0.2, 0.8);
+        const r3 = createOrbit(2.6, 1.2, 0.3);
+        coreGroup.add(r1, r2, r3);
 
-        // --- 2. EMOCIJŲ SKAITYMAS (SIMULIUOJAMAS RYŠYS) ---
-        function updateUI(emotion, score) {
-            const label = document.getElementById('emotion-label');
-            const aura = document.getElementById('aura');
-            const stress = document.getElementById('stress-val');
+        camera.position.z = 7;
+
+        // --- 2. KAMEROS IR EMOCIJŲ JUNGTIS ---
+        navigator.mediaDevices.getUserMedia({ video: true }).then(s => {
+            document.getElementById('webcam').srcObject = s;
+        });
+
+        // Simuliuojame realaus laiko skaitymą (čia jungiamas tavo API)
+        function updateNeuralCore() {
+            const stress = (Math.random() * 0.5).toFixed(2);
+            document.getElementById('stress-val').textContent = stress;
             
-            label.textContent = emotion.toUpperCase();
-            
-            if (emotion === 'angry' || emotion === 'stressed') {
-                label.style.color = "#ff4d4d";
-                aura.style.background = "radial-gradient(circle, rgba(255, 77, 77, 0.4) 0%, transparent 70%)";
-                stress.textContent = "0.89";
-                group.rotation.y += 0.2; // Kompasas sukasi greičiau
+            // Keičiame 3D objekto spalvą ir greitį pagal stresą
+            if (stress > 0.3) {
+                coreMat.color.setHex(0xff3b3b);
+                coreGroup.rotation.y += 0.05; // Greitėja
             } else {
-                label.style.color = "#3abff8";
-                aura.style.background = "radial-gradient(circle, rgba(58, 191, 248, 0.3) 0%, transparent 70%)";
-                stress.textContent = "0.21";
+                coreMat.color.setHex(0x3a8dff);
+                coreGroup.rotation.y += 0.01;
             }
         }
 
-        // --- 3. KAMEROS ĮJUNGIMAS ---
-        async function setupCamera() {
-            const video = document.getElementById('video-feed');
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            video.srcObject = stream;
-        }
-
-        // --- 4. ANIMACIJOS CIKLAS ---
         function animate() {
             requestAnimationFrame(animate);
-            outer.rotation.y += 0.005;
-            inner.rotation.x -= 0.01;
+            coreGroup.rotation.x += 0.002;
+            coreGroup.rotation.y += 0.003;
             
-            // "Kvėpavimo" efektas
-            const s = 1 + Math.sin(Date.now() * 0.002) * 0.1;
-            core.scale.set(s, s, s);
+            // "Kvėpavimo" efektas sferai
+            const pulse = 1 + Math.sin(Date.now() * 0.001) * 0.05;
+            coreGroup.scale.set(pulse, pulse, pulse);
             
             renderer.render(scene, camera);
         }
 
-        setupCamera();
         animate();
-
-        // Dirbtinis emocijų ciklas (pakeisti į tikrus face-api duomenis)
-        setInterval(() => {
-            const emos = ['calm', 'focused', 'joy', 'stressed'];
-            const rand = emos[Math.floor(Math.random() * emos.length)];
-            updateUI(rand, Math.random().toFixed(2));
-        }, 4000);
-
+        setInterval(updateNeuralCore, 2000);
     </script>
 </body>
 </html>
