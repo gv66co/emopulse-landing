@@ -2,181 +2,115 @@
 <html lang="lt">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EMOPULSE PRO - ULTIMATE TERMINAL</title>
+    <title>EMOPULSE PRO - NEURAL COMPASS</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
     <style>
-        :root { --cyan: #3abff8; --bg: #010307; --panel: rgba(10, 15, 25, 0.98); --glow: 0 0 15px rgba(58, 191, 248, 0.4); }
-        
+        :root { --cyan: #3abff8; --bg: #010307; --glow: 0 0 25px rgba(58, 191, 248, 0.7); }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; height: 100vh; overflow: hidden; }
+        body { background: var(--bg); color: white; font-family: 'Segoe UI', monospace; height: 100vh; overflow: hidden; }
 
-        .app-container { display: flex; flex-direction: column; height: 100vh; padding: 15px; gap: 15px; }
+        .terminal { display: flex; flex-direction: column; height: 100vh; padding: 20px; gap: 20px; background: radial-gradient(circle at center, #0a101f 0%, #000 100%); }
 
-        /* HEADER */
-        header { display: flex; justify-content: space-between; align-items: center; height: 50px; }
-        .logo { font-size: 1.8rem; font-weight: 900; letter-spacing: 2px; }
-        .logo span { color: var(--cyan); text-shadow: var(--glow); }
-        #live-clock { font-family: monospace; font-size: 1.3rem; color: var(--cyan); border: 1px solid var(--cyan); padding: 5px 15px; border-radius: 5px; box-shadow: var(--glow); }
+        /* GRID */
+        .layout { display: grid; grid-template-columns: 1.4fr 0.6fr; grid-template-rows: 1fr 180px; gap: 20px; flex: 1; min-height: 0; }
+        .panel { background: rgba(0, 5, 15, 0.8); border: 1px solid rgba(58, 191, 248, 0.3); border-radius: 20px; position: relative; overflow: hidden; box-shadow: inset 0 0 30px rgba(58, 191, 248, 0.1); }
 
-        /* GRID SYSTEM */
-        .main-grid {
-            display: grid;
-            flex: 1;
-            grid-template-areas: "vis hero" "cam risk";
-            grid-template-columns: 1.3fr 0.7fr;
-            grid-template-rows: 1fr 180px;
-            gap: 15px; min-height: 0;
+        /* 3D COMPASS AREA */
+        .area-vis { grid-column: 1; grid-row: 1; display: flex; align-items: center; justify-content: center; }
+        #canvas3d { width: 100%; height: 100%; filter: drop-shadow(0 0 15px var(--cyan)); }
+
+        /* CAMERA & DRIFT AURA */
+        .area-cam { grid-column: 2; grid-row: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        .cam-container { position: relative; width: 220px; height: 220px; margin-bottom: 20px; }
+        .video-ring { width: 100%; height: 100%; border-radius: 50%; border: 2px solid var(--cyan); overflow: hidden; position: relative; z-index: 5; box-shadow: var(--glow); }
+        #cam { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        
+        /* GYVA DRIFT AURA APLINK KAMERĄ */
+        .drift-aura { 
+            position: absolute; top: -30px; left: -30px; right: -30px; bottom: -30px;
+            border-radius: 50%; background: radial-gradient(circle, rgba(58, 191, 248, 0.3) 0%, transparent 70%);
+            z-index: 1; transition: 0.5s; filter: blur(10px);
         }
 
-        .panel { background: var(--panel); border: 1px solid rgba(58, 191, 248, 0.2); border-radius: 15px; position: relative; overflow: hidden; }
+        /* STATS */
+        footer { grid-column: 1 / span 2; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        .stat-card { background: rgba(58, 191, 248, 0.05); border-top: 2px solid var(--cyan); padding: 20px; text-align: center; }
+        .stat-val { font-size: 2rem; font-weight: bold; color: var(--cyan); text-shadow: var(--glow); }
+        .stat-label { font-size: 0.8rem; opacity: 0.6; text-transform: uppercase; margin-bottom: 5px; }
 
-        /* NEURAL CORE (Visual) */
-        .area-vis { grid-area: vis; background: radial-gradient(circle at center, #0a101f 0%, #010307 100%); }
-        #visual-container { width: 100%; height: 100%; }
-        .scan-line { position: absolute; width: 100%; height: 2px; background: var(--cyan); top: 0; box-shadow: var(--glow); animation: scan 4s linear infinite; z-index: 5; }
-        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
-
-        /* HERO / INPUT */
-        .area-hero { grid-area: hero; padding: 25px; display: flex; flex-direction: column; gap: 15px; }
-        h1 { font-size: 2rem; line-height: 1.1; margin-bottom: 10px; }
-        textarea { width: 100%; height: 100px; background: #000; border: 1px solid #333; border-radius: 10px; color: white; padding: 15px; resize: none; font-size: 1rem; }
-        button { padding: 15px; background: var(--cyan); color: black; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; text-transform: uppercase; }
-        button:hover { box-shadow: 0 0 20px var(--cyan); transform: translateY(-2px); }
-
-        /* CAMERA & AURA */
-        .area-cam { grid-area: cam; display: flex; align-items: center; gap: 25px; padding: 20px; }
-        .cam-box { position: relative; width: 130px; height: 130px; }
-        .cam-circle { width: 100%; height: 100%; border-radius: 50%; border: 3px solid var(--cyan); overflow: hidden; box-shadow: var(--glow); }
-        #cam { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
-        .aura-pulse { position: absolute; top: -5px; left: -5px; right: -5px; bottom: -5px; border: 2px solid var(--cyan); border-radius: 50%; animation: aura 2s infinite; opacity: 0; }
-        @keyframes aura { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(1.4); opacity: 0; } }
-
-        /* RISK / DRIFT */
-        .area-risk { grid-area: risk; padding: 20px; display: flex; flex-direction: column; justify-content: center; }
-        .label { font-size: 0.8rem; color: #64748b; text-transform: uppercase; margin-bottom: 5px; }
-        .big-val { font-size: 3rem; font-weight: 900; color: var(--cyan); text-shadow: var(--glow); }
-
-        /* FOOTER STATS */
-        footer { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; height: 100px; }
-        .stat-card { background: var(--panel); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 15px; text-align: center; transition: 0.3s; }
-        .stat-card:hover { border-color: var(--cyan); }
-        .stat-card span { font-size: 0.7rem; color: #64748b; text-transform: uppercase; }
-        .stat-val { font-size: 1.6rem; font-weight: bold; color: var(--cyan); margin-top: 5px; }
-
+        button { width: 100%; padding: 15px; background: rgba(58, 191, 248, 0.1); border: 1px solid var(--cyan); color: var(--cyan); cursor: pointer; text-transform: uppercase; transition: 0.3s; }
+        button:hover { background: var(--cyan); color: black; box-shadow: var(--glow); }
     </style>
 </head>
 <body>
 
-    <div class="app-container">
-        <header>
-            <div class="logo">EMOPULSE <span>PRO</span></div>
-            <div id="live-clock">00:00:00</div>
+    <div class="terminal">
+        <header style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 1px solid rgba(58, 191, 248, 0.2);">
+            <div style="font-weight: bold; letter-spacing: 3px;">NEURAL_NAVIGATOR <span style="color:var(--cyan)">V3.0</span></div>
+            <div id="clock" style="font-family: monospace; font-size: 1.2rem;">00:00:00</div>
         </header>
 
-        <main class="main-grid">
+        <main class="layout">
             <section class="panel area-vis">
-                <div class="scan-line"></div>
-                <div id="visual-container"></div>
-                <div style="position:absolute; bottom:15px; left:15px; font-size:0.7rem; color:var(--cyan); font-family:monospace;">CORE_STATUS: ACTIVE</div>
-            </section>
-
-            <section class="panel area-hero">
-                <h1>Decode Your Resonance</h1>
-                <textarea id="userInput" placeholder="Kaip jautiesi šiuo metu?"></textarea>
-                <button onclick="startNeuralScan()">Start Neural Scan</button>
-                <div id="ai-status" style="font-size:0.8rem; color:#444;">System standby...</div>
+                <div id="visual-container" style="width:100%; height:100%;"></div>
             </section>
 
             <section class="panel area-cam">
-                <div class="cam-box">
-                    <div class="aura-pulse"></div>
-                    <div class="cam-circle">
+                <div class="cam-container">
+                    <div class="drift-aura" id="aura"></div>
+                    <div class="video-ring">
                         <video id="cam" autoplay muted playsinline></video>
                     </div>
                 </div>
-                <div>
-                    <div class="label">Emotional Drift</div>
-                    <div id="drift-status" style="font-size:1.4rem; font-weight:bold;">STABLE</div>
-                    <div style="color:var(--cyan); font-size:0.9rem;">Stability Index: 112°</div>
+                <div style="width: 100%; text-align: center;">
+                    <div style="font-size: 0.7rem; color: #64748b; margin-bottom: 10px;">NEURAL DRIFT INTERFACE</div>
+                    <button onclick="syncNeuralField()">SYNC NEURAL FIELD</button>
                 </div>
             </section>
 
-            <section class="panel area-risk">
-                <div class="label">Stress Risk Factor</div>
-                <div class="big-val" id="risk-val">0.56</div>
-                <div style="width:100%; height:4px; background:#1e293b; margin-top:10px; border-radius:2px;">
-                    <div id="risk-bar" style="width:56%; height:100%; background:var(--cyan); box-shadow:var(--glow);"></div>
-                </div>
-            </section>
+            <footer>
+                <div class="stat-card"><div class="stat-label">Resonance</div><div class="stat-val" id="res-val">CALM</div></div>
+                <div class="stat-card"><div class="stat-label">Frequency</div><div class="stat-val" id="freq-val">432 Hz</div></div>
+                <div class="stat-card"><div class="stat-label">Stress Index</div><div class="stat-val" id="stress-val">0.12</div></div>
+                <div class="stat-card"><div class="stat-label">Stability</div><div class="stat-val" id="stab-val">98%</div></div>
+            </footer>
         </main>
-
-        <footer>
-            <div class="stat-card"><span>Mood Map</span><div class="stat-val" id="mood-val">Calm</div></div>
-            <div class="stat-card"><span>Coherence</span><div class="stat-val" id="coh-val">88%</div></div>
-            <div class="stat-card"><span>Emopulse Score</span><div class="stat-val" id="score-val">76</div></div>
-            <div class="stat-card"><span>Energy Level</span><div class="stat-val" id="energy-val">0.66</div></div>
-        </footer>
     </div>
 
     <script>
-        // --- 1. LAIKRODIS ---
-        function updateClock() {
-            const now = new Date();
-            document.getElementById('live-clock').textContent = now.toTimeString().split(' ')[0];
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
-
-        // --- 2. KAMERA ---
-        async function initCamera() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                document.getElementById('cam').srcObject = stream;
-            } catch (err) {
-                console.error("Kamera nepasiekiama");
-                document.getElementById('ai-status').textContent = "Camera Error: Check Permissions";
-            }
-        }
-        initCamera();
-
-        // --- 3. GARSAS IR ANALIZĖS SIMULIACIJA ---
+        // --- 1. KAMERA IR AUDIO ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playSignal(freq) {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.frequency.value = freq;
-            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-            osc.start();
-            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.3);
-            osc.stop(audioCtx.currentTime + 0.3);
-        }
+        navigator.mediaDevices.getUserMedia({ video: true }).then(s => document.getElementById('cam').srcObject = s);
+        
+        function updateClock() { document.getElementById('clock').textContent = new Date().toLocaleTimeString('lt-LT'); }
+        setInterval(updateClock, 1000);
 
-        function startNeuralScan() {
+        // --- 2. EMOCIJŲ REAKCIJA (SIMULIACIJA) ---
+        let currentStress = 0.12;
+        function syncNeuralField() {
             audioCtx.resume();
-            playSignal(880);
-            document.getElementById('ai-status').textContent = "Scanning bio-metrics...";
-            document.getElementById('ai-status').style.color = "var(--cyan)";
-            
-            // Dinaminis skaičių kitimas
             setInterval(() => {
-                const score = Math.floor(70 + Math.random() * 20);
-                const energy = (0.5 + Math.random() * 0.4).toFixed(2);
-                const risk = (Math.random() * 0.9).toFixed(2);
+                currentStress = Math.random();
+                const aura = document.getElementById('aura');
+                const stressVal = document.getElementById('stress-val');
                 
-                document.getElementById('score-val').textContent = score;
-                document.getElementById('energy-val').textContent = energy;
-                document.getElementById('risk-val').textContent = risk;
-                document.getElementById('risk-bar').style.width = (risk * 100) + "%";
+                stressVal.textContent = currentStress.toFixed(2);
+                document.getElementById('freq-val').textContent = (400 + currentStress * 100).toFixed(0) + " Hz";
                 
-                if(risk > 0.7) playSignal(330); // Stress alert garsas
+                // Reakcija: Aura keičia spalvą ir dydį
+                if(currentStress > 0.6) {
+                    aura.style.background = "radial-gradient(circle, rgba(255, 50, 50, 0.5) 0%, transparent 70%)";
+                    aura.style.transform = "scale(1.3)";
+                    document.getElementById('res-val').textContent = "HIGH";
+                } else {
+                    aura.style.background = "radial-gradient(circle, rgba(58, 191, 248, 0.4) 0%, transparent 70%)";
+                    aura.style.transform = "scale(1)";
+                    document.getElementById('res-val').textContent = "CALM";
+                }
             }, 3000);
         }
 
-        // --- 4. 3D BRANDUOLYS (THREE.JS) ---
+        // --- 3. 3D KOSMINIS KOMPASAS (Three.js) ---
         const container = document.getElementById('visual-container');
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
@@ -184,31 +118,43 @@
         renderer.setSize(container.clientWidth, container.clientHeight);
         container.appendChild(renderer.domElement);
 
-        // Sukuriame švytintį tinklą (Aura/Core)
-        const geometry = new THREE.IcosahedronGeometry(2, 2);
-        const material = new THREE.MeshBasicMaterial({ color: 0x3abff8, wireframe: true, transparent: true, opacity: 0.4 });
-        const core = new THREE.Mesh(geometry, material);
-        scene.add(core);
+        // Kompasas susideda iš kelių žiedų
+        const compassGroup = new THREE.Group();
+        scene.add(compassGroup);
 
-        // Vidinis švytintis branduolys
-        const innerGeo = new THREE.SphereGeometry(0.8, 32, 32);
-        const innerMat = new THREE.MeshBasicMaterial({ color: 0x3abff8 });
-        const innerSphere = new THREE.Mesh(innerGeo, innerMat);
-        scene.add(innerSphere);
+        const createRing = (radius, detail, opacity) => {
+            const geo = new THREE.IcosahedronGeometry(radius, detail);
+            const mat = new THREE.MeshBasicMaterial({ color: 0x3abff8, wireframe: true, transparent: true, opacity: opacity });
+            return new THREE.Mesh(geo, mat);
+        };
 
-        camera.position.z = 5;
+        const outerRing = createRing(2.5, 1, 0.2);
+        const innerRing = createRing(1.8, 1, 0.4);
+        const core = new THREE.Mesh(new THREE.OctahedronGeometry(0.5, 0), new THREE.MeshBasicMaterial({ color: 0x3abff8 }));
+        
+        compassGroup.add(outerRing);
+        compassGroup.add(innerRing);
+        compassGroup.add(core);
+
+        camera.position.z = 6;
 
         function animate() {
             requestAnimationFrame(animate);
-            core.rotation.y += 0.005;
-            core.rotation.x += 0.002;
-            const pulse = 1 + Math.sin(Date.now() * 0.005) * 0.1;
-            innerSphere.scale.set(pulse, pulse, pulse);
+            
+            // Kompasas sukasi pagal "emocijas"
+            const speed = 0.005 + (currentStress * 0.05);
+            outerRing.rotation.y += speed;
+            innerRing.rotation.x -= speed * 1.5;
+            core.rotation.z += speed * 2;
+            
+            // "Kvėpavimas"
+            const scale = 1 + (Math.sin(Date.now() * 0.002) * 0.1) + (currentStress * 0.2);
+            compassGroup.scale.set(scale, scale, scale);
+            
             renderer.render(scene, camera);
         }
         animate();
 
-        // Responsive resize
         window.addEventListener('resize', () => {
             camera.aspect = container.clientWidth / container.clientHeight;
             camera.updateProjectionMatrix();
