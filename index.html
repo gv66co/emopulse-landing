@@ -2,185 +2,122 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEURO-AURA: Emotion Drift System</title>
+    <title>NEURO-AURA DRIFT v1.0</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
     <style>
-        body { margin: 0; overflow: hidden; background: #000510; font-family: 'Segoe UI', sans-serif; color: #4fc3f7; }
-        #canvas-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-        #ui-overlay { position: absolute; top: 20px; left: 20px; z-index: 10; pointer-events: none; text-transform: uppercase; letter-spacing: 2px; }
-        #video-container { position: absolute; bottom: 20px; right: 20px; width: 200px; border: 2px solid #1a237e; border-radius: 10px; overflow: hidden; opacity: 0.7; }
-        video { width: 100%; transform: scaleX(-1); }
-        .stat-box { background: rgba(0, 5, 16, 0.7); padding: 15px; border-left: 3px solid #00e5ff; margin-bottom: 10px; }
-        .ai-assistant { position: absolute; bottom: 20px; left: 20px; max-width: 300px; font-size: 0.9em; line-height: 1.4; color: #81d4fa; }
-        #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; align-items: center; justify-content: center; z-index: 100; font-size: 2em; }
+        :root { --neon: #00e5ff; --bg: #000510; }
+        body { margin: 0; background: var(--bg); color: var(--neon); font-family: 'Orbitron', sans-serif; overflow: hidden; }
+        #overlay { position: absolute; top: 20px; left: 20px; z-index: 100; background: rgba(0,20,40,0.8); padding: 20px; border-left: 4px solid var(--neon); border-radius: 0 10px 10px 0; pointer-events: none; }
+        #video { position: absolute; bottom: 20px; right: 20px; width: 220px; border: 1px solid var(--neon); border-radius: 10px; z-index: 100; transform: scaleX(-1); filter: saturate(0) brightness(1.2); }
+        #loader { position: fixed; inset: 0; background: #000; z-index: 1000; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; text-transform: uppercase; letter-spacing: 5px; }
+        .data-val { color: #fff; text-shadow: 0 0 10px var(--neon); }
     </style>
 </head>
 <body>
 
-<div id="loading">INITIALIZING NEURO-LINK...</div>
-
-<div id="ui-overlay">
-    <div class="stat-box">
-        <div>Subject: <span id="status">Scanning...</span></div>
-        <div>Dominant Emotion: <span id="emotion">-</span></div>
-        <div>Neural Pulse: <span id="pulse">0</span> BPM</div>
-    </div>
+<div id="loader">Initializing Neural Links...</div>
+<div id="overlay">
+    <div>NEURAL STATUS: <span id="status" class="data-val">OFFLINE</span></div>
+    <div>EMOTION DRIFT: <span id="emotion" class="data-val">WAITING</span></div>
+    <div>PULSE (EST): <span id="pulse" class="data-val">0</span> BPM</div>
 </div>
-
-<div class="ai-assistant" id="ai-text">
-    Greetings. I am your Neural Assistant. I am monitoring your bio-rhythms and emotional aura drift.
-</div>
-
-<div id="video-container">
-    <video id="video" autoplay muted></video>
-</div>
-
-<div id="canvas-container"></div>
-
-
+<video id="video" autoplay muted></video>
 
 <script>
-/**
- * NEURO-AURA CORE SYSTEM
- * Integrating Emotion Recognition & 3D Generative Drift
- */
+    let scene, camera, renderer, aura, particles;
+    let currentEmotion = "neutral";
+    let emotionIntensity = 0;
 
-let scene, camera, renderer, auraMesh, particles;
-let currentEmotion = "neutral";
-let pulseRate = 72;
-
-// Initialize Face API Models
-async function setupAI() {
-    const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
-    await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
-    await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
-    document.getElementById('loading').style.display = 'none';
-    startVideo();
-}
-
-function startVideo() {
-    navigator.mediaDevices.getUserMedia({ video: {} }).then(stream => {
-        const video = document.getElementById('video');
-        video.srcObject = stream;
-        detectEmotions(video);
-    });
-}
-
-// Emotion & Pulse Logic
-async function detectEmotions(video) {
-    setInterval(async () => {
-        const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceExpressions();
-        
-        if (detections && detections.length > 0) {
-            const expressions = detections[0].expressions;
-            currentEmotion = Object.keys(expressions).reduce((a, b) => expressions[a] > expressions[b] ? a : b);
+    // --- 1. INITIALIZE AI MODELS ---
+    async function startSystem() {
+        try {
+            const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
+            await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+            await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
             
-            document.getElementById('emotion').innerText = currentEmotion;
-            document.getElementById('status').innerText = "CONNECTED";
+            const stream = await navigator.mediaDevices.getUserMedia({ video: {} });
+            document.getElementById('video').srcObject = stream;
             
-            // Simulate Heart Rate variability based on emotion intensity
-            pulseRate = 60 + Math.floor(expressions[currentEmotion] * 40);
-            document.getElementById('pulse').innerText = pulseRate;
-            
-            updateAIResponse(currentEmotion);
+            document.getElementById('loader').style.display = 'none';
+            init3D();
+            processEmotions();
+        } catch (err) {
+            document.getElementById('loader').innerText = "ERROR: ACCESS DENIED";
+            console.error(err);
         }
-    }, 200);
-}
-
-function updateAIResponse(emotion) {
-    const aiText = document.getElementById('ai-text');
-    const responses = {
-        happy: "I detect a surge in serotonin. Your aura is expanding with luminous vibrations.",
-        sad: "Melancholy detected. Shifting neural rings to stabilize your emotional equilibrium.",
-        angry: "High frequency detected. Cooling down the aura drift to prevent neural overload.",
-        neutral: "Stable state confirmed. Deep space harmony maintained."
-    };
-    aiText.innerText = responses[emotion] || "Monitoring neural patterns...";
-}
-
-// 3D Visuals: The "Aura Drift"
-function initThree() {
-    scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.getElementById('canvas-container').appendChild(renderer.domElement);
-
-    // Create the Aura Sphere (The "Neuro Body")
-    const geometry = new THREE.IcosahedronGeometry(2, 15);
-    const material = new THREE.MeshPhongMaterial({
-        color: 0x1a237e,
-        wireframe: true,
-        transparent: true,
-        opacity: 0.6,
-        emissive: 0x00e5ff,
-        emissiveIntensity: 0.5
-    });
-    
-    auraMesh = new THREE.Mesh(geometry, material);
-    scene.add(auraMesh);
-
-    // Space Particles (The Stars/Orbits)
-    const partGeom = new THREE.BufferGeometry();
-    const partCount = 5000;
-    const posArray = new Float32Array(partCount * 3);
-    for(let i=0; i < partCount * 3; i++) {
-        posArray[i] = (Math.random() - 0.5) * 15;
-    }
-    partGeom.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-    const partMat = new THREE.PointsMaterial({ size: 0.005, color: 0xffffff });
-    particles = new THREE.Points(partGeom, partMat);
-    scene.add(particles);
-
-    const light = new THREE.PointLight(0x00e5ff, 2, 100);
-    light.position.set(5, 5, 5);
-    scene.add(light);
-    scene.add(new THREE.AmbientLight(0x111111));
-
-    camera.position.z = 5;
-    animate();
-}
-
-function animate() {
-    requestAnimationFrame(animate);
-
-    // Aura reacts to emotions
-    const time = Date.now() * 0.001;
-    let speed = 0.01;
-    let scale = 1.0;
-
-    if (currentEmotion === 'happy') {
-        speed = 0.05;
-        auraMesh.material.color.setHex(0x00e5ff);
-        scale = 1.2 + Math.sin(time * 5) * 0.1;
-    } else if (currentEmotion === 'angry') {
-        speed = 0.1;
-        auraMesh.material.color.setHex(0xff5252);
-    } else {
-        auraMesh.material.color.setHex(0x1a237e);
     }
 
-    auraMesh.rotation.y += speed;
-    auraMesh.rotation.z += speed * 0.5;
-    auraMesh.scale.set(scale, scale, scale);
+    // --- 2. 3D AURA DRIFT ENGINE ---
+    function init3D() {
+        scene = new THREE.Scene();
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
 
-    // Drift particles
-    particles.rotation.y -= 0.001;
+        // Neural Body Geometry
+        const geo = new THREE.IcosahedronGeometry(2, 10);
+        const mat = new THREE.MeshPhongMaterial({
+            color: 0x00e5ff, wireframe: true, emissive: 0x00e5ff, emissiveIntensity: 0.5
+        });
+        aura = new THREE.Mesh(geo, mat);
+        scene.add(aura);
 
-    renderer.render(scene, camera);
-}
+        // Space Particles
+        const partGeo = new THREE.BufferGeometry();
+        const pos = [];
+        for(let i=0; i<10000; i++) pos.push((Math.random()-0.5)*20, (Math.random()-0.5)*20, (Math.random()-0.5)*20);
+        partGeo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+        particles = new THREE.Points(partGeo, new THREE.PointsMaterial({color: 0xffffff, size: 0.02}));
+        scene.add(particles);
 
-window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-});
+        const light = new THREE.PointLight(0x00e5ff, 2, 100);
+        light.position.set(10, 10, 10);
+        scene.add(light);
+        camera.position.z = 5;
 
-// Initialization
-initThree();
-setupAI();
+        animate();
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+        let speed = 0.005 + (emotionIntensity * 0.05);
+        aura.rotation.y += speed;
+        aura.rotation.x += speed * 0.5;
+        
+        // Aura reaction logic
+        const scale = 1 + (emotionIntensity * 0.5);
+        aura.scale.lerp(new THREE.Vector3(scale, scale, scale), 0.1);
+
+        particles.rotation.y -= 0.001;
+        renderer.render(scene, camera);
+    }
+
+    // --- 3. NEURAL DATA SYNC ---
+    async function processEmotions() {
+        const video = document.getElementById('video');
+        setInterval(async () => {
+            const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceExpressions();
+            if (detections.length > 0) {
+                const expressions = detections[0].expressions;
+                currentEmotion = Object.keys(expressions).reduce((a, b) => expressions[a] > expressions[b] ? a : b);
+                emotionIntensity = expressions[currentEmotion];
+
+                document.getElementById('status').innerText = "CONNECTED";
+                document.getElementById('emotion').innerText = currentEmotion.toUpperCase();
+                document.getElementById('pulse').innerText = Math.floor(65 + (emotionIntensity * 30));
+
+                // Change Color based on drift
+                if(currentEmotion === 'happy') aura.material.color.setHex(0x00ff00);
+                else if(currentEmotion === 'angry') aura.material.color.setHex(0xff0000);
+                else aura.material.color.setHex(0x00e5ff);
+            }
+        }, 100);
+    }
+
+    window.onload = startSystem;
 </script>
 </body>
 </html>
