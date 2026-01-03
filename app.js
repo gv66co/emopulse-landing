@@ -45,7 +45,6 @@ async function startCamera() {
                 video.play();
                 camStatus.innerHTML = `<span style="color: #3abff8">●</span> System online — field active`;
                 
-                // Sinchronizuojame drobių dydžius su video srautu
                 if (overlay) { overlay.width = video.videoWidth; overlay.height = video.videoHeight; }
                 if (auraCanvas) { auraCanvas.width = 320; auraCanvas.height = 320; }
                 
@@ -67,40 +66,42 @@ async function loop() {
         return;
     }
 
-    const det = await faceapi
-        .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 }))
-        .withFaceExpressions();
+    try {
+        const det = await faceapi
+            .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 }))
+            .withFaceExpressions();
 
-    if (det && det.expressions) {
-        const ex = det.expressions;
-        
-        // Emocijų normalizavimas ir svoriai
-        const joy = ex.happy + (ex.surprised * 0.2);
-        const stress = ex.angry + ex.fearful + (ex.disgusted * 0.4) + (ex.sad * 0.3);
-        const calm = ex.neutral;
+        if (det && det.expressions) {
+            const ex = det.expressions;
+            
+            const joy = ex.happy + (ex.surprised * 0.2);
+            const stress = ex.angry + ex.fearful + (ex.disgusted * 0.4) + (ex.sad * 0.3);
+            const calm = ex.neutral;
 
-        const total = joy + stress + calm || 1;
-        const currentEmotion = {
-            joy: joy / total,
-            stress: stress / total,
-            calm: calm / total
-        };
+            const total = joy + stress + calm || 1;
+            const currentEmotion = {
+                joy: joy / total,
+                stress: stress / total,
+                calm: calm / total
+            };
 
-        // UI Metrikos
-        const score = Math.round((currentEmotion.calm * 60 + currentEmotion.joy * 40 - currentEmotion.stress * 40 + 30));
-        const energyValue = Math.min(1, currentEmotion.joy + (currentEmotion.stress * 0.3));
-        const stressValue = currentEmotion.stress;
+            const score = Math.round((currentEmotion.calm * 60 + currentEmotion.joy * 40 - currentEmotion.stress * 40 + 30));
+            const energyValue = Math.min(1, currentEmotion.joy + (currentEmotion.stress * 0.3));
+            const stressValue = currentEmotion.stress;
 
-        const metrics = {
-            score: Math.min(100, Math.max(0, score)),
-            energy: energyValue,
-            stress: stressValue,
-            stability: 1 - Math.abs(energyValue - stressValue),
-            intensity: (energyValue + stressValue) / 2
-        };
+            const metrics = {
+                score: Math.min(100, Math.max(0, score)),
+                energy: energyValue,
+                stress: stressValue,
+                stability: 1 - Math.abs(energyValue - stressValue),
+                intensity: (energyValue + stressValue) / 2
+            };
 
-        updateUI(metrics);
-        drawAura(det.detection.box, currentEmotion);
+            updateUI(metrics);
+            drawAura(det.detection.box, currentEmotion);
+        }
+    } catch (e) {
+        console.warn("Detection pause", e);
     }
 
     requestAnimationFrame(loop);
@@ -114,10 +115,9 @@ function drawAura(box, emotion) {
     const { width: w, height: h } = auraCanvas;
     auraCtx.clearRect(0, 0, w, h);
 
-    // Dinaminė spalva pagal emociją
-    let color = "58, 191, 248"; // Neutral/Calm
-    if (emotion.joy > 0.4) color = "251, 191, 36"; // Joy
-    if (emotion.stress > 0.4) color = "248, 113, 113"; // Stress
+    let color = "58, 191, 248"; 
+    if (emotion.joy > 0.4) color = "251, 191, 36"; 
+    if (emotion.stress > 0.4) color = "248, 113, 113"; 
 
     const centerX = w / 2;
     const centerY = h / 2;
@@ -147,7 +147,6 @@ function updateUI(m) {
             : "Minor fluctuations. Practice rhythmic focus.";
     }
 
-    // 3D Kompaso kampas
     updateCompass3D((m.energy - m.stress) * Math.PI);
 
     pushHistory(m);
@@ -195,15 +194,17 @@ function drawPulse(m) {
 }
 
 /* ---------------------------------------------------------
-   INICIALIZACIJA
+   INICIALIZACIJA (SU TIESIOGINIU MODELIŲ KROVIMU)
 --------------------------------------------------------- */
 async function init() {
     try {
         camStatus.textContent = "Syncing Neural Networks...";
         
-        // Modeliai kraunami iš šakninio /models aplanko
-        await faceapi.nets.tinyFaceDetector.loadFromUri("./models");
-        await faceapi.nets.faceExpressionNet.loadFromUri("./models");
+        // PAKEITIMAS: Krauname modelius tiesiai iš interneto saugyklos
+        const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights/';
+        
+        await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+        await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
 
         modelsReady = true;
         await startCamera();
@@ -213,7 +214,7 @@ async function init() {
         loop();
     } catch (err) {
         camStatus.textContent = "Sync failed. System offline.";
-        console.error(err);
+        console.error("Initialization Error:", err);
     }
 }
 
