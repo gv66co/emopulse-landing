@@ -3,195 +3,200 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEURO-PULSE | EMOTION DRIFT</title>
+    <title>NEURO-PULSE SYSTEM</title>
     <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Space+Mono&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
     <style>
-        :root { --neon: #00f2ff; --deep: #00020a; --warning: #ff3300; }
-        body, html { margin: 0; padding: 0; background: var(--deep); color: var(--neon); font-family: 'Syncopate', sans-serif; overflow: hidden; height: 100%; }
+        :root { --neon: #00f2ff; --bg: #00020a; }
+        body, html { margin: 0; padding: 0; background: var(--bg); color: var(--neon); font-family: 'Syncopate', sans-serif; overflow: hidden; height: 100%; }
 
-        /* UI Overlays */
-        #ui-layer { position: absolute; inset: 0; z-index: 10; pointer-events: none; border: 1px solid rgba(0, 242, 255, 0.1); box-sizing: border-box; margin: 20px; }
-        .panel { position: absolute; background: rgba(0, 10, 20, 0.7); backdrop-filter: blur(10px); padding: 20px; border: 1px solid rgba(0, 242, 255, 0.2); }
-        #left-panel { top: 20px; left: 20px; border-left: 5px solid var(--neon); }
-        #right-panel { top: 20px; right: 20px; border-right: 5px solid var(--neon); text-align: right; }
+        /* HUD dizainas */
+        #hud { position: absolute; inset: 0; z-index: 10; pointer-events: none; padding: 40px; display: none; }
+        .panel { position: absolute; background: rgba(0, 10, 20, 0.6); backdrop-filter: blur(15px); border: 1px solid rgba(0, 242, 255, 0.2); padding: 25px; border-radius: 2px; }
+        #left-p { top: 40px; left: 40px; border-left: 5px solid var(--neon); }
+        #right-p { top: 40px; right: 40px; border-right: 5px solid var(--neon); text-align: right; }
         
-        /* Stats Styles */
-        .label { font-size: 0.6rem; letter-spacing: 2px; opacity: 0.6; margin-bottom: 5px; }
-        .value { font-size: 1.2rem; font-weight: bold; font-family: 'Space Mono', monospace; text-shadow: 0 0 10px var(--neon); }
+        .label { font-size: 0.6rem; letter-spacing: 3px; opacity: 0.5; margin-bottom: 8px; text-transform: uppercase; }
+        .value { font-size: 1.5rem; font-weight: bold; font-family: 'Space Mono', monospace; text-shadow: 0 0 15px var(--neon); }
 
-        /* Video Feed */
-        #video-container { position: absolute; bottom: 40px; right: 40px; width: 200px; height: 150px; border: 1px solid var(--neon); border-radius: 5px; overflow: hidden; opacity: 0.5; transition: 0.5s; }
-        #video-container:hover { opacity: 1; transform: scale(1.1); }
-        #video-feed { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        /* Kamera */
+        #cam-box { position: absolute; bottom: 40px; right: 40px; width: 220px; height: 160px; border: 1px solid var(--neon); border-radius: 5px; overflow: hidden; opacity: 0.6; }
+        #video-feed { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); filter: saturate(0) contrast(1.2); }
 
-        /* Initialization Button */
-        #init-screen { position: fixed; inset: 0; background: var(--deep); z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.8s; }
-        #init-screen h1 { letter-spacing: 12px; font-size: 1.5rem; transition: 0.3s; }
+        /* Pradinis ekranas */
+        #init-screen { position: fixed; inset: 0; background: var(--bg); z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
+        #init-screen h1 { letter-spacing: 15px; font-size: 1.8rem; text-transform: uppercase; transition: 0.5s; }
         #init-screen:hover h1 { color: #fff; text-shadow: 0 0 30px var(--neon); }
-        #status-log { font-family: 'Space Mono', monospace; font-size: 0.7rem; margin-top: 20px; color: var(--neon); opacity: 0.5; }
+        #log { font-family: 'Space Mono', monospace; font-size: 0.7rem; margin-top: 30px; opacity: 0.5; max-width: 400px; text-align: center; }
 
-        /* IA assistant text box */
-        #ai-comms { position: absolute; bottom: 40px; left: 40px; width: 300px; font-family: 'Space Mono', monospace; font-size: 0.8rem; line-height: 1.5; text-transform: none; }
+        /* IA Padėjėjo tekstas */
+        #ai-text { position: absolute; bottom: 40px; left: 40px; width: 350px; font-family: 'Space Mono', monospace; font-size: 0.85rem; line-height: 1.6; text-transform: none; color: #fff; border-bottom: 1px solid var(--neon); padding-bottom: 10px; }
     </style>
 </head>
 <body>
 
-<div id="init-screen" onclick="startNeuroLink()">
-    <h1 id="btn-text">INITIALIZE NEURO-BODY</h1>
-    <div id="status-log">SYSTEM STATUS: IDLE | AWAITING COMMAND</div>
+<div id="init-screen" onclick="launchNeuroLink()">
+    <h1>INITIALIZE NEURO-BODY</h1>
+    <div id="log">SYSTEM: STANDBY<br>CLICK TO CALIBRATE BIOMETRIC SENSORS</div>
 </div>
 
-<div id="ui-layer">
-    <div id="left-panel" class="panel">
-        <div class="label">NEURAL SIGNATURE</div>
-        <div id="emotion-val" class="value">CONNECTING...</div>
-        <br>
-        <div class="label">BIOMETRIC PULSE</div>
-        <div id="pulse-val" class="value">-- BPM</div>
+<div id="hud">
+    <div id="left-p" class="panel">
+        <div class="label">Neural State</div>
+        <div id="emo-display" class="value">SYNCING...</div>
+        <br><br>
+        <div class="label">Estimated Pulse</div>
+        <div id="pulse-display" class="value">000 BPM</div>
     </div>
 
-    <div id="right-panel" class="panel">
-        <div class="label">AURA STABILITY</div>
-        <div id="stability-val" class="value">99.2%</div>
-        <br>
-        <div class="label">NEURAL PHASE</div>
-        <div id="phase-val" class="value">STABLE</div>
+    <div id="right-p" class="panel">
+        <div class="label">Aura Frequency</div>
+        <div id="freq-display" class="value">STABLE</div>
+        <br><br>
+        <div class="label">Neuro Drift</div>
+        <div id="drift-display" class="value">ACTIVE</div>
     </div>
 
-    <div id="ai-comms">
-        > IA ASSISTANT: Awaiting neural link establishment. Please face the sensor for calibration.
-    </div>
+    <div id="ai-text">> IA: Initializing neural interface. Please look directly into the scanner.</div>
 
-    <div id="video-container">
+    <div id="cam-box">
         <video id="video-feed" autoplay muted playsinline></video>
     </div>
 </div>
 
 
 <script>
-    let scene, camera, renderer, aura, stars;
-    let systemActive = false;
+    let scene, camera, renderer, aura, stars, clock = new THREE.Clock();
+    let isLive = false;
     let lastEmotion = "";
 
-    // 1. AI VOICE SYNTHESIS
-    function speak(text) {
-        const synth = window.speechSynthesis;
-        const utter = new SpeechSynthesisUtterance(text);
-        utter.lang = 'en-US';
-        utter.pitch = 0.7;
-        utter.rate = 0.9;
-        synth.speak(utter);
-        document.getElementById('ai-comms').innerHTML = "> IA: " + text;
+    // 1. IA VOICE ENGINE
+    function speakIA(text) {
+        window.speechSynthesis.cancel(); // Sustabdome senas žinutes
+        const msg = new SpeechSynthesisUtterance(text);
+        msg.lang = 'en-US';
+        msg.pitch = 0.75;
+        msg.rate = 0.95;
+        window.speechSynthesis.speak(msg);
+        document.getElementById('ai-text').innerHTML = "> IA: " + text;
     }
 
-    // 2. INITIALIZE NEURAL LINK (AI + CAMERA)
-    async function startNeuroLink() {
-        const log = document.getElementById('status-log');
-        const btn = document.getElementById('btn-text');
-        
+    // 2. SYSTEM LAUNCHER
+    async function launchNeuroLink() {
+        const log = document.getElementById('log');
         try {
-            log.innerText = "LOADING NEURAL MODELS...";
-            btn.innerText = "CALIBRATING...";
-            
+            log.innerHTML = "DOWNLOADING NEURAL WEIGHTS...";
+            // Naudojame specifinį modelių šaltinį, kad išvengtume blokavimo
             const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
-            await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
-            await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
+            
+            await Promise.all([
+                faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+                faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL)
+            ]);
 
-            log.innerText = "ACCESSING BIOMETRIC FEED...";
-            const stream = await navigator.mediaDevices.getUserMedia({ video: {} });
+            log.innerHTML = "ACTIVATING CAMERA SENSORS...";
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
             document.getElementById('video-feed').srcObject = stream;
 
-            // Success Transition
-            document.getElementById('init-screen').style.opacity = '0';
-            setTimeout(() => document.getElementById('init-screen').remove(), 800);
+            // UI perėjimas
+            document.getElementById('init-screen').style.display = 'none';
+            document.getElementById('hud').style.display = 'block';
             
-            init3D();
-            systemActive = true;
-            speak("Neural link established. Monitoring your aura drift in real-time.");
-            processNeuralData();
-            
-        } catch (err) {
-            log.style.color = "red";
-            log.innerText = "ERROR: ACCESS DENIED. CHECK PERMISSIONS.";
-            console.error(err);
+            init3DScene();
+            isLive = true;
+            speakIA("Neural link established. Welcome back. I am monitoring your drift.");
+            runAIAnalysis();
+
+        } catch (e) {
+            log.style.color = "#ff3300";
+            log.innerHTML = "CRITICAL ERROR: ACCESS BLOCKED<br>ENABLE CAMERA AND DISABLE AD-BLOCKERS";
+            console.error(e);
         }
     }
 
-    // 3. 3D AURA ENGINE (Three.js)
-    function init3D() {
+    // 3. 3D AURA DRIFT CORE
+    function init3DScene() {
         scene = new THREE.Scene();
         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // Aura Mesh (Neuro-Body)
-        const geometry = new THREE.IcosahedronGeometry(2, 20);
-        const material = new THREE.MeshPhongMaterial({
-            color: 0x00f2ff, wireframe: true, emissive: 0x00f2ff, emissiveIntensity: 0.5, transparent: true, opacity: 0.7
+        // Aura Body
+        const geo = new THREE.IcosahedronGeometry(2, 30);
+        const mat = new THREE.MeshPhongMaterial({
+            color: 0x00f2ff, wireframe: true, emissive: 0x00f2ff, emissiveIntensity: 0.6, transparent: true, opacity: 0.8
         });
-        aura = new THREE.Mesh(geometry, material);
+        aura = new THREE.Mesh(geo, mat);
         scene.add(aura);
 
-        // Space Stars
+        // Orbiting Stars
         const starGeo = new THREE.BufferGeometry();
-        const starCoords = [];
-        for(let i=0; i<8000; i++) starCoords.push((Math.random()-0.5)*20, (Math.random()-0.5)*20, (Math.random()-0.5)*20);
-        starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starCoords, 3));
+        const starPos = [];
+        for(let i=0; i<15000; i++) starPos.push((Math.random()-0.5)*30, (Math.random()-0.5)*30, (Math.random()-0.5)*30);
+        starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPos, 3));
         stars = new THREE.Points(starGeo, new THREE.PointsMaterial({color: 0xffffff, size: 0.015}));
         scene.add(stars);
 
-        scene.add(new THREE.PointLight(0x00f2ff, 2, 50));
+        const light = new THREE.PointLight(0x00f2ff, 2, 100);
+        light.position.set(10, 10, 10);
+        scene.add(light);
         camera.position.z = 6;
-        animate();
+
+        renderLoop();
     }
 
-    function animate() {
-        requestAnimationFrame(animate);
-        if(!systemActive) return;
+    function renderLoop() {
+        requestAnimationFrame(renderLoop);
+        const t = clock.getElapsedTime();
 
-        aura.rotation.y += 0.005;
-        aura.rotation.x += 0.003;
-        stars.rotation.y -= 0.0005;
-
+        aura.rotation.y += 0.004;
+        aura.rotation.z += 0.002;
+        
+        // Aura "kvėpavimas"
+        const s = 1 + Math.sin(t * 1.5) * 0.05;
+        aura.scale.set(s, s, s);
+        
+        stars.rotation.y -= 0.0003;
         renderer.render(scene, camera);
     }
 
-    // 4. EMOTION ANALYSIS LOOP
-    async function processNeuralData() {
+    // 4. NEURAL PROCESSING LOOP
+    async function runAIAnalysis() {
         const video = document.getElementById('video-feed');
         setInterval(async () => {
+            if(!isLive) return;
+            
             const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceExpressions();
             
-            if (detections.length > 0) {
+            if (detections && detections.length > 0) {
                 const expressions = detections[0].expressions;
-                const top = Object.keys(expressions).reduce((a, b) => expressions[a] > expressions[b] ? a : b);
-                const score = expressions[top];
+                const topEmotion = Object.keys(expressions).reduce((a, b) => expressions[a] > expressions[b] ? a : b);
+                const intensity = expressions[topEmotion];
 
-                // Update UI
-                document.getElementById('emotion-val').innerText = top.toUpperCase();
-                document.getElementById('pulse-val').innerText = Math.floor(68 + (score * 35)) + " BPM";
+                // Atnaujiname HUD
+                document.getElementById('emo-display').innerText = topEmotion.toUpperCase();
+                document.getElementById('pulse-display').innerText = Math.floor(65 + (intensity * 40)) + " BPM";
+                
+                // Vizualinė reakcija (Color Shift)
+                const colors = { happy: 0x00ffcc, angry: 0xff3300, sad: 0x0044ff, neutral: 0x00f2ff };
+                aura.material.color.setHex(colors[topEmotion] || 0x00f2ff);
+                aura.material.emissive.setHex(colors[topEmotion] || 0x00f2ff);
 
-                // Visual Drift Reaction
-                const colors = { happy: 0x00ffaa, angry: 0xff3300, sad: 0x0066ff, neutral: 0x00f2ff };
-                aura.material.color.setHex(colors[top] || 0x00f2ff);
-                aura.scale.setScalar(1 + (score * 0.4));
-
-                // IA Voice Reaction
-                if (top !== lastEmotion && score > 0.85) {
-                    lastEmotion = top;
+                // IA Reakcija balsu
+                if (topEmotion !== lastEmotion && intensity > 0.8) {
+                    lastEmotion = topEmotion;
                     const responses = {
-                        happy: "Dopamine surge detected. Your aura is in high-vibration state.",
-                        angry: "Warning. Neural friction detected. Stabilizing rings.",
-                        sad: "Lower frequencies identified. Initiating orbital calming.",
-                        neutral: "System balance maintained. Pure neural flow."
+                        happy: "Dopamine surge confirmed. Aura frequency is optimal.",
+                        angry: "Neural friction detected. Initiating cooling protocols.",
+                        sad: "Lower frequency detected. Shifting to recovery drift.",
+                        neutral: "Neural baseline stable. Flow state maintained."
                     };
-                    speak(responses[top] || "Processing new emotional drift.");
+                    speakIA(responses[topEmotion] || "Emotion shift detected.");
                 }
             }
-        }, 200);
+        }, 250);
     }
 
     window.addEventListener('resize', () => {
