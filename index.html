@@ -3,200 +3,200 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEURO-PULSE SYSTEM</title>
+    <title>NEURO-PULSE | BIOMETRIC INTERFACE</title>
     <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Space+Mono&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
     <style>
-        :root { --neon: #00f2ff; --bg: #00020a; }
+        :root { --neon: #00f2ff; --bg: #00020a; --warn: #ff3300; }
         body, html { margin: 0; padding: 0; background: var(--bg); color: var(--neon); font-family: 'Syncopate', sans-serif; overflow: hidden; height: 100%; }
 
-        /* HUD dizainas */
-        #hud { position: absolute; inset: 0; z-index: 10; pointer-events: none; padding: 40px; display: none; }
-        .panel { position: absolute; background: rgba(0, 10, 20, 0.6); backdrop-filter: blur(15px); border: 1px solid rgba(0, 242, 255, 0.2); padding: 25px; border-radius: 2px; }
-        #left-p { top: 40px; left: 40px; border-left: 5px solid var(--neon); }
-        #right-p { top: 40px; right: 40px; border-right: 5px solid var(--neon); text-align: right; }
+        /* HUD & UI Panels */
+        #hud { position: absolute; inset: 0; z-index: 10; pointer-events: none; padding: 30px; display: none; }
+        .panel { position: absolute; background: rgba(0, 12, 24, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(0, 242, 255, 0.2); padding: 20px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        #panel-l { top: 30px; left: 30px; border-left: 4px solid var(--neon); }
+        #panel-r { top: 30px; right: 30px; border-right: 4px solid var(--neon); text-align: right; }
         
-        .label { font-size: 0.6rem; letter-spacing: 3px; opacity: 0.5; margin-bottom: 8px; text-transform: uppercase; }
-        .value { font-size: 1.5rem; font-weight: bold; font-family: 'Space Mono', monospace; text-shadow: 0 0 15px var(--neon); }
+        .label { font-size: 0.6rem; letter-spacing: 3px; opacity: 0.5; margin-bottom: 5px; }
+        .value { font-size: 1.4rem; font-weight: bold; font-family: 'Space Mono', monospace; text-shadow: 0 0 10px var(--neon); }
 
-        /* Kamera */
-        #cam-box { position: absolute; bottom: 40px; right: 40px; width: 220px; height: 160px; border: 1px solid var(--neon); border-radius: 5px; overflow: hidden; opacity: 0.6; }
-        #video-feed { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); filter: saturate(0) contrast(1.2); }
+        /* Camera Feed with Scanline Effect */
+        #cam-container { position: absolute; bottom: 30px; right: 30px; width: 220px; height: 160px; border: 1px solid var(--neon); border-radius: 4px; overflow: hidden; opacity: 0.6; z-index: 50; }
+        #video-feed { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); filter: contrast(1.2) brightness(1.1) saturate(0); }
+        #cam-container::after { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: var(--neon); box-shadow: 0 0 10px var(--neon); animation: scan 3s linear infinite; }
+        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
 
-        /* Pradinis ekranas */
-        #init-screen { position: fixed; inset: 0; background: var(--bg); z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
-        #init-screen h1 { letter-spacing: 15px; font-size: 1.8rem; text-transform: uppercase; transition: 0.5s; }
+        /* Splash Screen */
+        #init-screen { position: fixed; inset: 0; background: var(--bg); z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; text-align: center; }
+        #init-screen h1 { letter-spacing: 15px; font-size: 2rem; transition: 0.4s; }
         #init-screen:hover h1 { color: #fff; text-shadow: 0 0 30px var(--neon); }
-        #log { font-family: 'Space Mono', monospace; font-size: 0.7rem; margin-top: 30px; opacity: 0.5; max-width: 400px; text-align: center; }
+        #status-msg { font-family: 'Space Mono', monospace; font-size: 0.75rem; margin-top: 25px; color: var(--neon); opacity: 0.6; }
 
-        /* IA Padėjėjo tekstas */
-        #ai-text { position: absolute; bottom: 40px; left: 40px; width: 350px; font-family: 'Space Mono', monospace; font-size: 0.85rem; line-height: 1.6; text-transform: none; color: #fff; border-bottom: 1px solid var(--neon); padding-bottom: 10px; }
+        /* IA Messaging */
+        #ai-log { position: absolute; bottom: 30px; left: 30px; width: 320px; font-family: 'Space Mono', monospace; font-size: 0.85rem; border-bottom: 1px solid var(--neon); padding-bottom: 10px; text-transform: none; line-height: 1.5; }
     </style>
 </head>
 <body>
 
-<div id="init-screen" onclick="launchNeuroLink()">
-    <h1>INITIALIZE NEURO-BODY</h1>
-    <div id="log">SYSTEM: STANDBY<br>CLICK TO CALIBRATE BIOMETRIC SENSORS</div>
+<div id="init-screen" onclick="startNeuroBody()">
+    <h1 id="title-txt">INITIALIZE NEURO-BODY</h1>
+    <div id="status-msg">SYSTEM STATUS: READY | CLICK TO BIND NEURAL LINK</div>
 </div>
 
 <div id="hud">
-    <div id="left-p" class="panel">
-        <div class="label">Neural State</div>
-        <div id="emo-display" class="value">SYNCING...</div>
-        <br><br>
-        <div class="label">Estimated Pulse</div>
-        <div id="pulse-display" class="value">000 BPM</div>
+    <div id="panel-l" class="panel">
+        <div class="label">NEURAL SIGNATURE</div>
+        <div id="emo-out" class="value">ANALYZING...</div>
+        <br>
+        <div class="label">BIOMETRIC PULSE</div>
+        <div id="pulse-out" class="value">000 BPM</div>
     </div>
 
-    <div id="right-p" class="panel">
-        <div class="label">Aura Frequency</div>
-        <div id="freq-display" class="value">STABLE</div>
-        <br><br>
-        <div class="label">Neuro Drift</div>
-        <div id="drift-display" class="value">ACTIVE</div>
+    <div id="panel-r" class="panel">
+        <div class="label">AURA STABILITY</div>
+        <div id="stab-out" class="value">98.4%</div>
+        <br>
+        <div class="label">DRIFT PHASE</div>
+        <div id="phase-out" class="value">SYNCHRONIZING</div>
     </div>
 
-    <div id="ai-text">> IA: Initializing neural interface. Please look directly into the scanner.</div>
+    <div id="ai-log">> IA: Initializing biometric sensors. Please look into the scanner.</div>
 
-    <div id="cam-box">
+    <div id="cam-container">
         <video id="video-feed" autoplay muted playsinline></video>
     </div>
 </div>
 
-
 <script>
     let scene, camera, renderer, aura, stars, clock = new THREE.Clock();
-    let isLive = false;
-    let lastEmotion = "";
+    let systemActive = false;
+    let lastEmo = "";
 
-    // 1. IA VOICE ENGINE
-    function speakIA(text) {
-        window.speechSynthesis.cancel(); // Sustabdome senas žinutes
+    // 1. IA VOICE SYNTHESIS (English)
+    function speak(text) {
+        window.speechSynthesis.cancel();
         const msg = new SpeechSynthesisUtterance(text);
         msg.lang = 'en-US';
-        msg.pitch = 0.75;
-        msg.rate = 0.95;
+        msg.pitch = 0.8;
+        msg.rate = 0.9;
         window.speechSynthesis.speak(msg);
-        document.getElementById('ai-text').innerHTML = "> IA: " + text;
+        document.getElementById('ai-log').innerHTML = "> IA: " + text;
     }
 
-    // 2. SYSTEM LAUNCHER
-    async function launchNeuroLink() {
-        const log = document.getElementById('log');
+    // 2. CORE SYSTEM INITIALIZER
+    async function startNeuroBody() {
+        const msg = document.getElementById('status-msg');
+        const title = document.getElementById('title-txt');
+        
         try {
-            log.innerHTML = "DOWNLOADING NEURAL WEIGHTS...";
-            // Naudojame specifinį modelių šaltinį, kad išvengtume blokavimo
-            const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
+            msg.innerText = "DOWNLOADING NEURAL MODELS...";
+            title.innerText = "CALIBRATING...";
             
-            await Promise.all([
-                faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-                faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL)
-            ]);
+            const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
+            await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+            await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
 
-            log.innerHTML = "ACTIVATING CAMERA SENSORS...";
-            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+            msg.innerText = "LINKING BIOMETRIC FEED...";
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
             document.getElementById('video-feed').srcObject = stream;
 
-            // UI perėjimas
-            document.getElementById('init-screen').style.display = 'none';
-            document.getElementById('hud').style.display = 'block';
+            // Transition to HUD
+            document.getElementById('init-screen').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('init-screen').remove();
+                document.getElementById('hud').style.display = 'block';
+                init3D();
+                systemActive = true;
+                speak("Neural link established. Your bio-signature is now driving the aura drift.");
+                runAI();
+            }, 600);
             
-            init3DScene();
-            isLive = true;
-            speakIA("Neural link established. Welcome back. I am monitoring your drift.");
-            runAIAnalysis();
-
         } catch (e) {
-            log.style.color = "#ff3300";
-            log.innerHTML = "CRITICAL ERROR: ACCESS BLOCKED<br>ENABLE CAMERA AND DISABLE AD-BLOCKERS";
+            msg.style.color = "red";
+            msg.innerText = "ACCESS DENIED: PLEASE ENABLE CAMERA AND DISABLE TRACKING PROTECTION.";
             console.error(e);
         }
     }
 
-    // 3. 3D AURA DRIFT CORE
-    function init3DScene() {
+    // 3. 3D AURA ENGINE
+    function init3D() {
         scene = new THREE.Scene();
         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // Aura Body
-        const geo = new THREE.IcosahedronGeometry(2, 30);
+        // Aura Mesh
+        const geo = new THREE.IcosahedronGeometry(2, 25);
         const mat = new THREE.MeshPhongMaterial({
-            color: 0x00f2ff, wireframe: true, emissive: 0x00f2ff, emissiveIntensity: 0.6, transparent: true, opacity: 0.8
+            color: 0x00f2ff, wireframe: true, emissive: 0x00f2ff, emissiveIntensity: 0.5, transparent: true, opacity: 0.8
         });
         aura = new THREE.Mesh(geo, mat);
         scene.add(aura);
 
-        // Orbiting Stars
-        const starGeo = new THREE.BufferGeometry();
-        const starPos = [];
-        for(let i=0; i<15000; i++) starPos.push((Math.random()-0.5)*30, (Math.random()-0.5)*30, (Math.random()-0.5)*30);
-        starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPos, 3));
-        stars = new THREE.Points(starGeo, new THREE.PointsMaterial({color: 0xffffff, size: 0.015}));
+        // Space Particles
+        const sGeo = new THREE.BufferGeometry();
+        const sPos = [];
+        for(let i=0; i<12000; i++) sPos.push((Math.random()-0.5)*40, (Math.random()-0.5)*40, (Math.random()-0.5)*40);
+        sGeo.setAttribute('position', new THREE.Float32BufferAttribute(sPos, 3));
+        stars = new THREE.Points(sGeo, new THREE.PointsMaterial({color: 0xffffff, size: 0.012}));
         scene.add(stars);
 
-        const light = new THREE.PointLight(0x00f2ff, 2, 100);
-        light.position.set(10, 10, 10);
-        scene.add(light);
-        camera.position.z = 6;
-
-        renderLoop();
+        scene.add(new THREE.PointLight(0x00f2ff, 2, 60));
+        camera.position.z = 7;
+        animate();
     }
 
-    function renderLoop() {
-        requestAnimationFrame(renderLoop);
-        const t = clock.getElapsedTime();
+    function animate() {
+        requestAnimationFrame(animate);
+        if(!systemActive) return;
 
-        aura.rotation.y += 0.004;
-        aura.rotation.z += 0.002;
+        const time = clock.getElapsedTime();
+        aura.rotation.y += 0.005;
+        aura.rotation.z += 0.003;
         
-        // Aura "kvėpavimas"
-        const s = 1 + Math.sin(t * 1.5) * 0.05;
+        // Aura pulse animation
+        const s = 1 + Math.sin(time * 2) * 0.05;
         aura.scale.set(s, s, s);
         
-        stars.rotation.y -= 0.0003;
+        stars.rotation.y -= 0.0002;
         renderer.render(scene, camera);
     }
 
-    // 4. NEURAL PROCESSING LOOP
-    async function runAIAnalysis() {
+    // 4. NEURAL EMOTION ENGINE
+    async function runAI() {
         const video = document.getElementById('video-feed');
         setInterval(async () => {
-            if(!isLive) return;
-            
+            if(!systemActive) return;
             const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceExpressions();
             
             if (detections && detections.length > 0) {
                 const expressions = detections[0].expressions;
-                const topEmotion = Object.keys(expressions).reduce((a, b) => expressions[a] > expressions[b] ? a : b);
-                const intensity = expressions[topEmotion];
+                const top = Object.keys(expressions).reduce((a, b) => expressions[a] > expressions[b] ? a : b);
+                const score = expressions[top];
 
-                // Atnaujiname HUD
-                document.getElementById('emo-display').innerText = topEmotion.toUpperCase();
-                document.getElementById('pulse-display').innerText = Math.floor(65 + (intensity * 40)) + " BPM";
-                
-                // Vizualinė reakcija (Color Shift)
-                const colors = { happy: 0x00ffcc, angry: 0xff3300, sad: 0x0044ff, neutral: 0x00f2ff };
-                aura.material.color.setHex(colors[topEmotion] || 0x00f2ff);
-                aura.material.emissive.setHex(colors[topEmotion] || 0x00f2ff);
+                // HUD Update
+                document.getElementById('emo-out').innerText = top.toUpperCase();
+                document.getElementById('pulse-out').innerText = Math.floor(68 + (score * 38)) + " BPM";
 
-                // IA Reakcija balsu
-                if (topEmotion !== lastEmotion && intensity > 0.8) {
-                    lastEmotion = topEmotion;
-                    const responses = {
-                        happy: "Dopamine surge confirmed. Aura frequency is optimal.",
-                        angry: "Neural friction detected. Initiating cooling protocols.",
-                        sad: "Lower frequency detected. Shifting to recovery drift.",
-                        neutral: "Neural baseline stable. Flow state maintained."
+                // Aura Color Change
+                const colors = { happy: 0x00ffcc, angry: 0xff4400, sad: 0x0055ff, neutral: 0x00f2ff };
+                aura.material.color.setHex(colors[top] || 0x00f2ff);
+                aura.material.emissive.setHex(colors[top] || 0x00f2ff);
+
+                // IA Assistant Logic
+                if (top !== lastEmo && score > 0.8) {
+                    lastEmo = top;
+                    const iaMsgs = {
+                        happy: "Joyous vibration detected. Aura luminosity at maximum.",
+                        angry: "Warning: High neural friction. Stabilizing drifts.",
+                        sad: "Lower frequency detected. Shifting to harmonic recovery.",
+                        neutral: "Neural balance confirmed. Deep space harmony maintained."
                     };
-                    speakIA(responses[topEmotion] || "Emotion shift detected.");
+                    speak(iaMsgs[top] || "Analyzing new neural pattern.");
                 }
             }
-        }, 250);
+        }, 300);
     }
 
     window.addEventListener('resize', () => {
