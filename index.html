@@ -2,164 +2,220 @@
 <html lang="lt">
 <head>
     <meta charset="UTF-8">
-    <title>EMOPULSE PRO - NEURAL COMPASS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMOPULSE PRO - NEURAL INTERFACE V3</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
     <style>
-        :root { --cyan: #3abff8; --bg: #010307; --glow: 0 0 25px rgba(58, 191, 248, 0.7); }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: var(--bg); color: white; font-family: 'Segoe UI', monospace; height: 100vh; overflow: hidden; }
-
-        .terminal { display: flex; flex-direction: column; height: 100vh; padding: 20px; gap: 20px; background: radial-gradient(circle at center, #0a101f 0%, #000 100%); }
-
-        /* GRID */
-        .layout { display: grid; grid-template-columns: 1.4fr 0.6fr; grid-template-rows: 1fr 180px; gap: 20px; flex: 1; min-height: 0; }
-        .panel { background: rgba(0, 5, 15, 0.8); border: 1px solid rgba(58, 191, 248, 0.3); border-radius: 20px; position: relative; overflow: hidden; box-shadow: inset 0 0 30px rgba(58, 191, 248, 0.1); }
-
-        /* 3D COMPASS AREA */
-        .area-vis { grid-column: 1; grid-row: 1; display: flex; align-items: center; justify-content: center; }
-        #canvas3d { width: 100%; height: 100%; filter: drop-shadow(0 0 15px var(--cyan)); }
-
-        /* CAMERA & DRIFT AURA */
-        .area-cam { grid-column: 2; grid-row: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-        .cam-container { position: relative; width: 220px; height: 220px; margin-bottom: 20px; }
-        .video-ring { width: 100%; height: 100%; border-radius: 50%; border: 2px solid var(--cyan); overflow: hidden; position: relative; z-index: 5; box-shadow: var(--glow); }
-        #cam { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
-        
-        /* GYVA DRIFT AURA APLINK KAMERĄ */
-        .drift-aura { 
-            position: absolute; top: -30px; left: -30px; right: -30px; bottom: -30px;
-            border-radius: 50%; background: radial-gradient(circle, rgba(58, 191, 248, 0.3) 0%, transparent 70%);
-            z-index: 1; transition: 0.5s; filter: blur(10px);
+        :root { 
+            --cyan: #3abff8; 
+            --bg: #01050a; 
+            --glass: rgba(10, 20, 40, 0.7);
+            --glow: 0 0 25px rgba(58, 191, 248, 0.5);
         }
 
-        /* STATS */
-        footer { grid-column: 1 / span 2; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-        .stat-card { background: rgba(58, 191, 248, 0.05); border-top: 2px solid var(--cyan); padding: 20px; text-align: center; }
-        .stat-val { font-size: 2rem; font-weight: bold; color: var(--cyan); text-shadow: var(--glow); }
-        .stat-label { font-size: 0.8rem; opacity: 0.6; text-transform: uppercase; margin-bottom: 5px; }
+        body { 
+            background: var(--bg); 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            margin: 0; 
+            overflow: hidden; 
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
 
-        button { width: 100%; padding: 15px; background: rgba(58, 191, 248, 0.1); border: 1px solid var(--cyan); color: var(--cyan); cursor: pointer; text-transform: uppercase; transition: 0.3s; }
-        button:hover { background: var(--cyan); color: black; box-shadow: var(--glow); }
+        /* Pagrindinis tinklelis */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1.5fr 0.5fr;
+            grid-template-rows: 1fr 200px;
+            gap: 20px;
+            padding: 20px;
+            flex: 1;
+            z-index: 10;
+        }
+
+        .panel {
+            background: var(--glass);
+            border: 1px solid rgba(58, 191, 248, 0.2);
+            border-radius: 24px;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 30px rgba(58, 191, 248, 0.05);
+        }
+
+        /* Centrinis 3D Kompasas */
+        .main-viewer { grid-column: 1; grid-row: 1; display: flex; align-items: center; justify-content: center; }
+        #canvas-container { width: 100%; height: 100%; cursor: crosshair; }
+
+        /* Kamera ir Aura */
+        .side-panel { grid-column: 2; grid-row: 1; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .camera-wrap {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin-bottom: 30px;
+        }
+        #video-feed {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--cyan);
+            box-shadow: var(--glow);
+            z-index: 5;
+            position: relative;
+        }
+        .aura-field {
+            position: absolute;
+            inset: -20px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(58, 191, 248, 0.3) 0%, transparent 70%);
+            animation: drift 4s infinite ease-in-out;
+            z-index: 1;
+        }
+
+        /* Statistiniai duomenys */
+        .bottom-bar { grid-column: 1 / span 2; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        .stat-box { padding: 20px; border-top: 1px solid var(--cyan); }
+        .label { font-size: 0.75rem; color: var(--cyan); text-transform: uppercase; letter-spacing: 2px; }
+        .value { font-size: 2rem; font-weight: 800; margin-top: 5px; text-shadow: var(--glow); }
+
+        @keyframes drift {
+            0%, 100% { transform: scale(1) translate(0,0); opacity: 0.4; }
+            50% { transform: scale(1.2) translate(5px, -5px); opacity: 0.7; }
+        }
+
+        /* Overlay tekstas */
+        .hud-text {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-family: monospace;
+            color: var(--cyan);
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
 
-    <div class="terminal">
-        <header style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 1px solid rgba(58, 191, 248, 0.2);">
-            <div style="font-weight: bold; letter-spacing: 3px;">NEURAL_NAVIGATOR <span style="color:var(--cyan)">V3.0</span></div>
-            <div id="clock" style="font-family: monospace; font-size: 1.2rem;">00:00:00</div>
-        </header>
+    <div class="hud-text">NEURAL_CORE_V3.1 // STATUS: ACTIVE</div>
 
-        <main class="layout">
-            <section class="panel area-vis">
-                <div id="visual-container" style="width:100%; height:100%;"></div>
-            </section>
+    <div class="dashboard">
+        <section class="panel main-viewer">
+            <div id="canvas-container"></div>
+        </section>
 
-            <section class="panel area-cam">
-                <div class="cam-container">
-                    <div class="drift-aura" id="aura"></div>
-                    <div class="video-ring">
-                        <video id="cam" autoplay muted playsinline></video>
-                    </div>
-                </div>
-                <div style="width: 100%; text-align: center;">
-                    <div style="font-size: 0.7rem; color: #64748b; margin-bottom: 10px;">NEURAL DRIFT INTERFACE</div>
-                    <button onclick="syncNeuralField()">SYNC NEURAL FIELD</button>
-                </div>
-            </section>
+        <section class="panel side-panel">
+            <div class="camera-wrap">
+                <div class="aura-field" id="aura"></div>
+                <video id="video-feed" autoplay muted playsinline></video>
+            </div>
+            <div style="width: 100%;">
+                <div class="label">Current Emotion</div>
+                <div id="emotion-label" class="value" style="color: #3abff8;">CALM</div>
+                <div id="emotion-score" style="font-size: 0.9rem; opacity: 0.6;">Scanning Field...</div>
+            </div>
+        </section>
 
-            <footer>
-                <div class="stat-card"><div class="stat-label">Resonance</div><div class="stat-val" id="res-val">CALM</div></div>
-                <div class="stat-card"><div class="stat-label">Frequency</div><div class="stat-val" id="freq-val">432 Hz</div></div>
-                <div class="stat-card"><div class="stat-label">Stress Index</div><div class="stat-val" id="stress-val">0.12</div></div>
-                <div class="stat-card"><div class="stat-label">Stability</div><div class="stat-val" id="stab-val">98%</div></div>
-            </footer>
-        </main>
+        <footer class="bottom-bar">
+            <div class="panel stat-box">
+                <div class="label">Emotional Stability</div>
+                <div class="value" id="stab-val">112°</div>
+            </div>
+            <div class="panel stat-box">
+                <div class="label">Stress Risk</div>
+                <div class="value" id="stress-val">0.21</div>
+            </div>
+            <div class="panel stat-box">
+                <div class="label">Resonance</div>
+                <div class="value" id="res-val">Focus</div>
+            </div>
+            <div class="panel stat-box">
+                <div class="label">Neural Energy</div>
+                <div class="value" id="energy-val">0.66</div>
+            </div>
+        </footer>
     </div>
 
     <script>
-        // --- 1. KAMERA IR AUDIO ---
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        navigator.mediaDevices.getUserMedia({ video: true }).then(s => document.getElementById('cam').srcObject = s);
-        
-        function updateClock() { document.getElementById('clock').textContent = new Date().toLocaleTimeString('lt-LT'); }
-        setInterval(updateClock, 1000);
-
-        // --- 2. EMOCIJŲ REAKCIJA (SIMULIACIJA) ---
-        let currentStress = 0.12;
-        function syncNeuralField() {
-            audioCtx.resume();
-            setInterval(() => {
-                currentStress = Math.random();
-                const aura = document.getElementById('aura');
-                const stressVal = document.getElementById('stress-val');
-                
-                stressVal.textContent = currentStress.toFixed(2);
-                document.getElementById('freq-val').textContent = (400 + currentStress * 100).toFixed(0) + " Hz";
-                
-                // Reakcija: Aura keičia spalvą ir dydį
-                if(currentStress > 0.6) {
-                    aura.style.background = "radial-gradient(circle, rgba(255, 50, 50, 0.5) 0%, transparent 70%)";
-                    aura.style.transform = "scale(1.3)";
-                    document.getElementById('res-val').textContent = "HIGH";
-                } else {
-                    aura.style.background = "radial-gradient(circle, rgba(58, 191, 248, 0.4) 0%, transparent 70%)";
-                    aura.style.transform = "scale(1)";
-                    document.getElementById('res-val').textContent = "CALM";
-                }
-            }, 3000);
-        }
-
-        // --- 3. 3D KOSMINIS KOMPASAS (Three.js) ---
-        const container = document.getElementById('visual-container');
+        // --- 1. THREE.JS KOSMINIS KOMPASAS ---
+        const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(container.clientWidth, container.clientHeight);
         container.appendChild(renderer.domElement);
 
-        // Kompasas susideda iš kelių žiedų
-        const compassGroup = new THREE.Group();
-        scene.add(compassGroup);
+        // Sukuriame kinetinį kompasą
+        const group = new THREE.Group();
+        scene.add(group);
 
-        const createRing = (radius, detail, opacity) => {
-            const geo = new THREE.IcosahedronGeometry(radius, detail);
-            const mat = new THREE.MeshBasicMaterial({ color: 0x3abff8, wireframe: true, transparent: true, opacity: opacity });
+        const createRing = (r, detail, color) => {
+            const geo = new THREE.IcosahedronGeometry(r, detail);
+            const mat = new THREE.MeshBasicMaterial({ color: color, wireframe: true, transparent: true, opacity: 0.3 });
             return new THREE.Mesh(geo, mat);
         };
 
-        const outerRing = createRing(2.5, 1, 0.2);
-        const innerRing = createRing(1.8, 1, 0.4);
-        const core = new THREE.Mesh(new THREE.OctahedronGeometry(0.5, 0), new THREE.MeshBasicMaterial({ color: 0x3abff8 }));
+        const outer = createRing(2.5, 1, 0x3abff8);
+        const inner = createRing(1.8, 1, 0xffffff);
+        const core = new THREE.Mesh(new THREE.SphereGeometry(0.5, 32, 32), new THREE.MeshBasicMaterial({ color: 0x3abff8 }));
         
-        compassGroup.add(outerRing);
-        compassGroup.add(innerRing);
-        compassGroup.add(core);
-
+        group.add(outer, inner, core);
         camera.position.z = 6;
 
+        // --- 2. EMOCIJŲ SKAITYMAS (SIMULIUOJAMAS RYŠYS) ---
+        function updateUI(emotion, score) {
+            const label = document.getElementById('emotion-label');
+            const aura = document.getElementById('aura');
+            const stress = document.getElementById('stress-val');
+            
+            label.textContent = emotion.toUpperCase();
+            
+            if (emotion === 'angry' || emotion === 'stressed') {
+                label.style.color = "#ff4d4d";
+                aura.style.background = "radial-gradient(circle, rgba(255, 77, 77, 0.4) 0%, transparent 70%)";
+                stress.textContent = "0.89";
+                group.rotation.y += 0.2; // Kompasas sukasi greičiau
+            } else {
+                label.style.color = "#3abff8";
+                aura.style.background = "radial-gradient(circle, rgba(58, 191, 248, 0.3) 0%, transparent 70%)";
+                stress.textContent = "0.21";
+            }
+        }
+
+        // --- 3. KAMEROS ĮJUNGIMAS ---
+        async function setupCamera() {
+            const video = document.getElementById('video-feed');
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            video.srcObject = stream;
+        }
+
+        // --- 4. ANIMACIJOS CIKLAS ---
         function animate() {
             requestAnimationFrame(animate);
+            outer.rotation.y += 0.005;
+            inner.rotation.x -= 0.01;
             
-            // Kompasas sukasi pagal "emocijas"
-            const speed = 0.005 + (currentStress * 0.05);
-            outerRing.rotation.y += speed;
-            innerRing.rotation.x -= speed * 1.5;
-            core.rotation.z += speed * 2;
-            
-            // "Kvėpavimas"
-            const scale = 1 + (Math.sin(Date.now() * 0.002) * 0.1) + (currentStress * 0.2);
-            compassGroup.scale.set(scale, scale, scale);
+            // "Kvėpavimo" efektas
+            const s = 1 + Math.sin(Date.now() * 0.002) * 0.1;
+            core.scale.set(s, s, s);
             
             renderer.render(scene, camera);
         }
+
+        setupCamera();
         animate();
 
-        window.addEventListener('resize', () => {
-            camera.aspect = container.clientWidth / container.clientHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(container.clientWidth, container.clientHeight);
-        });
+        // Dirbtinis emocijų ciklas (pakeisti į tikrus face-api duomenis)
+        setInterval(() => {
+            const emos = ['calm', 'focused', 'joy', 'stressed'];
+            const rand = emos[Math.floor(Math.random() * emos.length)];
+            updateUI(rand, Math.random().toFixed(2));
+        }, 4000);
+
     </script>
 </body>
 </html>
