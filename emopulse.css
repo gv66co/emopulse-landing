@@ -1,27 +1,30 @@
-.cam-container {
+/* Fiksuojame kameros konteinerį, kad jis neviršytų panelės ribų */
+.camera-panel .cam-container {
     position: relative;
     width: 100%;
-    aspect-ratio: 16/9;
+    max-width: 480px; /* Galite koreguoti pagal poreikį */
+    aspect-ratio: 16 / 9;
+    background: #000;
     border: 1px solid var(--cyan);
-    border-radius: 10px;
+    border-radius: 12px;
     overflow: hidden;
 }
 
+/* Vaizdo įrašas turi užpildyti tik savo rėmelį */
 #cam {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: cover; /* Tai užtikrina, kad vaizdas neišsitemptų */
+    display: block;
 }
 
+/* SVARBIAUSIA: Tinklelis turi būti tiksliai ant kameros vaizdo */
 #face-mesh-canvas {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    pointer-events: none; /* Kad netrukdytų paspaudimams */
+    pointer-events: none; /* Leidžia spausti elementus po drobė */
+    z-index: 10;
 }
-
-/* Neural Drift bar animacija */
-.progress-bar { width: 100%; height: 4px; background: rgba(0, 242, 255, 0.1); margin-top: 10px; }
-.fill { width: 84%; height: 100%; background: var(--cyan); box-shadow: 0 0 10px var(--cyan); }
