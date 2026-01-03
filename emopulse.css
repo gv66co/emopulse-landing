@@ -1,169 +1,191 @@
-/* =========================================
-   EMOPULSE PRO – CORE DESIGN SYSTEM
-   ========================================= */
-
 :root {
-    /* Spalvų paletė */
-    --bg-dark: #020408;
-    --bg-gradient: radial-gradient(circle at 15% 15%, #0a1a3a 0%, #020408 100%);
+    --bg-dark: #020617;
+    --card-bg: rgba(15, 23, 42, 0.6);
     --accent-blue: #3abff8;
     --accent-purple: #7b5cff;
-    --accent-gold: #fbbf24;
     --text-main: #f8fafc;
     --text-muted: #94a3b8;
-    
-    /* Panelės ir stiklo efektai */
-    --panel-bg: rgba(15, 23, 42, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.08);
-    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+    --border: rgba(255, 255, 255, 0.1);
 }
 
 * {
     box-sizing: border-box;
-    -webkit-font-smoothing: antialiased;
+    margin: 0;
+    padding: 0;
 }
 
 body {
-    margin: 0;
-    padding: 0;
-    background: var(--bg-gradient);
+    background-color: var(--bg-dark);
     color: var(--text-main);
-    font-family: 'Inter', -apple-system, sans-serif;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+    height: 100vh;
 }
 
-/* Pagrindinis Konteineris */
+/* Pagrindinis konteineris, kuris užpildo ekraną */
 .app-container {
-    display: grid;
-    grid-template-columns: 1.2fr 0.8fr;
-    grid-template-rows: auto auto;
-    gap: 25px;
+    display: flex;
+    flex-direction: column;
     max-width: 1400px;
-    width: 95%;
+    margin: 0 auto;
+    height: 100vh;
     padding: 20px;
+    gap: 20px;
 }
 
-/* =========================================
-   KOMPONENTŲ STILIUS
-   ========================================= */
-
-.emo-panel {
-    background: var(--panel-bg);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--glass-border);
-    border-radius: 24px;
-    padding: 30px;
-    box-shadow: var(--glass-shadow);
-    transition: transform 0.3s ease, border-color 0.3s ease;
+/* Navigacija viršuje */
+.top-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 20px;
 }
 
-.emo-panel:hover {
-    border-color: rgba(58, 191, 248, 0.3);
+/* Pagrindinis Grid išdėstymas (Kairė: 3D/Kamera, Dešinė: Tekstai) */
+.main-layout {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr; /* 60% ir 40% */
+    gap: 20px;
+    flex: 1; /* Užpildo likusią vietą tarp nav ir footer */
+    min-height: 0; /* Neleidžia gridui išsipūsti */
 }
 
-/* Kameros ir Scenos Skiltis */
-.stage-3d {
+/* Kairė pusė */
+.visual-engine {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
     position: relative;
-    width: 100%;
-    aspect-ratio: 16 / 10;
-    background: #000;
-    border-radius: 20px;
+}
+
+.stage-3d {
+    background: radial-gradient(circle, rgba(58, 191, 248, 0.1) 0%, transparent 70%);
+    border-radius: 24px;
+    flex: 1;
+    position: relative;
+    border: 1px solid var(--border);
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+#compass3d {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Maža kamera kairėje apačioje (kaip nuotraukoje) */
+.drift-panel {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 15px;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    backdrop-filter: blur(10px);
+}
+
+.video-wrap {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    overflow: hidden;
+    position: relative;
+    border: 2px solid var(--accent-blue);
 }
 
 #cam {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transform: scaleX(-1); /* Veidrodinis vaizdas natūralumui */
+    transform: scaleX(-1);
 }
 
-/* Tekstų hierarchija */
-.hero-title {
-    font-size: 2.8rem;
+#overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+}
+
+.sensor-stats {
+    flex: 1;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+/* Dešinė pusė */
+.data-engine {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    justify-content: center;
+}
+
+.hero-text h1 {
+    font-size: 2.5rem;
     font-weight: 800;
-    margin: 0 0 10px 0;
-    letter-spacing: -1.5px;
-    background: linear-gradient(to right, #fff, var(--accent-blue));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    line-height: 1.1;
+    margin-bottom: 15px;
 }
 
-.signature-text {
-    font-size: 1.25rem;
-    line-height: 1.6;
-    color: var(--text-main);
-    font-weight: 300;
-    margin-bottom: 20px;
-    border-left: 3px solid var(--accent-purple);
-    padding-left: 20px;
+.insight-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    padding: 25px;
+    border-radius: 20px;
+    position: relative;
 }
 
-/* Metrikų kortelės (Apačioje) */
-.bottom-metrics {
-    grid-column: 1 / span 2;
+.big-score {
+    font-size: 5rem;
+    font-weight: 800;
+    color: var(--accent-blue);
+    line-height: 1;
+}
+
+/* Apačia: Metrikų Grid (3 stulpeliai) */
+.metrics-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
+    gap: 15px;
+    height: 180px;
 }
 
-.metric-box {
-    text-align: left;
+.m-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
 }
 
-.metric-box h4 {
+.m-header {
     font-size: 0.75rem;
     color: var(--text-muted);
     text-transform: uppercase;
-    letter-spacing: 2px;
-    margin: 0 0 15px 0;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
 }
 
-.metric-value {
-    font-size: 2.2rem;
-    font-weight: 700;
+canvas {
+    width: 100% !important;
+    height: 60px !important;
+}
+
+.m-val {
     color: var(--accent-blue);
-    font-variant-numeric: tabular-nums;
+    font-weight: bold;
+    font-size: 1.2rem;
 }
 
-/* Statuso indikatoriai ir Tags */
-.tag-container {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-.tag {
-    font-size: 0.7rem;
-    padding: 4px 12px;
-    border-radius: 100px;
-    background: rgba(123, 92, 255, 0.15);
-    color: var(--accent-purple);
-    border: 1px solid rgba(123, 92, 255, 0.3);
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-/* Canvas grafikai */
-canvas.mini-chart {
-    width: 100%;
-    height: 60px;
-    margin-top: 15px;
-    opacity: 0.8;
-}
-
-/* Responsyvumas */
-@media (max-width: 1024px) {
-    .app-container {
-        grid-template-columns: 1fr;
-    }
-    .bottom-metrics {
-        grid-column: 1;
-        grid-template-columns: 1fr;
-    }
+/* Pašaliname tuščią vietą mobiliems */
+@media (max-width: 1000px) {
+    .main-layout { grid-template-columns: 1fr; }
+    .app-container { height: auto; }
+    .metrics-grid { grid-template-columns: 1fr; height: auto; }
 }
