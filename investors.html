@@ -1,79 +1,124 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Emopulse — Investors</title>
+import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js";
 
-    <link rel="stylesheet" href="emopulse.css" />
+let scene, camera, renderer, controls, group;
+let slides = [];
+let currentIndex = 0;
+let isPaused = false;
+
+// Skaidrių sąrašas - įsitikink, kad šie failai yra aplanke /slides/
+const slideImages = [
+    'slides/slide1.jpg',
+    'slides/slide2.jpg',
+    'slides/slide3.jpg',
+    'slides/slide4.jpg',
+    'slides/team.jpg' // Arvid Pak skaidrė
+];
+
+const slideLabels = [
+    "Problem & Vision",
+    "Solution Technology",
+    "Market Analysis",
+    "Business Model",
+    "Founder: Arvid Pak"
+];
+
+function init() {
+    const canvas = document.getElementById('deck3d');
+    if (!canvas) return;
+
+    // --- SCENE ---
+    scene = new THREE.Scene();
     
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📈</text></svg>">
-</head>
+    camera = new THREE.PerspectiveCamera(45, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
+    camera.position.set(0, 0, 10);
 
-<body class="bg">
-    <header class="topbar">
-        <div class="brand">
-            <div class="mark">E</div>
-            <div class="brandText">
-                <div class="brandName">Emopulse</div>
-            </div>
-        </div>
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-        <div class="hero">
-            <div class="heroTitle">Pitch Deck</div>
-            <div class="heroSub">Interactive 3D Experience</div>
-        </div>
+    // --- CONTROLS ---
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 0.5;
 
-        <nav class="nav">
-            <a class="navLink" href="index.html">Live Model</a>
-            <a class="navLink navLinkActive" href="investors.html">Investors</a>
-        </nav>
-    </header>
+    // --- GROUP FOR CAROUSEL ---
+    group = new THREE.Group();
+    scene.add(group);
 
-    <main class="containerGrid">
-        <section class="panel panelWide">
-            <div class="panelTitle">Pitch Presentation</div>
+    // --- LOAD SLIDES ---
+    const loader = new THREE.TextureLoader();
+    const radius = 5;
 
-            <div class="carouselWrap">
-                <canvas id="deck3d" class="deck3d"></canvas>
+    slideImages.forEach((url, i) => {
+        loader.load(url, (texture) => {
+            const geometry = new THREE.PlaneGeometry(4, 2.5);
+            const material = new THREE.MeshBasicMaterial({ 
+                map: texture, 
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: 0.9 
+            });
+            const mesh = new THREE.Mesh(geometry, material);
 
-                <div class="carouselHud">
-                    <button id="prev" class="btn btnGhost">Prev</button>
-                    <button id="next" class="btn btnGhost">Next</button>
-                    <button id="pause" class="btn btnGhost">Pause</button>
-                </div>
+            const angle = (i / slideImages.length) * Math.PI * 2;
+            mesh.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
+            mesh.lookAt(0, 0, 0);
+            
+            group.add(mesh);
+            slides.push(mesh);
 
-                <div class="carouselMeta">
-                    <div id="slideLabel" class="carouselLabel">Loading slides...</div>
-                    <div class="carouselHint">Hover to pause • Drag to rotate • Wheel to zoom</div>
-                </div>
-            </div>
+            if (i === 0) updateLabel(0);
+        });
+    });
 
-            <div class="row mt12">
-                <a class="btn btnPrimary" href="index.html">Try Live Demo</a>
-                <a class="btn btnGhost" href="EMOPULSE.APP.pdf" download>Download PDF</a>
-            </div>
-        </section>
+    // --- LIGHTS ---
+    scene.add(new THREE.AmbientLight(0xffffff, 1));
 
-        <aside class="panel">
-            <div class="panelTitle">Project Rules</div>
-            <div class="bullets">
-                <div class="bullet">Source: <code>/slides/</code> directory</div>
-                <div class="bullet">Founder: Arvid Pak (Single Image)</div>
-                <div class="bullet">Technology: Three.js WebGL Engine</div>
-            </div>
-        </aside>
-    </main>
+    // --- EVENTS ---
+    document.getElementById('next')?.addEventListener('click', () => navigate(1));
+    document.getElementById('prev')?.addEventListener('click', () => navigate(-1));
+    document.getElementById('pause')?.addEventListener('click', togglePause);
 
-    <footer class="footer footerCompact">
-        <div>© 2026 Emopulse. All rights reserved.</div>
-    </footer>
+    window.addEventListener('resize', onWindowResize);
+    animate();
+}
 
-    <script type="module">
-        import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
-        // Priskiriame globaliam kintamajam, kad investors.js jį matytų, jei nėra modulis
-        window.THREE = THREE; 
-    </script>
-    <script type="module" src="investors.js"></script>
-</body>
-</html>
+function navigate(dir) {
+    currentIndex = (currentIndex + dir + slideImages.length) % slideImages.length;
+    const targetRotation = -(currentIndex / slideImages.length) * Math.PI * 2;
+    
+    // Paprastas sukimasis link pasirinktos skaidrės
+    group.rotation.y = targetRotation;
+    updateLabel(currentIndex);
+}
+
+function updateLabel(index) {
+    const labelEl = document.getElementById('slideLabel');
+    if (labelEl) labelEl.textContent = slideLabels[index] || `Slide ${index + 1}`;
+}
+
+function togglePause() {
+    isPaused = !isPaused;
+    controls.autoRotate = !isPaused;
+    const btn = document.getElementById('pause');
+    if (btn) btn.textContent = isPaused ? "Play" : "Pause";
+}
+
+function onWindowResize() {
+    const canvas = document.getElementById('deck3d');
+    camera.aspect = canvas.clientWidth / canvas.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    controls.update();
+    renderer.render(scene, camera);
+}
+
+// Paleidžiame kai Three.js jau yra užkrautas per HTML
+window.addEventListener('load', () => {
+    if (window.THREE) init();
+});
