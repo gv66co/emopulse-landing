@@ -3,60 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEURO-PULSE V2.0</title>
+    <title>EMOPULSE - NEURO-LINK PRO</title>
     <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Space+Mono&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
     <style>
         :root { --neon: #00f2ff; --bg: #00020a; }
         body, html { margin: 0; padding: 0; background: var(--bg); color: var(--neon); font-family: 'Syncopate', sans-serif; overflow: hidden; height: 100%; }
+        
+        /* Pradinis ekranas */
         #init-screen { position: fixed; inset: 0; background: var(--bg); z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; text-align: center; }
-        #init-screen h1 { letter-spacing: 12px; font-size: 1.8rem; margin-bottom: 20px; transition: 0.5s; }
-        #init-screen:hover h1 { color: #fff; text-shadow: 0 0 30px var(--neon); }
-        #status-log { font-family: 'Space Mono', monospace; font-size: 0.7rem; opacity: 0.6; line-height: 1.6; }
+        #init-screen h1 { letter-spacing: 15px; font-size: 1.8rem; margin-bottom: 20px; text-transform: uppercase; }
+        #status-log { font-family: 'Space Mono', monospace; font-size: 0.7rem; opacity: 0.6; }
+
+        /* HUD Sluoksnis */
         #hud { position: absolute; inset: 0; z-index: 10; pointer-events: none; display: none; padding: 30px; }
-        .panel { position: absolute; background: rgba(0, 10, 20, 0.75); backdrop-filter: blur(15px); border: 1px solid rgba(0, 242, 255, 0.2); padding: 20px; border-radius: 4px; }
-        #panel-l { top: 30px; left: 30px; border-left: 4px solid var(--neon); }
+        .panel { position: absolute; background: rgba(0, 10, 20, 0.8); backdrop-filter: blur(15px); border: 1px solid rgba(0, 242, 255, 0.2); padding: 20px; }
+        #panel-l { top: 30px; left: 30px; border-left: 4px solid var(--neon); width: 250px; }
         #panel-r { top: 30px; right: 30px; border-right: 4px solid var(--neon); text-align: right; }
-        .label { font-size: 0.6rem; letter-spacing: 2px; opacity: 0.5; margin-bottom: 5px; }
-        .value { font-size: 1.3rem; font-weight: bold; font-family: 'Space Mono', monospace; text-shadow: 0 0 10px var(--neon); }
-        #video-box { position: absolute; bottom: 30px; right: 30px; width: 200px; height: 150px; border: 1px solid var(--neon); border-radius: 8px; overflow: hidden; opacity: 0.5; }
-        #video-feed { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); filter: saturate(0) contrast(1.2); }
-        #ai-comms { position: absolute; bottom: 30px; left: 30px; width: 320px; font-family: 'Space Mono', monospace; font-size: 0.8rem; border-bottom: 1px solid var(--neon); padding-bottom: 10px; }
+        
+        .label { font-size: 0.55rem; letter-spacing: 2px; opacity: 0.5; margin-bottom: 5px; text-transform: uppercase; }
+        .value { font-size: 1.3rem; font-weight: bold; font-family: 'Space Mono', monospace; text-shadow: 0 0 10px var(--neon); margin-bottom: 15px; }
+
+        /* Video ir Neurolink Tinklas */
+        #video-container { position: absolute; bottom: 30px; right: 30px; width: 220px; height: 165px; border: 1px solid var(--neon); border-radius: 4px; overflow: hidden; opacity: 0.8; }
+        #video-feed { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); filter: contrast(1.2) saturate(0); }
+        #face-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: scaleX(-1); }
+
+        /* IA Pranešimai */
+        #ai-comms { position: absolute; bottom: 30px; left: 30px; width: 350px; font-family: 'Space Mono', monospace; font-size: 0.8rem; border-bottom: 1px solid var(--neon); padding-bottom: 10px; line-height: 1.4; text-transform: none; }
     </style>
 </head>
 <body>
 
-<div id="init-screen" onclick="startSystem()">
-    <h1 id="btn-text">INITIALIZE NEURO-BODY</h1>
-    <div id="status-log">SYSTEM STATUS: IDLE<br>CLICK TO BIND NEURAL LINK</div>
+<div id="init-screen" onclick="launchSystem()">
+    <h1>INITIALIZE NEURO-LINK</h1>
+    <div id="status-log">SYSTEM STATUS: STANDBY<br>CLICK TO BIND BIOMETRIC INTERFACE</div>
 </div>
 
 <div id="hud">
     <div id="panel-l" class="panel">
-        <div class="label">NEURAL SIGNATURE</div>
-        <div id="emo-val" class="value">CONNECTING...</div>
-        <br>
-        <div class="label">BIOMETRIC PULSE</div>
-        <div id="pulse-val" class="value">-- BPM</div>
+        <div class="label">Neural State</div>
+        <div id="emo-val" class="value">SYNCING...</div>
+        <div id="scales-container"></div>
     </div>
+
     <div id="panel-r" class="panel">
-        <div class="label">STABILITY</div>
-        <div id="stab-val" class="value">99.1%</div>
-        <br>
-        <div class="label">DRIFT PHASE</div>
-        <div id="drift-val" class="value">ACTIVE</div>
+        <div class="label">Biometric Pulse</div>
+        <div id="pulse-val" class="value">-- BPM</div>
+        <div class="label">System Drift</div>
+        <div id="drift-val" class="value">IDLE</div>
     </div>
-    <div id="ai-comms">> IA: Awaiting neural link establishment...</div>
-    <div id="video-box"><video id="video-feed" autoplay muted playsinline></video></div>
+
+    <div id="ai-comms">> IA: Awaiting neural link...</div>
+
+    <div id="video-container">
+        <video id="video-feed" autoplay muted playsinline></video>
+        <canvas id="face-canvas"></canvas>
+    </div>
 </div>
 
 <script>
     let scene, camera, renderer, aura, stars;
     let systemActive = false;
-    let lastEmotion = "";
+    let analysisData = [];
+    const ANALYSIS_LIMIT = 200; // Analizės trukmė (~20 sek)
 
-    // 1. Ištaisyta 3D Scenos inicializacija
+    // 1. ŠVELNUS MOTERIŠKAS BALSAS
+    function speak(text) {
+        const synth = window.speechSynthesis;
+        const utter = new SpeechSynthesisUtterance(text);
+        const voices = synth.getVoices();
+        
+        // Ieškome geriausio moteriško balso
+        const softVoice = voices.find(v => v.name.includes('Female') || v.name.includes('Google UK English Female') || v.name.includes('Zira'));
+        if (softVoice) utter.voice = softVoice;
+
+        utter.pitch = 1.2; // Švelnesnis tonas
+        utter.rate = 0.85; // Ramus tempas
+        synth.speak(utter);
+        document.getElementById('ai-comms').innerHTML = `<span style="color:#fff">> FINAL ANALYSIS: ${text}</span>`;
+    }
+
+    // 2. 3D VARIKLIS
     function init3D() {
         scene = new THREE.Scene();
         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -65,102 +94,122 @@
         document.body.appendChild(renderer.domElement);
 
         const geo = new THREE.IcosahedronGeometry(2, 20);
-        const mat = new THREE.MeshPhongMaterial({ color: 0x00f2ff, wireframe: true, emissive: 0x00f2ff, emissiveIntensity: 0.5, transparent: true, opacity: 0.7 });
+        const mat = new THREE.MeshPhongMaterial({ color: 0x00f2ff, wireframe: true, transparent: true, opacity: 0.6 });
         aura = new THREE.Mesh(geo, mat);
         scene.add(aura);
 
         const starGeo = new THREE.BufferGeometry();
         const starCoords = [];
-        for(let i=0; i<10000; i++) starCoords.push((Math.random()-0.5)*30, (Math.random()-0.5)*30, (Math.random()-0.5)*30);
+        for(let i=0; i<10000; i++) starCoords.push((Math.random()-0.5)*40, (Math.random()-0.5)*40, (Math.random()-0.5)*40);
         starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starCoords, 3));
         stars = new THREE.Points(starGeo, new THREE.PointsMaterial({color: 0xffffff, size: 0.015}));
         scene.add(stars);
 
-        scene.add(new THREE.PointLight(0x00f2ff, 2, 100));
+        scene.add(new THREE.PointLight(0x00f2ff, 2, 50));
         camera.position.z = 6;
         animate();
     }
 
     function animate() {
         requestAnimationFrame(animate);
-        if(!systemActive || !aura) return; // Saugiklis
+        if(!systemActive) return;
         aura.rotation.y += 0.005;
-        aura.rotation.x += 0.002;
-        stars.rotation.y -= 0.0003;
+        stars.rotation.y -= 0.0002;
         renderer.render(scene, camera);
     }
 
-    // 2. IA Balsas
-    function speak(text) {
-        const synth = window.speechSynthesis;
-        const utter = new SpeechSynthesisUtterance(text);
-        utter.lang = 'en-US';
-        utter.pitch = 0.8;
-        utter.rate = 0.95;
-        synth.speak(utter);
-        document.getElementById('ai-comms').innerHTML = "> IA: " + text;
+    // 3. NEUROLINK TINKLO PIEŠIMAS
+    function drawNeurolink(landmarks) {
+        const canvas = document.getElementById('face-canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.strokeStyle = 'rgba(0, 242, 255, 0.4)';
+        ctx.fillStyle = '#00f2ff';
+        ctx.lineWidth = 0.5;
+
+        const points = landmarks.positions;
+        ctx.beginPath();
+        points.forEach((p, i) => {
+            const x = p.x * (canvas.width / 640);
+            const y = p.y * (canvas.height / 480);
+            ctx.fillRect(x-1, y-1, 2, 2);
+            if(i % 5 === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
     }
 
-    // 3. Sistemos paleidimas
-    async function startSystem() {
-        const log = document.getElementById('status-log');
-        const btn = document.getElementById('btn-text');
-        
-        try {
-            log.innerHTML = "DOWNLOADING NEURAL MODELS...";
-            btn.innerText = "CALIBRATING...";
-            
-            const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
-            await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
-            await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
+    // 4. ANALIZĖS LOGIKA
+    function processAnalysis(topEmotion) {
+        analysisData.push(topEmotion);
+        const progress = Math.round((analysisData.length / ANALYSIS_LIMIT) * 100);
+        document.getElementById('drift-val').innerText = `SCANNING: ${progress}%`;
 
-            log.innerText = "LINKING BIOMETRIC FEED...";
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            document.getElementById('video-feed').srcObject = stream;
+        if (analysisData.length >= ANALYSIS_LIMIT) {
+            const counts = {};
+            analysisData.forEach(e => counts[e] = (counts[e] || 0) + 1);
+            const dominant = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
 
-            document.getElementById('init-screen').style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('init-screen').remove();
-                document.getElementById('hud').style.display = 'block';
-                init3D();
-                systemActive = true;
-                speak("Neural link established. Your bio-signature is now active.");
-                runAI();
-            }, 600);
-            
-        } catch (err) {
-            log.style.color = "red";
-            log.innerText = "ACCESS DENIED. PLEASE ENABLE CAMERA.";
-            console.error(err);
+            const reports = {
+                happy: "Neural resonance is high. You are in a sustained state of harmony.",
+                neutral: "Bio-signature is balanced. Equilibrium maintained.",
+                sad: "Low frequency shift detected. Recalibrate through deep breathing.",
+                angry: "Neural friction identified. Stability protocols recommended."
+            };
+
+            speak(reports[dominant] || `Analysis complete. Dominant state: ${dominant}.`);
+            analysisData = [];
         }
     }
 
-    // 4. Analizės ciklas
-    async function runAI() {
-        const video = document.getElementById('video-feed');
-        setInterval(async () => {
-            if(!systemActive) return;
-            const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceExpressions();
+    // 5. PAGRINDINIS CIKLAS
+    async function launchSystem() {
+        const log = document.getElementById('status-log');
+        try {
+            log.innerText = "LOADING NEURAL MODELS...";
+            const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
+            await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+            await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
+            await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            document.getElementById('video-feed').srcObject = stream;
+
+            document.getElementById('init-screen').style.display = 'none';
+            document.getElementById('hud').style.display = 'block';
             
-            if (detections.length > 0) {
-                const expressions = detections[0].expressions;
-                const top = Object.keys(expressions).reduce((a, b) => expressions[a] > expressions[b] ? a : b);
-                const score = expressions[top];
+            init3D();
+            systemActive = true;
+            
+            setInterval(async () => {
+                const video = document.getElementById('video-feed');
+                const result = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions();
+                
+                if (result) {
+                    drawNeurolink(result.landmarks);
+                    const top = Object.keys(result.expressions).reduce((a, b) => result.expressions[a] > result.expressions[b] ? a : b);
+                    document.getElementById('emo-val').innerText = top.toUpperCase();
+                    document.getElementById('pulse-val').innerText = Math.floor(65 + (result.expressions[top] * 30)) + " BPM";
+                    
+                    // Skalės HUD kairėje
+                    let scalesHtml = "";
+                    ['happy', 'neutral', 'sad', 'angry'].forEach(e => {
+                        const v = Math.round(result.expressions[e] * 100);
+                        scalesHtml += `<div class="label">${e}</div><div style="width:100%; height:2px; background:rgba(0,242,255,0.1); margin-bottom:10px;"><div style="width:${v}%; height:100%; background:var(--neon);"></div></div>`;
+                    });
+                    document.getElementById('scales-container').innerHTML = scalesHtml;
 
-                document.getElementById('emo-val').innerText = top.toUpperCase();
-                document.getElementById('pulse-val').innerText = Math.floor(65 + (score * 35)) + " BPM";
-
-                if (top !== lastEmotion && score > 0.8) {
-                    lastEmotion = top;
-                    speak(`Detected ${top} drift. Adjusting aura frequency.`);
+                    processAnalysis(top);
                 }
-            }
-        }, 200);
+            }, 150);
+
+        } catch (e) {
+            log.innerText = "ERROR: CAMERA ACCESS DENIED";
+        }
     }
 
-    // Ištaisyta resize funkcija (saugo nuo 'undefined aspect' klaidos)
     window.addEventListener('resize', () => {
-        if (camera && renderer) {
+        if(camera && renderer) {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
