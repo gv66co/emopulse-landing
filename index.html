@@ -2,235 +2,156 @@
 <html lang="lt">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EMOPULSE PRO - NEURAL NAVIGATOR V3</title>
-    
+    <title>EMOPULSE V3 - SOLID CORE</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;400;800&display=swap');
-
-        body, html {
-            margin: 0; padding: 0;
-            width: 100%; height: 100%;
-            background: #000105; /* Gili juoda */
-            font-family: 'Inter', sans-serif;
-            overflow: hidden;
-            color: white;
-        }
-
-        /* 3D Kanva fone */
-        #canvas-container {
+        body { margin: 0; background: #020508; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
+        
+        /* UI sluoksnis */
+        #interface {
             position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: 1;
-        }
-
-        /* Pagrindinis UI sluoksnis */
-        #ui-layer {
-            position: relative;
-            z-index: 10;
-            display: grid;
-            grid-template-columns: 1fr 380px;
-            height: 100vh;
-            padding: 50px;
-            box-sizing: border-box;
-            pointer-events: none; /* Leidžia sukti 3D modelį pelyte per viršų */
-        }
-
-        /* Kairė pusė */
-        .left-content {
+            inset: 0;
+            z-index: 100;
             display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
+            justify-content: space-between;
+            padding: 60px;
+            pointer-events: none;
+            background: radial-gradient(circle at center, transparent 20%, rgba(0,0,0,0.8) 100%);
         }
 
-        .system-tag {
-            font-size: 12px;
-            letter-spacing: 6px;
-            color: #3a8dff;
-            font-weight: 800;
-            opacity: 0.8;
-        }
-
-        /* Dešinė panelė (Glassmorphism) */
-        .right-panel {
+        .data-panel {
             pointer-events: auto;
-            background: rgba(2, 10, 25, 0.4);
-            backdrop-filter: blur(25px);
-            border: 1px solid rgba(58, 141, 255, 0.1);
-            border-radius: 40px;
+            background: rgba(10, 15, 25, 0.7);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
             padding: 40px;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            width: 320px;
+            box-shadow: -20px 0 50px rgba(0,0,0,0.5);
         }
 
-        /* Kameros vaizdas auroje */
-        .camera-aura {
-            width: 260px; height: 260px;
-            border-radius: 50%;
-            border: 1px solid rgba(58, 141, 255, 0.5);
-            margin: 0 auto 30px;
-            position: relative;
+        .cam-frame {
+            width: 100%; aspect-ratio: 1;
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.05);
+            background: #000;
             overflow: hidden;
-            box-shadow: 0 0 40px rgba(58, 141, 255, 0.2);
+            position: relative;
         }
 
-        #webcam {
-            width: 100%; height: 100%;
-            object-fit: cover;
-            filter: grayscale(0.2) contrast(1.1);
-        }
+        #video { width: 100%; height: 100%; object-fit: cover; opacity: 0.7; filter: contrast(1.2) grayscale(0.5); }
 
-        /* Tekstai */
-        .resonance-title {
-            font-size: 10px;
-            letter-spacing: 3px;
-            opacity: 0.5;
-            text-transform: uppercase;
+        .stat-label { font-size: 10px; color: #666; letter-spacing: 2px; margin-top: 30px; }
+        .stat-value { font-size: 32px; color: #fff; font-weight: 200; margin-bottom: 20px; }
+        
+        .status-tag { 
+            display: inline-block; padding: 4px 12px; border: 1px solid #3a8dff; 
+            color: #3a8dff; font-size: 10px; border-radius: 20px;
         }
-
-        .resonance-value {
-            font-size: 36px;
-            font-weight: 200;
-            margin: 10px 0;
-        }
-
-        .hashtags {
-            color: #ff9f1c;
-            font-size: 14px;
-            font-weight: 400;
-        }
-
-        .metrics-grid {
-            margin-top: auto;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        .metric-box h4 {
-            margin: 0; font-size: 10px; opacity: 0.4;
-        }
-
-        .metric-box p {
-            margin: 5px 0 0; font-size: 24px; font-weight: 800;
-        }
-
     </style>
 </head>
 <body>
 
     <div id="canvas-container"></div>
 
-    <div id="ui-layer">
-        <div class="left-content">
-            <div class="system-tag">SYSTEM_ACTIVE // V3.NAV</div>
+    <div id="interface">
+        <div style="color: rgba(255,255,255,0.2); font-size: 11px; letter-spacing: 10px;">
+            NEURAL NAVIGATOR <br> <span style="font-weight: 800; color: #fff;">SOLID STATE V3</span>
         </div>
 
-        <div class="right-panel">
-            <div class="camera-aura">
-                <video id="webcam" autoplay muted playsinline></video>
+        <div class="data-panel">
+            <div class="cam-frame">
+                <video id="video" autoplay muted playsinline></video>
+                <div style="position: absolute; top: 10px; left: 10px; color: red; font-size: 8px;">● LIVE</div>
             </div>
 
-            <div class="resonance-title">Real-time Resonance</div>
-            <div class="resonance-value">Calm Focused</div>
-            <div class="hashtags">#deep_resonance #tranquility</div>
+            <div class="stat-label">RESONANCE STATE</div>
+            <div class="stat-value">Deep Calm</div>
+            <div class="status-tag">STABLE DRIFT</div>
 
-            <div class="metrics-grid">
-                <div class="metric-box">
-                    <h4>STRESS RISK</h4>
-                    <p style="color: #ff3b3b;">0.39</p>
+            <div style="margin-top: 50px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <span style="font-size: 10px; color: #444;">ENGINE LOAD</span>
+                    <span style="font-size: 10px; color: #fff;">14.2%</span>
                 </div>
-                <div class="metric-box">
-                    <h4>NEURAL ENERGY</h4>
-                    <p style="color: #3a8dff;">0.89</p>
+                <div style="width: 100%; height: 2px; background: rgba(255,255,255,0.05);">
+                    <div style="width: 14%; height: 100%; background: #3a8dff;"></div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        let scene, camera, renderer, composer, coreGroup, stars;
+        let scene, camera, renderer, composer, core, particles;
 
-        function init3D() {
-            // 1. Scenos nustatymai
+        function init() {
             scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.z = 10;
+            camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 15;
 
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-            // 2. Centrinis objektas (Core)
-            coreGroup = new THREE.Group();
-            scene.add(coreGroup);
+            // 1. SOLID CORE - Mechaninis "Wow"
+            const group = new THREE.Group();
+            scene.add(group);
 
-            // Branduolio tinklelis
-            const coreGeo = new THREE.IcosahedronGeometry(2, 2);
-            const coreMat = new THREE.MeshBasicMaterial({ 
-                color: 0x3a8dff, 
-                wireframe: true, 
-                transparent: true, 
-                opacity: 0.4 
+            // Pagrindinė sferinė ašis
+            const coreGeo = new THREE.SphereGeometry(1.5, 32, 32);
+            const coreMat = new THREE.MeshPhongMaterial({
+                color: 0x111111,
+                shininess: 100,
+                specular: 0x3a8dff,
+                transparent: true,
+                opacity: 0.9
             });
-            const coreMesh = new THREE.Mesh(coreGeo, coreMat);
-            coreGroup.add(coreMesh);
+            core = new THREE.Mesh(coreGeo, coreMat);
+            group.add(core);
 
-            // Orbitos
-            const colors = [0x3a8dff, 0x7b5cff, 0x00f2ff];
-            for(let i=0; i<3; i++) {
-                const ringGeo = new THREE.TorusGeometry(3.2 + i*0.5, 0.015, 16, 100);
-                const ringMat = new THREE.MeshBasicMaterial({ 
-                    color: colors[i], 
-                    transparent: true, 
-                    opacity: 0.6 
+            // Išoriniai preciziniai žiedai
+            for(let i=0; i<4; i++) {
+                const ringGeo = new THREE.TorusGeometry(3 + i*0.4, 0.02, 16, 100);
+                const ringMat = new THREE.MeshStandardMaterial({ 
+                    color: i === 0 ? 0x3a8dff : 0x222222,
+                    metalness: 1,
+                    roughness: 0.2
                 });
                 const ring = new THREE.Mesh(ringGeo, ringMat);
                 ring.rotation.x = Math.random() * Math.PI;
                 ring.rotation.y = Math.random() * Math.PI;
-                coreGroup.add(ring);
+                group.add(ring);
             }
 
-            // 3. Žvaigždės / Dalelės (Stars)
-            const starGeo = new THREE.BufferGeometry();
-            const starCount = 3000;
-            const posArray = new Float32Array(starCount * 3);
-            for(let i=0; i<starCount*3; i++) {
-                posArray[i] = (Math.random() - 0.5) * 20;
-            }
-            starGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-            const starMat = new THREE.PointsMaterial({ 
-                size: 0.03, 
-                color: 0xffffff,
-                transparent: true,
-                opacity: 0.7,
-                blending: THREE.AdditiveBlending 
-            });
-            stars = new THREE.Points(starGeo, starMat);
-            scene.add(stars);
+            // 2. EMOTIONAL DUST (Dalelės fone)
+            const pGeo = new THREE.BufferGeometry();
+            const pCount = 5000;
+            const pos = new Float32Array(pCount * 3);
+            for(let i=0; i<pCount*3; i++) pos[i] = (Math.random() - 0.5) * 30;
+            pGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+            const pMat = new THREE.PointsMaterial({ size: 0.015, color: 0x3a8dff, transparent: true, opacity: 0.3 });
+            particles = new THREE.Points(pGeo, pMat);
+            scene.add(particles);
 
-            // 4. Post-processing (Aukštos kokybės Glow)
-            const renderScene = new THREE.RenderPass(scene, camera);
-            const bloomPass = new THREE.UnrealBloomPass(
-                new THREE.Vector2(window.innerWidth, window.innerHeight), 
-                2.0, // Strength
-                0.4, // Radius
-                0.1  // Threshold
-            );
+            // 3. ŠVIESOS (Gyliui sukurti)
+            const light1 = new THREE.PointLight(0x3a8dff, 2, 20);
+            light1.position.set(5, 5, 5);
+            scene.add(light1);
 
+            const light2 = new THREE.PointLight(0xffffff, 0.5, 20);
+            light2.position.set(-5, -5, 2);
+            scene.add(light2);
+
+            // 4. POST PROCESSING (Solidiam švytėjimui)
+            const renderPass = new THREE.RenderPass(scene, camera);
+            const bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.0, 0.5, 0.8);
+            
             composer = new THREE.EffectComposer(renderer);
-            composer.addPass(renderScene);
+            composer.addPass(renderPass);
             composer.addPass(bloomPass);
 
             animate();
@@ -238,33 +159,22 @@
 
         function animate() {
             requestAnimationFrame(animate);
-            const time = Date.now() * 0.0008;
+            const time = Date.now() * 0.0005;
 
-            // DRIFT EFEKTAS: lėtas, sklandus plaukiojimas
-            coreGroup.position.y = Math.sin(time * 0.5) * 0.3;
-            coreGroup.position.x = Math.cos(time * 0.3) * 0.2;
-            coreGroup.rotation.y += 0.002;
-            coreGroup.rotation.z += 0.001;
-
-            // Fono žvaigždžių judėjimas
-            stars.rotation.y -= 0.0003;
-            stars.position.y = Math.sin(time * 0.2) * 0.1;
+            // DRIFT: Lėtas, solidus judėjimas
+            scene.children[0].rotation.y += 0.001;
+            scene.children[0].position.y = Math.sin(time) * 0.2;
+            
+            particles.rotation.y -= 0.0002;
 
             composer.render();
         }
 
-        // Kameros pajungimas
-        async function setupCamera() {
-            const video = document.getElementById('webcam');
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                video.srcObject = stream;
-            } catch (err) {
-                console.error("Kamera nepasiekiama", err);
-            }
-        }
+        // Kamera
+        navigator.mediaDevices.getUserMedia({ video: true }).then(s => {
+            document.getElementById('video').srcObject = s;
+        });
 
-        // Reakcija į lango dydžio keitimą
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
@@ -272,10 +182,7 @@
             composer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        // Startas
-        init3D();
-        setupCamera();
-
+        init();
     </script>
 </body>
 </html>
