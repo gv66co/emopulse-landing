@@ -3,7 +3,8 @@
         <div class="logo">EMOPULSE <span>PRO</span></div>
         <div class="nav">
             <a href="#" class="active">Live Terminal</a>
-            <span id="live-clock">00:00:00</span> </div>
+            <span id="live-clock">00:00:00</span>
+        </div>
     </header>
 
     <main class="pro-grid">
@@ -18,7 +19,7 @@
             <h1>Decode Your Emotional Resonance</h1>
             <div class="input-group">
                 <textarea id="userInput" placeholder="Kaip jautiesi?"></textarea>
-                <button onclick="analyzeField()">ANALYZE FIELD</button>
+                <button id="analyzeBtn">ANALYZE FIELD</button>
             </div>
             <div class="ai-box">
                 <div class="label">AI SUMMARY</div>
@@ -26,7 +27,7 @@
             </div>
         </section>
 
-        <section class="panel camera-box">
+        <section class="panel mini-panel camera-box">
             <div class="cam-frame">
                 <video id="cam" autoplay muted playsinline></video>
             </div>
@@ -36,17 +37,15 @@
             </div>
         </section>
 
-        <section class="panel risk-box">
+        <section class="panel mini-panel risk-box">
             <div class="label">STRESS RISK</div>
-            <div class="chart-container">
-                <canvas id="stressChart"></canvas>
-            </div>
+            <canvas id="stressChart"></canvas>
         </section>
     </main>
 
     <footer class="pro-footer">
         <div class="stat-card"><span>Mood Map</span><div class="val" id="mood-val">Positive</div></div>
-        <div class="stat-card"><span>Timeline</span><div class="val" id="time-val">12:05</div></div>
+        <div class="stat-card"><span>Timeline</span><div class="val" id="time-val">Steady</div></div>
         <div class="stat-card"><span>Score</span><div class="val" id="score-val">76</div></div>
         <div class="stat-card"><span>Energy</span><div class="val" id="energy-val">0.66</div></div>
     </footer>
