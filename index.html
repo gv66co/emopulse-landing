@@ -12,52 +12,46 @@
         body, html { margin: 0; padding: 0; background: var(--bg); color: var(--neon); font-family: 'Syncopate', sans-serif; overflow: hidden; height: 100%; }
         
         #init-screen { position: fixed; inset: 0; background: var(--bg); z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; text-align: center; }
-        #init-screen h1 { letter-spacing: 15px; font-size: 1.5rem; transition: 0.5s; }
-        #init-screen:hover h1 { color: #fff; text-shadow: 0 0 20px var(--neon); }
+        #init-screen h1 { letter-spacing: 12px; font-size: 1.4rem; transition: 0.5s; }
 
         #hud { position: absolute; inset: 0; z-index: 10; pointer-events: none; display: none; padding: 30px; }
-        .panel { position: absolute; background: rgba(0, 8, 15, 0.92); backdrop-filter: blur(20px); border: 1px solid rgba(0, 242, 255, 0.1); padding: 20px; box-shadow: 0 0 40px rgba(0,0,0,0.8); }
-        #panel-l { top: 30px; left: 30px; border-left: 2px solid var(--neon); width: 250px; }
+        .panel { position: absolute; background: rgba(0, 8, 15, 0.9); backdrop-filter: blur(20px); border: 1px solid rgba(0, 242, 255, 0.1); padding: 20px; }
+        #panel-l { top: 30px; left: 30px; border-left: 2px solid var(--neon); width: 240px; }
         #panel-r { top: 30px; right: 30px; border-right: 2px solid var(--neon); text-align: right; }
         
         .label { font-size: 0.5rem; letter-spacing: 2px; opacity: 0.4; margin-bottom: 5px; text-transform: uppercase; }
         .value { font-size: 1.1rem; font-family: 'Space Mono', monospace; text-shadow: 0 0 8px var(--neon); margin-bottom: 15px; }
 
         #video-container { position: absolute; bottom: 30px; right: 30px; width: 240px; height: 180px; border: 1px solid rgba(0, 242, 255, 0.3); overflow: hidden; opacity: 0.85; pointer-events: auto; }
-        #video-feed { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); filter: grayscale(1) brightness(0.8); }
+        #video-feed { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); filter: grayscale(1); }
         #face-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: scaleX(-1); }
 
-        #mute-btn { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.5); border: 1px solid var(--neon); color: var(--neon); font-family: 'Space Mono'; font-size: 0.55rem; padding: 4px 8px; cursor: pointer; z-index: 100; transition: 0.3s; }
-        #mute-btn.active { background: #ff4400; border-color: #ff4400; color: #fff; }
-
-        #ai-comms { position: absolute; bottom: 30px; left: 30px; width: 380px; font-family: 'Space Mono', monospace; font-size: 0.85rem; border-left: 1px solid var(--neon); padding-left: 20px; text-transform: none; line-height: 1.7; color: #d0f0f5; }
+        #mute-btn { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); border: 1px solid var(--neon); color: var(--neon); font-family: 'Space Mono'; font-size: 0.5rem; padding: 5px; cursor: pointer; z-index: 100; }
+        #ai-comms { position: absolute; bottom: 30px; left: 30px; width: 350px; font-family: 'Space Mono', monospace; font-size: 0.8rem; border-left: 1px solid var(--neon); padding-left: 20px; line-height: 1.6; color: #d0f0f5; }
     </style>
 </head>
 <body>
 
-<div id="init-screen" onclick="launchNeuroSystem()">
-    <h1>CONNECT SOUL-LINK</h1>
-    <div style="font-family:'Space Mono'; opacity:0.3; margin-top:15px; font-size: 0.7rem;">[ ESTABLISHING EMPATHETIC NEURAL INTERFACE ]</div>
+<div id="init-screen" onclick="launch()">
+    <h1 id="status-text">INITIALIZE SOUL-LINK</h1>
+    <p style="font-family:'Space Mono'; font-size:0.6rem; opacity:0.4;">[ CLICK TO ACTIVATE NEURAL INTERFACE ]</p>
 </div>
 
 <div id="hud">
     <div id="panel-l" class="panel">
-        <div class="label">Dominant Emotion</div>
-        <div id="emo-val" class="value">CONNECTING</div>
+        <div class="label">Current State</div>
+        <div id="emo-val" class="value">SYNCING</div>
         <div id="scales-ui"></div>
     </div>
-
     <div id="panel-r" class="panel">
-        <div class="label">Pulse Estimate</div>
+        <div class="label">Pulse Est.</div>
         <div id="pulse-val" class="value">-- BPM</div>
-        <div class="label">Deep Scan Progress</div>
+        <div class="label">Analysis Progress</div>
         <div id="drift-val" class="value">0%</div>
     </div>
-
-    <div id="ai-comms">> Asistentas: Tyliai stebiu jūsų bio-lauką. Prašau atsipalaiduoti, kol vyksta analizė.</div>
-
+    <div id="ai-comms">> Asistentas: Monitoring. Please remain calm.</div>
     <div id="video-container">
-        <button id="mute-btn" onclick="toggleMute()">MUTE</button>
+        <button id="mute-btn" onclick="isMuted = !isMuted; this.innerText = isMuted ? 'MUTED' : 'MUTE'">MUTE</button>
         <video id="video-feed" autoplay muted playsinline></video>
         <canvas id="face-canvas"></canvas>
     </div>
@@ -65,69 +59,37 @@
 
 <script>
     let scene, camera, renderer, aura, stars;
-    let systemActive = false;
-    let isMuted = false;
+    let systemActive = false, isMuted = false;
     let analysisData = [];
-    const ANALYSIS_GOAL = 220; 
+    const GOAL = 200;
 
-    function toggleMute() {
-        isMuted = !isMuted;
-        const btn = document.getElementById('mute-btn');
-        btn.innerText = isMuted ? "MUTED" : "MUTE";
-        btn.classList.toggle('active', isMuted);
-        if (isMuted) window.speechSynthesis.cancel();
-    }
+    async function launch() {
+        const txt = document.getElementById('status-text');
+        try {
+            txt.innerText = "LOADING MODELS...";
+            const URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
+            await Promise.all([
+                faceapi.nets.tinyFaceDetector.loadFromUri(URL),
+                faceapi.nets.faceExpressionNet.loadFromUri(URL),
+                faceapi.nets.faceLandmark68Net.loadFromUri(URL)
+            ]);
 
-    // --- ŠVELNUS ŽMOGIŠKAS BALSAS ---
-    function speak(text) {
-        if (isMuted) return;
-        window.speechSynthesis.cancel();
-        const utter = new SpeechSynthesisUtterance(text);
-        const voices = window.speechSynthesis.getVoices();
-        
-        // Ieškome geriausio prieinamo balso
-        const bestVoice = voices.find(v => v.name.includes('Google UK English Female') || v.name.includes('Samantha') || v.name.includes('Natural'));
-        if (bestVoice) utter.voice = bestVoice;
+            txt.innerText = "ACCESSING CAMERA...";
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            document.getElementById('video-feed').srcObject = stream;
 
-        utter.pitch = 0.95; // Švelnus, šiltas tembras
-        utter.rate = 0.78;  // Ramus, neskubantis tempas
-        utter.volume = 0.7;
-        
-        window.speechSynthesis.speak(utter);
-        document.getElementById('ai-comms').innerHTML = `<span style="color:var(--neon)">> ASISTENTAS:</span> ${text}`;
-    }
-
-    // --- NEUROLINK TINKLO BRAIŽYMAS ---
-    function drawNeuralMesh(landmarks) {
-        const canvas = document.getElementById('face-canvas');
-        const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const points = landmarks.positions;
-        const wS = canvas.width / 640;
-        const hS = canvas.height / 480;
-
-        ctx.strokeStyle = 'rgba(0, 242, 255, 0.12)';
-        ctx.lineWidth = 0.4;
-        ctx.beginPath();
-        // Sujungiame taškus į tinklą
-        for(let i=0; i<points.length; i++) {
-            for(let j=i+1; j<points.length; j++) {
-                let dist = Math.hypot(points[i].x - points[j].x, points[i].y - points[j].y);
-                if(dist < 32) {
-                    ctx.moveTo(points[i].x * wS, points[i].y * hS);
-                    ctx.lineTo(p = points[j].x * wS, points[j].y * hS);
-                }
-            }
+            document.getElementById('init-screen').style.display = 'none';
+            document.getElementById('hud').style.display = 'block';
+            
+            init3D();
+            systemActive = true;
+            loop();
+        } catch (e) {
+            txt.innerText = "ERROR: CHECK CAMERA PERMISSIONS";
+            console.error(e);
         }
-        ctx.stroke();
-
-        ctx.fillStyle = 'rgba(0, 242, 255, 0.8)';
-        points.forEach(p => {
-            ctx.fillRect(p.x * wS - 0.5, p.y * hS - 0.5, 1, 1);
-        });
     }
 
-    // --- 3D KOSMOSAS ---
     function init3D() {
         scene = new THREE.Scene();
         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -135,42 +97,79 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        const geo = new THREE.IcosahedronGeometry(2, 10);
-        aura = new THREE.Mesh(geo, new THREE.MeshPhongMaterial({ color: 0x00f2ff, wireframe: true, transparent: true, opacity: 0.25 }));
+        aura = new THREE.Mesh(
+            new THREE.IcosahedronGeometry(2, 8),
+            new THREE.MeshPhongMaterial({ color: 0x00f2ff, wireframe: true, transparent: true, opacity: 0.3 })
+        );
         scene.add(aura);
-
-        const starGeo = new THREE.BufferGeometry();
-        const starPos = [];
-        for(let i=0; i<7000; i++) starPos.push((Math.random()-0.5)*40, (Math.random()-0.5)*40, (Math.random()-0.5)*40);
-        starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPos, 3));
-        stars = new THREE.Points(starGeo, new THREE.PointsMaterial({color: 0xffffff, size: 0.008}));
-        scene.add(stars);
-
-        scene.add(new THREE.PointLight(0x00f2ff, 1.2, 80));
+        scene.add(new THREE.PointLight(0x00f2ff, 1.5, 100));
         camera.position.z = 7;
-        
-        function update() {
-            requestAnimationFrame(update);
-            if(systemActive) {
-                aura.rotation.y += 0.0015;
-                stars.rotation.y -= 0.0001;
-                renderer.render(scene, camera);
-            }
-        }
-        update();
     }
 
-    // --- TYLI ANALIZĖ IR GALUTINIS BALSAS ---
-    function processAnalysis(topEmotion) {
-        analysisData.push(topEmotion);
-        const progress = Math.round((analysisData.length / ANALYSIS_GOAL) * 100);
-        document.getElementById('drift-val').innerText = `${progress}%`;
+    function speak(text) {
+        if (isMuted) return;
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        const voices = window.speechSynthesis.getVoices();
+        utter.voice = voices.find(v => v.name.includes('Female') || v.name.includes('Google UK English Female')) || voices[0];
+        utter.pitch = 0.9;
+        utter.rate = 0.8;
+        window.speechSynthesis.speak(utter);
+        document.getElementById('ai-comms').innerHTML = `<span style="color:var(--neon)">> ASISTENTAS:</span> ${text}`;
+    }
 
-        if (analysisData.length >= ANALYSIS_GOAL) {
-            const counts = {};
-            analysisData.forEach(e => counts[e] = (counts[e] || 0) + 1);
-            const dominant = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
+    async function loop() {
+        if (!systemActive) return;
+        const video = document.getElementById('video-feed');
+        const res = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions();
 
-            const reports = {
-                happy: "I feel a very gentle and warm energy coming from you. Your soul seems to be in a beautiful place right now. Keep this light.",
-                neutral: "You are very grounded and calm. It's a perfect state for your heart to rest and recover. Your resonance is stable.",
+        if (res) {
+            // Draw Mesh
+            const canvas = document.getElementById('face-canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = 'rgba(0, 242, 255, 0.2)';
+            ctx.beginPath();
+            res.landmarks.positions.forEach((p, i) => {
+                const x = p.x * (canvas.width / 640), y = p.y * (canvas.height / 480);
+                if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+
+            // Logic
+            const top = Object.keys(res.expressions).reduce((a, b) => res.expressions[a] > res.expressions[b] ? a : b);
+            document.getElementById('emo-val').innerText = top.toUpperCase();
+            document.getElementById('pulse-val').innerText = Math.floor(65 + (res.expressions[top] * 20)) + " BPM";
+
+            analysisData.push(top);
+            const prog = Math.round((analysisData.length / GOAL) * 100);
+            document.getElementById('drift-val').innerText = prog + "%";
+
+            if (analysisData.length >= GOAL) {
+                const dominant = analysisData.sort((a,b) => analysisData.filter(v => v===a).length - analysisData.filter(v => v===b).length).pop();
+                const msgs = {
+                    happy: "I feel a very warm and stable energy from you. Your soul is in harmony.",
+                    neutral: "Your presence is calm and grounded. It is a perfect moment for peace.",
+                    sad: "I sense a gentle shadow. Please remember to be kind to yourself.",
+                    angry: "There is tension in your neural field. Release it with a deep breath.",
+                    surprised: "Your mind is vibrant and full of wonder. Your energy is very bright."
+                };
+                speak(msgs[dominant] || "Analysis complete. You are stable.");
+                analysisData = [];
+            }
+        }
+        
+        aura.rotation.y += 0.01;
+        renderer.render(scene, camera);
+        setTimeout(loop, 100);
+    }
+
+    window.onresize = () => {
+        if (!camera) return;
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    };
+</script>
+</body>
+</html>
