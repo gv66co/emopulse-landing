@@ -2,153 +2,172 @@
 <html lang="lt">
 <head>
     <meta charset="UTF-8">
-    <title>EMOPULSE - QUANTUM REACH</title>
+    <title>EMOPULSE - NEURAL CORE LIVE</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@200;500;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Inter:wght@100;300&display=swap" rel="stylesheet">
     <style>
-        body, html { margin: 0; padding: 0; background: #000; overflow: hidden; font-family: 'Inter', sans-serif; }
+        :root {
+            --accent: #00f2ff;
+            --bg: #00050a;
+        }
+        body, html { margin: 0; padding: 0; background: var(--bg); overflow: hidden; font-family: 'Inter', sans-serif; color: white; }
         
-        #overlay {
+        #ui-layer {
             position: absolute; inset: 0; z-index: 100; pointer-events: none;
-            display: flex; flex-direction: column; justify-content: space-between;
-            padding: 50px; background: radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.4) 100%);
+            display: grid; grid-template-columns: 350px 1fr 350px; padding: 40px;
         }
 
-        .hud-top { display: flex; justify-content: space-between; color: #00f2ff; font-family: 'Orbitron'; letter-spacing: 5px; }
-        
-        .side-stats {
-            width: 300px; padding: 30px;
-            background: rgba(0, 20, 40, 0.3); backdrop-filter: blur(15px);
-            border-left: 2px solid #00f2ff; border-radius: 0 20px 20px 0;
-            pointer-events: auto;
+        .panel {
+            background: rgba(0, 8, 20, 0.7); backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 242, 255, 0.2); border-radius: 20px;
+            padding: 25px; pointer-events: auto; transition: all 0.5s ease;
         }
 
-        .cam-ring {
-            width: 180px; height: 180px; border-radius: 50%;
-            border: 2px solid #00f2ff; margin-bottom: 20px;
-            overflow: hidden; box-shadow: 0 0 30px rgba(0, 242, 255, 0.4);
-            position: relative;
-        }
-        #webcam { width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(1.5); }
+        /* Dinaminės būsenos klases */
+        .state-stress { border-color: #ff3e3e !important; box-shadow: 0 0 30px rgba(255, 62, 62, 0.2); }
+        .state-stress .accent-text { color: #ff3e3e !important; }
 
-        .stat-bar { height: 4px; background: rgba(255,255,255,0.1); margin: 10px 0; position: relative; }
-        .stat-fill { position: absolute; height: 100%; background: #00f2ff; box-shadow: 0 0 10px #00f2ff; }
-        
-        .glitch-text { animation: pulse 2s infinite alternate; }
-        @keyframes pulse { from { opacity: 0.5; } to { opacity: 1; } }
+        .cam-box { width: 100%; height: 180px; background: #000; border-radius: 15px; overflow: hidden; border: 1px solid var(--accent); position: relative; }
+        #webcam { width: 100%; height: 100%; object-fit: cover; filter: grayscale(1); opacity: 0.6; }
+
+        .btn-group { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+        button {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            color: white; padding: 12px; border-radius: 10px; cursor: pointer;
+            font-family: 'Orbitron'; font-size: 10px; transition: 0.3s;
+        }
+        button:hover { background: var(--accent); color: black; }
+
+        .stat-val { font-family: 'Orbitron'; font-size: 28px; color: var(--accent); }
+        canvas { position: absolute; top: 0; left: 0; z-index: 1; }
     </style>
 </head>
 <body>
 
-    <div id="overlay">
-        <div class="hud-top">
-            <div>CORE_STATUS: <span style="color: #fff;">SYNCED</span></div>
-            <div>EMOPULSE v5.0.2</div>
+    <div id="ui-layer">
+        <div class="panel" id="left-panel">
+            <div style="font-family: 'Orbitron'; letter-spacing: 5px; margin-bottom: 20px;">EMOPULSE V5</div>
+            <div class="cam-box" id="cam-border">
+                <video id="webcam" autoplay muted playsinline></video>
+            </div>
+            <div style="margin-top: 20px;">
+                <div style="font-size: 10px; opacity: 0.5;">NEURAL DRIFT</div>
+                <div class="stat-val" id="drift-val">+0.842</div>
+            </div>
         </div>
 
-        <div class="side-stats">
-            <div class="cam-ring"><video id="webcam" autoplay muted playsinline></video></div>
-            <div style="color: #00f2ff; font-size: 10px; letter-spacing: 2px;">NEURAL DRIFT</div>
-            <div style="color: #fff; font-size: 32px; font-weight: 100;">+0.842</div>
-            <div class="stat-bar"><div class="stat-fill" style="width: 74%;"></div></div>
-            <div style="color: rgba(255,255,255,0.4); font-size: 12px; margin-top: 20px;">
-                "The mind is not a vessel to be filled, but a fire to be kindled."
+        <div></div> <div class="right-side" style="display: flex; flex-direction: column; gap: 20px;">
+            <div class="panel">
+                <div style="font-size: 10px; opacity: 0.5;">SIMULATE EMOTION</div>
+                <div class="btn-group">
+                    <button onclick="setEmotion('calm')">SET CALM MODE</button>
+                    <button onclick="setEmotion('focus')">SET FOCUS MODE</button>
+                    <button onclick="setEmotion('stress')">SET STRESS ALERT</button>
+                </div>
+            </div>
+            <div class="panel">
+                <div style="font-size: 10px; opacity: 0.5;">SYSTEM LOG</div>
+                <div id="log" style="font-size: 11px; margin-top: 10px; color: #00f2ff;">> Core synchronized...</div>
             </div>
         </div>
     </div>
 
     <script>
-        let scene, camera, renderer, rings = [], stars;
+        let scene, camera, renderer, core, rings = [], starField;
+        let currentConfig = { color: 0x00f2ff, speed: 1, pulse: 1 };
 
         function init() {
             scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 2000);
-            camera.position.z = 12;
+            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 15;
 
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(window.devicePixelRatio);
             document.body.appendChild(renderer.domElement);
 
-            // 1. ŽVAIGŽDŽIŲ LAUKAS (Gylis)
+            // 1. Žvaigždės
             const starGeo = new THREE.BufferGeometry();
             const starPos = [];
-            for(let i=0; i<15000; i++) {
-                starPos.push((Math.random()-0.5)*1000, (Math.random()-0.5)*1000, (Math.random()-0.5)*1000);
-            }
+            for(let i=0; i<5000; i++) starPos.push((Math.random()-0.5)*1000, (Math.random()-0.5)*1000, (Math.random()-0.5)*1000);
             starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPos, 3));
-            stars = new THREE.Points(starGeo, new THREE.PointsMaterial({color: 0xffffff, size: 0.5}));
-            scene.add(stars);
+            starField = new THREE.Points(starGeo, new THREE.PointsMaterial({color: 0xffffff, size: 0.5}));
+            scene.add(starField);
 
-            // 2. KOSMINĖS ORBITOS
-            const createComplexRing = (radius, count, color, speed) => {
-                const geo = new THREE.BufferGeometry();
-                const pos = [];
-                for(let i=0; i<count; i++) {
-                    const angle = (i / count) * Math.PI * 2;
-                    const r = radius + (Math.random() - 0.5) * 0.5;
-                    pos.push(Math.cos(angle)*r, Math.sin(angle)*r, (Math.random()-0.5)*0.2);
-                }
-                geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-                const mat = new THREE.PointsMaterial({color: color, size: 0.02, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending});
-                const points = new THREE.Points(geo, mat);
-                points.userData.speed = speed;
-                scene.add(points);
-                return points;
+            // 2. Quantum Rings
+            const createRing = (r, c) => {
+                const geo = new THREE.TorusGeometry(r, 0.02, 16, 100);
+                const mat = new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.4, blending: THREE.AdditiveBlending });
+                const mesh = new THREE.Mesh(geo, mat);
+                scene.add(mesh);
+                return mesh;
             };
+            rings.push(createRing(4, 0x00f2ff));
+            rings.push(createRing(5, 0x7000ff));
 
-            rings.push(createComplexRing(4, 5000, 0x00f2ff, 0.002));
-            rings.push(createComplexRing(4.5, 3000, 0x7000ff, -0.001));
-            rings.push(createComplexRing(6, 2000, 0x00f2ff, 0.0005));
-
-            // 3. CENTRINIS BRANDUOLYS (Singularity)
-            const coreGeo = new THREE.SphereGeometry(1.8, 64, 64);
-            const coreMat = new THREE.MeshPhongMaterial({
-                color: 0x000000,
-                emissive: 0x001122,
-                shininess: 100,
-                transparent: true,
-                opacity: 0.9
-            });
-            const core = new THREE.Mesh(coreGeo, coreMat);
+            // 3. Central Core
+            core = new THREE.Mesh(
+                new THREE.IcosahedronGeometry(2, 15),
+                new THREE.MeshPhongMaterial({ color: 0x000000, emissive: 0x00f2ff, wireframe: true })
+            );
             scene.add(core);
 
-            // Aura aplink branduolį
-            const auraGeo = new THREE.SphereGeometry(2.1, 64, 64);
-            const auraMat = new THREE.MeshBasicMaterial({
-                color: 0x00f2ff,
-                wireframe: true,
-                transparent: true,
-                opacity: 0.05
-            });
-            scene.add(new THREE.Mesh(auraGeo, auraMat));
-
-            // Apšvietimas
-            const light1 = new THREE.PointLight(0x00f2ff, 2, 50);
-            light1.position.set(5, 5, 5);
-            scene.add(light1);
-            
-            const light2 = new THREE.PointLight(0x7000ff, 2, 50);
-            light2.position.set(-5, -5, 5);
-            scene.add(light2);
+            const light = new THREE.PointLight(0xffffff, 2, 50);
+            light.position.set(10, 10, 10);
+            scene.add(light);
 
             animate();
+        }
+
+        function setEmotion(type) {
+            const drift = document.getElementById('drift-val');
+            const log = document.getElementById('log');
+            const cam = document.getElementById('cam-border');
+            
+            if(type === 'stress') {
+                currentConfig = { color: 0xff3e3e, speed: 5, pulse: 2 };
+                drift.innerText = "+4.129";
+                drift.style.color = "#ff3e3e";
+                log.innerText = "> ALERT: High neural tension detected";
+                cam.style.borderColor = "#ff3e3e";
+            } else if(type === 'calm') {
+                currentConfig = { color: 0x00f2ff, speed: 0.5, pulse: 0.5 };
+                drift.innerText = "+0.112";
+                drift.style.color = "#00f2ff";
+                log.innerText = "> Status: Deep calm state";
+                cam.style.borderColor = "#00f2ff";
+            } else {
+                currentConfig = { color: 0x7000ff, speed: 2, pulse: 1.2 };
+                drift.innerText = "+1.842";
+                drift.style.color = "#7000ff";
+                log.innerText = "> Status: Flow state active";
+                cam.style.borderColor = "#7000ff";
+            }
+            
+            core.material.emissive.setHex(currentConfig.color);
+            rings.forEach(r => r.material.color.setHex(currentConfig.color));
         }
 
         function animate() {
             requestAnimationFrame(animate);
             const time = Date.now() * 0.001;
 
-            // Orbitos sukasi
+            core.rotation.y += 0.01 * currentConfig.speed;
+            core.scale.setScalar(1 + Math.sin(time * 3 * currentConfig.pulse) * 0.1);
+
             rings.forEach((r, i) => {
-                r.rotation.z += r.userData.speed;
-                r.rotation.x = Math.sin(time * 0.2 + i) * 0.1;
-                r.rotation.y = Math.cos(time * 0.3 + i) * 0.1;
+                r.rotation.x += 0.01 * (i + 1);
+                r.rotation.y += 0.005 * currentConfig.speed;
             });
 
-            // Foninės žvaigždės lėtai juda
-            stars.rotation.y += 0.0002;
+            starField.rotation.y += 0.0005;
+            renderer.render(scene, camera);
+        }
 
-            // Kamera lėtai "kvėpuoja"
-            camera.position.x = Math.sin(time * 0.5) * 0.5;
-            camera.position.y
+        navigator.mediaDevices.getUserMedia({ video: true }).then(s => {
+            document.getElementById('webcam').srcObject = s;
+        });
+
+        init();
+    </script>
+</body>
+</html>
