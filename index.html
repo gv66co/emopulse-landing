@@ -2,128 +2,197 @@
 <html lang="lt">
 <head>
     <meta charset="UTF-8">
-    <title>EMOPULSE PRO - ULTIMATE CORE</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMOPULSE PRO - NEURAL NAVIGATOR V3</title>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
 
     <style>
-        body, html { margin: 0; padding: 0; background: #000105; overflow: hidden; }
-        
-        /* Tikrasis gylis per Overlay */
-        #interface-layer {
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;400;800&display=swap');
+
+        body, html {
+            margin: 0; padding: 0;
+            width: 100%; height: 100%;
+            background: #000105; /* Gili juoda */
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            color: white;
+        }
+
+        /* 3D Kanva fone */
+        #canvas-container {
             position: absolute;
-            inset: 0;
-            z-index: 100;
-            pointer-events: none;
-            display: flex;
-            justify-content: space-between;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1;
+        }
+
+        /* Pagrindinis UI sluoksnis */
+        #ui-layer {
+            position: relative;
+            z-index: 10;
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            height: 100vh;
             padding: 50px;
             box-sizing: border-box;
-            background: radial-gradient(circle at center, transparent 30%, rgba(0,2,10,0.8) 100%);
+            pointer-events: none; /* Leidžia sukti 3D modelį pelyte per viršų */
         }
 
-        .panel {
+        /* Kairė pusė */
+        .left-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        .system-tag {
+            font-size: 12px;
+            letter-spacing: 6px;
+            color: #3a8dff;
+            font-weight: 800;
+            opacity: 0.8;
+        }
+
+        /* Dešinė panelė (Glassmorphism) */
+        .right-panel {
             pointer-events: auto;
-            background: rgba(2, 8, 20, 0.4);
-            backdrop-filter: blur(30px);
+            background: rgba(2, 10, 25, 0.4);
+            backdrop-filter: blur(25px);
             border: 1px solid rgba(58, 141, 255, 0.1);
             border-radius: 40px;
-            padding: 35px;
-            box-shadow: inset 0 0 20px rgba(58, 141, 255, 0.05);
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
         }
 
-        .camera-ring {
-            width: 240px; height: 240px;
+        /* Kameros vaizdas auroje */
+        .camera-aura {
+            width: 260px; height: 260px;
             border-radius: 50%;
-            border: 1px solid rgba(58, 141, 255, 0.4);
+            border: 1px solid rgba(58, 141, 255, 0.5);
+            margin: 0 auto 30px;
             position: relative;
             overflow: hidden;
             box-shadow: 0 0 40px rgba(58, 141, 255, 0.2);
         }
 
-        #webcam { width: 100%; height: 100%; object-fit: cover; filter: contrast(1.2) brightness(0.8); }
-
-        .scan-line {
-            position: absolute;
-            width: 100%; height: 2px;
-            background: linear-gradient(90deg, transparent, #3a8dff, transparent);
-            box-shadow: 0 0 15px #3a8dff;
-            top: 0; animation: scan 4s infinite linear;
+        #webcam {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            filter: grayscale(0.2) contrast(1.1);
         }
 
-        @keyframes scan { 0% { top: -10%; } 100% { top: 110%; } }
-
-        .value-neon {
-            font-size: 48px; font-weight: 200;
-            background: linear-gradient(180deg, #fff, #3a8dff);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 20px rgba(58, 141, 255, 0.4);
+        /* Tekstai */
+        .resonance-title {
+            font-size: 10px;
+            letter-spacing: 3px;
+            opacity: 0.5;
+            text-transform: uppercase;
         }
+
+        .resonance-value {
+            font-size: 36px;
+            font-weight: 200;
+            margin: 10px 0;
+        }
+
+        .hashtags {
+            color: #ff9f1c;
+            font-size: 14px;
+            font-weight: 400;
+        }
+
+        .metrics-grid {
+            margin-top: auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .metric-box h4 {
+            margin: 0; font-size: 10px; opacity: 0.4;
+        }
+
+        .metric-box p {
+            margin: 5px 0 0; font-size: 24px; font-weight: 800;
+        }
+
     </style>
 </head>
 <body>
 
-    <div id="three-container"></div>
+    <div id="canvas-container"></div>
 
-    <div id="interface-layer">
-        <div style="display: flex; flex-direction: column; gap: 30px;">
-            <div style="color: #3a8dff; letter-spacing: 8px; font-size: 11px; font-weight: 900;">SYSTEM_ACTIVE // V3.NAV</div>
-            <div class="panel">
-                <div style="opacity: 0.5; font-size: 10px; color: #fff; margin-bottom: 10px;">NEURAL RESONANCE</div>
-                <div class="value-neon">76.4</div>
-                <div style="color: #3a8dff; font-size: 12px; margin-top: 5px;">STABILITY: OPTIMAL</div>
-            </div>
+    <div id="ui-layer">
+        <div class="left-content">
+            <div class="system-tag">SYSTEM_ACTIVE // V3.NAV</div>
         </div>
 
-        <div class="panel">
-            <div class="camera-ring">
-                <div class="scan-line"></div>
+        <div class="right-panel">
+            <div class="camera-aura">
                 <video id="webcam" autoplay muted playsinline></video>
             </div>
-            <div style="margin-top: 30px;">
-                <div style="color: #fff; font-size: 24px; font-weight: 700;">Calm Focused</div>
-                <div style="color: #ff9f1c; font-size: 13px; margin-top: 5px; opacity: 0.8;">#deep_resonance #tranquility</div>
+
+            <div class="resonance-title">Real-time Resonance</div>
+            <div class="resonance-value">Calm Focused</div>
+            <div class="hashtags">#deep_resonance #tranquility</div>
+
+            <div class="metrics-grid">
+                <div class="metric-box">
+                    <h4>STRESS RISK</h4>
+                    <p style="color: #ff3b3b;">0.39</p>
+                </div>
+                <div class="metric-box">
+                    <h4>NEURAL ENERGY</h4>
+                    <p style="color: #3a8dff;">0.89</p>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        let scene, camera, renderer, composer, core, particles;
+        let scene, camera, renderer, composer, coreGroup, stars;
 
-        function init() {
+        function init3D() {
+            // 1. Scenos nustatymai
             scene = new THREE.Scene();
             camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.z = 12;
+            camera.position.z = 10;
 
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(window.devicePixelRatio);
-            document.getElementById('three-container').appendChild(renderer.domElement);
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-            // 1. BRANDUOLYS - TŪRINĖ SFERA
-            const coreGroup = new THREE.Group();
+            // 2. Centrinis objektas (Core)
+            coreGroup = new THREE.Group();
             scene.add(coreGroup);
 
-            // Pagrindinė šviečianti šerdis
-            const coreGeo = new THREE.IcosahedronGeometry(1.8, 15);
-            const coreMat = new THREE.MeshPhongMaterial({
-                color: 0x3a8dff,
-                emissive: 0x1a2a4a,
-                wireframe: true,
-                transparent: true,
-                opacity: 0.3
+            // Branduolio tinklelis
+            const coreGeo = new THREE.IcosahedronGeometry(2, 2);
+            const coreMat = new THREE.MeshBasicMaterial({ 
+                color: 0x3a8dff, 
+                wireframe: true, 
+                transparent: true, 
+                opacity: 0.4 
             });
-            core = new THREE.Mesh(coreGeo, coreMat);
-            coreGroup.add(core);
+            const coreMesh = new THREE.Mesh(coreGeo, coreMat);
+            coreGroup.add(coreMesh);
 
-            // 2. ORBITOS - NEONINIAI ŽIEDAI
-            const ringColors = [0x3a8dff, 0x7b5cff, 0x00f2ff];
+            // Orbitos
+            const colors = [0x3a8dff, 0x7b5cff, 0x00f2ff];
             for(let i=0; i<3; i++) {
-                const ringGeo = new THREE.TorusGeometry(3 + i*0.6, 0.015, 16, 100);
+                const ringGeo = new THREE.TorusGeometry(3.2 + i*0.5, 0.015, 16, 100);
                 const ringMat = new THREE.MeshBasicMaterial({ 
-                    color: ringColors[i], 
+                    color: colors[i], 
                     transparent: true, 
                     opacity: 0.6 
                 });
@@ -133,65 +202,69 @@
                 coreGroup.add(ring);
             }
 
-            // 3. DALELIŲ DEBESIS (AURA)
-            const pGeo = new THREE.BufferGeometry();
-            const pCount = 4000;
-            const posArray = new Float32Array(pCount * 3);
-            for(let i=0; i<pCount*3; i++) {
-                posArray[i] = (Math.random() - 0.5) * 18;
+            // 3. Žvaigždės / Dalelės (Stars)
+            const starGeo = new THREE.BufferGeometry();
+            const starCount = 3000;
+            const posArray = new Float32Array(starCount * 3);
+            for(let i=0; i<starCount*3; i++) {
+                posArray[i] = (Math.random() - 0.5) * 20;
             }
-            pGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-            const pMat = new THREE.PointsMaterial({
-                size: 0.03,
-                color: 0x3a8dff,
+            starGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            const starMat = new THREE.PointsMaterial({ 
+                size: 0.03, 
+                color: 0xffffff,
                 transparent: true,
-                opacity: 0.4,
-                blending: THREE.AdditiveBlending
+                opacity: 0.7,
+                blending: THREE.AdditiveBlending 
             });
-            particles = new THREE.Points(pGeo, pMat);
-            scene.add(particles);
+            stars = new THREE.Points(starGeo, starMat);
+            scene.add(stars);
 
-            // 4. POST-PROCESSING (TIKRAJAM GLOW)
+            // 4. Post-processing (Aukštos kokybės Glow)
             const renderScene = new THREE.RenderPass(scene, camera);
             const bloomPass = new THREE.UnrealBloomPass(
-                new THREE.Vector2(window.innerWidth, window.innerHeight),
-                2.5, // Stiprumas
-                0.5, // Spindulys
-                0.1  // Slenkstis
+                new THREE.Vector2(window.innerWidth, window.innerHeight), 
+                2.0, // Strength
+                0.4, // Radius
+                0.1  // Threshold
             );
 
             composer = new THREE.EffectComposer(renderer);
             composer.addPass(renderScene);
             composer.addPass(bloomPass);
 
-            // Šviesa gyliui
-            const light = new THREE.PointLight(0x3a8dff, 2, 50);
-            light.position.set(5, 5, 5);
-            scene.add(light);
-
             animate();
         }
 
         function animate() {
             requestAnimationFrame(animate);
-            const time = Date.now() * 0.001;
+            const time = Date.now() * 0.0008;
 
-            // DRIFT LOGIKA: Viskas juda kaip viena visuma
-            core.rotation.y += 0.002;
-            core.position.y = Math.sin(time * 0.5) * 0.4;
-            core.position.x = Math.cos(time * 0.3) * 0.2;
+            // DRIFT EFEKTAS: lėtas, sklandus plaukiojimas
+            coreGroup.position.y = Math.sin(time * 0.5) * 0.3;
+            coreGroup.position.x = Math.cos(time * 0.3) * 0.2;
+            coreGroup.rotation.y += 0.002;
+            coreGroup.rotation.z += 0.001;
 
-            // Dalelių "kvėpavimas"
-            particles.rotation.y -= 0.0005;
-            particles.position.y = Math.sin(time * 0.2) * 0.1;
+            // Fono žvaigždžių judėjimas
+            stars.rotation.y -= 0.0003;
+            stars.position.y = Math.sin(time * 0.2) * 0.1;
 
             composer.render();
         }
 
-        navigator.mediaDevices.getUserMedia({ video: true }).then(s => {
-            document.getElementById('webcam').srcObject = s;
-        });
+        // Kameros pajungimas
+        async function setupCamera() {
+            const video = document.getElementById('webcam');
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+            } catch (err) {
+                console.error("Kamera nepasiekiama", err);
+            }
+        }
 
+        // Reakcija į lango dydžio keitimą
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
@@ -199,7 +272,10 @@
             composer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        init();
+        // Startas
+        init3D();
+        setupCamera();
+
     </script>
 </body>
 </html>
