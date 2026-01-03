@@ -2,45 +2,42 @@
 <html lang="lt">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EMOPULSE V5 - FIX</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_landmarker@0.10.0"></script>
+    <title>EMOPULSE V5 - FINAL FIX</title>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_landmarker@0.10.0/face_landmarker.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/vision_bundle.js"></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@100;300;600&display=swap" rel="stylesheet">
+    
     <style>
         :root { --neon: #00f2ff; --glass: rgba(0, 10, 20, 0.9); }
         body, html { margin: 0; padding: 0; background: #000; overflow: hidden; font-family: 'Inter', sans-serif; color: white; height: 100vh; }
-        
         canvas#bg-canvas { position: absolute; inset: 0; z-index: 1; }
         #ui-interface { position: relative; z-index: 10; height: 100vh; display: grid; grid-template-columns: 380px 1fr 380px; grid-template-rows: 80px 1fr 200px; padding: 30px; gap: 20px; pointer-events: none; }
         .panel { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid rgba(0, 242, 255, 0.15); border-radius: 20px; padding: 25px; pointer-events: auto; }
-        .cam-container { position: relative; width: 100%; height: 200px; border-radius: 15px; overflow: hidden; border: 1px solid var(--neon); background: #000; }
+        .cam-container { position: relative; width: 100%; height: 200px; border-radius: 15px; overflow: hidden; border: 1px solid var(--neon); background: #111; }
         #webcam { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
         #face-canvas { position: absolute; inset: 0; width: 100%; height: 100%; transform: scaleX(-1); }
         .stat-value { font-family: 'Orbitron'; font-size: 28px; color: var(--neon); }
-        .bottom-shelf { grid-column: 1 / 4; grid-row: 3; display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
-        .mini-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 15px; padding: 20px; }
-
-        /* Loading ekranas */
-        #loading-overlay { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s; }
-        .loader-ring { width: 60px; height: 60px; border: 3px solid rgba(0,242,255,0.1); border-top: 3px solid var(--neon); border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        #loading-screen { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .ring { width: 50px; height: 50px; border: 3px solid rgba(0,242,255,0.1); border-top: 3px solid var(--neon); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <div id="loading-overlay">
-        <div class="loader-ring"></div>
-        <p id="loading-text" style="margin-top: 25px; font-family: 'Orbitron'; font-size: 11px; letter-spacing: 3px;">INITIALIZING NEURAL CORE...</p>
-        <button id="skip-btn" style="margin-top: 20px; background: none; border: 1px solid var(--neon); color: var(--neon); padding: 5px 15px; cursor: pointer; display: none;" onclick="hideLoading()">SKIP AI LOADING</button>
+    <div id="loading-screen">
+        <div class="ring"></div>
+        <p id="load-msg" style="margin-top: 20px; font-family: 'Orbitron'; font-size: 10px; letter-spacing: 2px;">SYNCING WITH EMOPULSE CLOUD...</p>
     </div>
 
     <canvas id="bg-canvas"></canvas>
 
     <div id="ui-interface">
-        <div style="grid-column: 1/4; display: flex; justify-content: space-between; align-items: center;">
+        <div style="grid-column: 1/4; display: flex; justify-content: space-between;">
             <div style="font-family: 'Orbitron'; font-size: 24px; color: var(--neon);">EMOPULSE V5</div>
-            <div id="sys-status" style="font-size: 11px;">SYSTEM: <span style="color: #ff3e3e;">OFFLINE</span></div>
+            <div id="status">STATUS: <span style="color:red">OFFLINE</span></div>
         </div>
 
         <div class="panel">
@@ -50,115 +47,87 @@
             </div>
             <div style="margin-top: 15px;">
                 <div style="font-size: 10px; opacity: 0.5;">NEURAL DRIFT</div>
-                <div class="stat-value" id="drift-display">+0.842</div>
+                <div class="stat-value" id="drift">+0.842</div>
             </div>
         </div>
 
-        <div></div> <div class="panel" style="border-left: 4px solid var(--neon);">
-            <div style="font-size: 10px; opacity: 0.5;">EMOTIONAL SUMMARY</div>
-            <div id="summary-text" style="font-size: 18px; margin-top: 10px;">Ready for analysis...</div>
-        </div>
+        <div></div>
 
-        <div class="bottom-shelf">
-            <div class="mini-card"><div>SCORE</div><div class="stat-value">76</div></div>
-            <div class="mini-card"><div>ENERGY</div><div class="stat-value">0,66</div></div>
-            <div class="mini-card"><div>STRESS</div><div class="stat-value" id="stress-lvl">LOW</div></div>
-            <div class="mini-card"><div>STABILITY</div><div class="stat-value">112°</div></div>
+        <div class="panel">
+            <div style="font-size: 10px; opacity: 0.5;">EMOTIONAL SUMMARY</div>
+            <div id="summary" style="font-size: 18px; margin-top: 10px;">Initializing AI...</div>
         </div>
     </div>
 
     <script type="module">
-        import { FaceLandmarker, FilesetResolver, DrawingUtils } from "https://cdn.jsdelivr.net/npm/@mediapipe/face_landmarker@0.10.0";
+        // Svarbu: Naudojame tiesioginį importą iš CDN, kad išvengtume 404 klaidų
+        import { FaceLandmarker, FilesetResolver, DrawingUtils } from "https://cdn.skypack.dev/@mediapipe/tasks-vision@0.10.0";
 
-        // Parodome SKIP mygtuką po 10 sekundžių, jei AI vis dar kraunasi
-        setTimeout(() => { document.getElementById('skip-btn').style.display = 'block'; }, 10000);
+        const video = document.getElementById("webcam");
+        const canvas = document.getElementById("face-canvas");
+        const ctx = canvas.getContext("2d");
+        let faceLandmarker;
 
-        function hideLoading() { document.getElementById('loading-overlay').style.opacity = '0'; setTimeout(() => { document.getElementById('loading-overlay').style.display = 'none'; }, 500); }
-
-        // --- THREE.JS PRADŽIA ---
+        // --- THREE.JS FONAS ---
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('bg-canvas'), antialias: true, alpha: true });
+        const camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('bg-canvas'), alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
+        const core = new THREE.Mesh(new THREE.IcosahedronGeometry(4, 2), new THREE.MeshBasicMaterial({ color: 0x00f2ff, wireframe: true }));
+        scene.add(core);
         camera.position.z = 15;
 
-        // Branduolio objektas
-        const core = new THREE.Mesh(new THREE.IcosahedronGeometry(4, 15), new THREE.MeshPhongMaterial({ color: 0x000000, emissive: 0x00f2ff, wireframe: true, transparent: true, opacity: 0.2 }));
-        scene.add(core);
-        scene.add(new THREE.PointLight(0x00f2ff, 2, 50));
-
-        // --- AI PRADŽIA ---
-        let faceLandmarker;
-        const video = document.getElementById("webcam");
-        const canvasFace = document.getElementById("face-canvas");
-        const ctxFace = canvasFace.getContext("2d");
-
-        async function initAI() {
+        async function init() {
             try {
-                document.getElementById('loading-text').innerText = "RESOLVING FILES...";
-                const files = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/face_landmarker@0.10.0/wasm");
-                
-                document.getElementById('loading-text').innerText = "DOWNLOADING MODEL (25MB)...";
-                faceLandmarker = await FaceLandmarker.createFromOptions(files, {
-                    baseOptions: { modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task`, delegate: "GPU" },
+                const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm");
+                faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
+                    baseOptions: {
+                        modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
+                        delegate: "GPU"
+                    },
                     outputFaceBlendshapes: true,
                     runningMode: "VIDEO"
                 });
                 
-                startCamera();
-            } catch (e) {
-                console.error("AI klaida:", e);
-                document.getElementById('loading-text').innerText = "AI ERROR. TRY REFRESHING.";
-            }
-        }
-
-        async function startCamera() {
-            try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 video.srcObject = stream;
-                video.addEventListener("loadeddata", () => {
-                    hideLoading();
-                    document.getElementById('sys-status').innerHTML = "SYSTEM: <span style='color:var(--neon)'>LIVE</span>";
-                    runDetection();
-                });
+                video.onloadeddata = () => {
+                    document.getElementById("loading-screen").style.display = "none";
+                    document.getElementById("status").innerHTML = "STATUS: <span style='color:#00f2ff'>ONLINE</span>";
+                    detect();
+                };
             } catch (err) {
-                alert("Prašau suteikti leidimą kamerai!");
-                hideLoading();
+                document.getElementById("load-msg").innerHTML = "ERROR: Camera access denied or AI failed.";
+                console.error(err);
             }
         }
 
-        async function runDetection() {
-            canvasFace.width = video.videoWidth;
-            canvasFace.height = video.videoHeight;
-            
-            function detect() {
-                if (!faceLandmarker) return;
-                const results = faceLandmarker.detectForVideo(video, performance.now());
-                ctxFace.clearRect(0, 0, canvasFace.width, canvasFace.height);
+        function detect() {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const results = faceLandmarker.detectForVideo(video, performance.now());
 
-                if (results.faceLandmarks && results.faceLandmarks[0]) {
-                    const drawingUtils = new DrawingUtils(ctxFace);
-                    drawingUtils.drawConnectors(results.faceLandmarks[0], FaceLandmarker.FACE_LANDMARKS_TESSELATION, { color: "#00f2ff33", lineWidth: 1 });
-                    
-                    if (results.faceBlendshapes && results.faceBlendshapes[0]) {
-                        const stress = results.faceBlendshapes[0].categories.find(s => s.categoryName === "browDownLeft")?.score || 0;
-                        document.getElementById('drift-display').innerText = "+" + (0.8 + stress).toFixed(3);
-                        document.getElementById('stress-lvl').innerText = stress > 0.2 ? "ELEVATED" : "LOW";
-                        document.getElementById('stress-lvl').style.color = stress > 0.2 ? "#ff3e3e" : "#00f2ff";
-                    }
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (results.faceLandmarks && results.faceLandmarks[0]) {
+                const utils = new DrawingUtils(ctx);
+                utils.drawConnectors(results.faceLandmarks[0], FaceLandmarker.FACE_LANDMARKS_TESSELATION, { color: "#00f2ff33", lineWidth: 1 });
+                
+                // Emocijos
+                if (results.faceBlendshapes[0]) {
+                    const stress = results.faceBlendshapes[0].categories.find(c => c.categoryName === "browDownLeft")?.score || 0;
+                    document.getElementById("summary").innerText = stress > 0.2 ? "Elevated Stress" : "Stable State";
                 }
-                requestAnimationFrame(detect);
             }
-            detect();
+            requestAnimationFrame(detect);
         }
 
         function animate() {
-            requestAnimationFrame(animate);
-            core.rotation.y += 0.005;
+            core.rotation.y += 0.01;
             renderer.render(scene, camera);
+            requestAnimationFrame(animate);
         }
 
-        initAI();
+        init();
         animate();
     </script>
 </body>
