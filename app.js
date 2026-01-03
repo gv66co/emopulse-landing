@@ -1,111 +1,105 @@
-// --- SISTEMOS KONTROLĖ ---
 let scene, camera, renderer, aura, stars;
 let systemActive = false;
-let analysisBuffer = []; // Skirta galutinei analizei
-let lastFinalSpeech = 0;
-const canvas = document.createElement('canvas'); // Tinklo piešimui
+let analysisData = []; // Čia kaupsime emocijas galutinei analizei
+let isAnalyzing = false;
+let lastSpeechTime = 0;
+
+// 1. NEUROLINK: Veido taškų piešimas ant vaizdo
+const canvas = document.createElement('canvas');
 const ctx = canvas.getContext('2d');
 
-// --- 1. NEUROLINK VIZUALIZACIJA (VEIDO TAŠKAI) ---
-function setupFaceCanvas() {
-    canvas.id = "face-overlay";
-    canvas.style.position = "absolute";
-    const video = document.getElementById('video-feed');
-    // Sinchronizuojame matmenis
-    canvas.width = 200; 
+function setupNeurolinkCanvas() {
+    canvas.style.position = 'absolute';
+    canvas.style.top = '0';
+    canvas.style.left = '0';
+    canvas.width = 200; // Turi sutapti su video-box dydžiu
     canvas.height = 150;
     document.getElementById('video-box').appendChild(canvas);
 }
 
-function drawNeurolink(detection) {
+function drawNeurolink(landmarks) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    if (!detection) return;
-
-    const landmarks = detection.landmarks._positions;
-    ctx.strokeStyle = '#00f2ff';
     ctx.fillStyle = '#00f2ff';
-    ctx.lineWidth = 0.5;
-
-    // Piešiame visus 68 biometrinius taškus
-    landmarks.forEach(point => {
+    ctx.strokeStyle = 'rgba(0, 242, 255, 0.3)';
+    
+    const points = landmarks.positions;
+    points.forEach(p => {
+        // Adaptuojame taškus prie mažo video lango
+        const x = p.x * (canvas.width / 640); 
+        const y = p.y * (canvas.height / 480);
         ctx.beginPath();
-        ctx.arc(point.x * (canvas.width / 200), point.y * (canvas.height / 150), 1, 0, 2 * Math.PI);
+        ctx.arc(x, y, 1.2, 0, 2 * Math.PI);
         ctx.fill();
     });
-
-    // Sujungiame taškus linijomis (Neurolink tinklas)
-    ctx.beginPath();
-    ctx.moveTo(landmarks[0].x, landmarks[0].y);
-    // ... (supaprastintas tinklas vizualui)
-    ctx.stroke();
 }
 
-// --- 2. IŠMANIOJI ANALIZĖ (BALSAS TIK PABAIGOJE) ---
-function processFinalAnalysis(emotion, intensity) {
-    analysisBuffer.push(emotion);
-    if (analysisBuffer.length > 50) analysisBuffer.shift(); // Saugome paskutines 5 sekundes
-
+// 2. IA BALSAS: Tik galutinis rezultatas
+function processFinalSpeech(currentEmotion) {
     const now = Date.now();
-    // Kalbėti tik kas 10 sekundžių ir tik jei emocija stabili
-    if (now - lastFinalSpeech > 10000 && intensity > 0.85) {
-        const mostFrequent = analysisBuffer.sort((a,b) =>
-            analysisBuffer.filter(v => v===a).length - analysisBuffer.filter(v => v===b).length
+    analysisData.push(currentEmotion);
+
+    // Kaupiame duomenis (pvz., 100 kadrų ~ 10 sekundžių)
+    if (analysisData.length >= 100) {
+        // Surandame dažniausiai pasikartojusią emociją per tą laiką
+        const summary = analysisData.sort((a,b) =>
+            analysisData.filter(v => v===a).length - analysisData.filter(v => v===b).length
         ).pop();
 
-        let report = `Final analysis complete. Your core state is ${mostFrequent}. Stability is nominal.`;
-        if(mostFrequent === 'angry') report = "Alert. High neural friction detected. Please initiate calming drift.";
-        
-        speak(report);
-        lastFinalSpeech = now;
+        // IA prabyla tik jei praėjo bent 15 sek. nuo paskutinio sakinio
+        if (now - lastSpeechTime > 15000) {
+            const report = `Neural analysis complete. Your dominant cognitive state is ${summary}. Stability is nominal.`;
+            speak(report);
+            lastSpeechTime = now;
+            analysisData = []; // Išvalome kaupiklį naujai analizei
+        }
     }
 }
 
-// --- 3. DINAMINĖS SKALĖS ---
+// 3. SKALĖS: Emocijų stebėjimas realiu laiku (be balso)
 function updateScales(expressions) {
-    const emotions = ['happy', 'sad', 'angry', 'surprised', 'neutral'];
     let html = "";
-    emotions.forEach(emo => {
+    Object.keys(expressions).forEach(emo => {
         const val = Math.round(expressions[emo] * 100);
-        html += `<div style="margin-bottom:5px">
-                    <span style="font-size:0.6rem">${emo.toUpperCase()}</span>
-                    <div style="width:100%; height:4px; background:rgba(0,242,255,0.1)">
-                        <div style="width:${val}%; height:100%; background:#00f2ff; box-shadow:0 0 10px #00f2ff"></div>
-                    </div>
-                 </div>`;
+        if(val > 5) { // Rodome tik tas, kurios turi bent 5% reikšmę
+            html += `<div style="margin-bottom:8px">
+                <div class="label" style="font-size:0.5rem">${emo}</div>
+                <div style="width:100%; height:3px; background:rgba(0,242,255,0.1)">
+                    <div style="width:${val}%; height:100%; background:var(--neon); box-shadow:0 0 5px var(--neon)"></div>
+                </div>
+            </div>`;
+        }
     });
     document.getElementById('ai-comms').innerHTML = html;
 }
 
-// --- PAGRINDINIS CIKLAS (ATNAUJINTAS) ---
+// ATNAUJINTAS PALEIDIMAS
 async function runAI() {
-    setupFaceCanvas();
+    setupNeurolinkCanvas();
     const video = document.getElementById('video-feed');
     
-    // Pridedame landmarks modelį tinklui piešti
+    // Užkrauname papildomą modelį taškams (Landmarks)
     const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
     await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
 
     setInterval(async () => {
         if(!systemActive) return;
         
-        const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
-                                       .withFaceLandmarks()
-                                       .withFaceExpressions();
+        // Skaitome veidą + taškus + emocijas
+        const result = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
+                                    .withFaceLandmarks()
+                                    .withFaceExpressions();
         
-        if (detection) {
-            const expressions = detection.expressions;
-            const top = Object.keys(expressions).reduce((a, b) => expressions[a] > expressions[b] ? a : b);
+        if (result) {
+            drawNeurolink(result.landmarks);
+            updateScales(result.expressions);
             
-            // Atnaujiname vizualus
-            drawNeurolink(detection);
-            updateScales(expressions);
+            const top = Object.keys(result.expressions).reduce((a, b) => result.expressions[a] > result.expressions[b] ? a : b);
             
-            // HUD skaičiai
+            // HUD atnaujinimas (be balso)
             document.getElementById('emo-val').innerText = top.toUpperCase();
-            document.getElementById('pulse-val').innerText = Math.floor(65 + (expressions[top] * 35)) + " BPM";
-
-            // IA Analizė (tyli)
-            processFinalAnalysis(top, expressions[top]);
+            
+            // Siunčiame duomenis į kaupiklį galutinei analizei
+            processFinalSpeech(top);
         }
     }, 100);
 }
