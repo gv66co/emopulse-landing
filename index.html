@@ -1,92 +1,53 @@
-<!DOCTYPE html>
-<html lang="lt">
-<head>
-    <meta charset="UTF-8">
-    <title>Emopulse PRO - Neural Terminal</title>
-    <link rel="stylesheet" href="emopulse.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body>
-    <div class="pro-screen">
-        <header class="top-bar">
-            <div class="brand">
-                <i class="fa-solid fa-microchip"></i> 
-                <span>EMOPULSE <strong>PRO</strong></span>
+<div class="pro-container">
+    <header class="pro-header">
+        <div class="logo">EMOPULSE <span>PRO</span></div>
+        <div class="nav">
+            <a href="#" class="active">Live Terminal</a>
+            <span id="live-clock">00:00:00</span> </div>
+    </header>
+
+    <main class="pro-grid">
+        <section class="panel main-visual">
+            <div id="visual-container">
+                <canvas id="compass3d"></canvas>
             </div>
-            <nav class="menu">
-                <a href="#" class="active">Live Terminal</a>
-                <a href="#">Investors</a>
-                <a href="#">Technology</a>
-                <div class="timer" id="live-clock">18:00:00</div>
-            </nav>
-        </header>
+            <div class="tag">NEURAL CORE ACTIVE</div>
+        </section>
 
-        <main class="dashboard-core">
-            
-            <section class="panel visual-panel">
-                <div class="panel-header">NEURAL RESONANCE CORE ACTIVE</div>
-                <div id="visual-container">
-                    <canvas id="compass3d"></canvas>
-                </div>
-            </section>
-
-            <section class="panel analysis-panel">
-                <div class="hero-text">
-                    <h1>Understand your emotional field</h1>
-                    <p>High-frequency micro-expression analysis via neural core v2.1</p>
-                </div>
-                
-                <div class="ai-interaction">
-                    <textarea id="feeling-input" placeholder="Kaip jautiesi šiuo metu?"></textarea>
-                    <button class="glow-btn">ANALYZE FIELD</button>
-                </div>
-
-                <div class="ai-result-box">
-                    <div class="label"><i class="fa-solid fa-robot"></i> AI SUMMARY</div>
-                    <p id="ai-status">System Online. Biometric stream stable.</p>
-                </div>
-            </section>
-
-            <section class="panel camera-panel">
-                <div class="cam-content">
-                    <div class="oval-view">
-                        <video id="cam" autoplay muted playsinline></video>
-                    </div>
-                    <div class="drift-info">
-                        <h3>Emotional Drift</h3>
-                        <p>Stability: <span class="cyan">112°</span></p>
-                        <p>Intensity: <span class="cyan">Low</span></p>
-                    </div>
-                </div>
-            </section>
-
-            <section class="panel risk-panel">
-                <div class="label">STRESS RISK</div>
-                <div class="risk-display">
-                    <canvas id="stressChart"></canvas>
-                    <div class="risk-data">Factor: <span class="cyan">0.56</span></div>
-                </div>
-            </section>
-        </main>
-
-        <footer class="bottom-stats">
-            <div class="mini-card">
-                <span class="card-title">Mood Map</span>
-                <div class="graph-box"></div>
+        <section class="panel main-analysis">
+            <h1>Decode Your Emotional Resonance</h1>
+            <div class="input-group">
+                <textarea id="userInput" placeholder="Kaip jautiesi?"></textarea>
+                <button onclick="analyzeField()">ANALYZE FIELD</button>
             </div>
-            <div class="mini-card">
-                <span class="card-title">Timeline</span>
-                <div class="graph-box"></div>
+            <div class="ai-box">
+                <div class="label">AI SUMMARY</div>
+                <p id="aiStatus">Biometric stream stable.</p>
             </div>
-            <div class="mini-card">
-                <span class="card-title">Emopulse Score</span>
-                <span class="big-val">76<small>/100</small></span>
+        </section>
+
+        <section class="panel camera-box">
+            <div class="cam-frame">
+                <video id="cam" autoplay muted playsinline></video>
             </div>
-            <div class="mini-card">
-                <span class="card-title">Energy Level</span>
-                <span class="big-val">0.66 <small>rising</small></span>
+            <div class="cam-data">
+                <h3>Emotional Drift</h3>
+                <p>Stability: <span class="cyan" id="stab-val">112°</span></p>
             </div>
-        </footer>
-    </div>
-</body>
-</html>
+        </section>
+
+        <section class="panel risk-box">
+            <div class="label">STRESS RISK</div>
+            <div class="chart-container">
+                <canvas id="stressChart"></canvas>
+            </div>
+        </section>
+    </main>
+
+    <footer class="pro-footer">
+        <div class="stat-card"><span>Mood Map</span><div class="val" id="mood-val">Positive</div></div>
+        <div class="stat-card"><span>Timeline</span><div class="val" id="time-val">12:05</div></div>
+        <div class="stat-card"><span>Score</span><div class="val" id="score-val">76</div></div>
+        <div class="stat-card"><span>Energy</span><div class="val" id="energy-val">0.66</div></div>
+    </footer>
+</div>
