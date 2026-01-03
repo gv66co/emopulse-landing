@@ -2,81 +2,57 @@
 <html lang="lt">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EMOPULSE V5 // PRE-EMPTIVE LOGIC</title>
+    <title>EMOPULSE V5 // ULTIMATUM</title>
     <style>
-        /* Griežtas fono fiksavimas - jokių baltų blyksnių */
-        :root { --bg: #010307; --panel: rgba(10, 15, 25, 0.98); --cyan: #00f2ff; }
-        html, body { background: var(--bg) !important; color: #fff; margin: 0; padding: 0; font-family: 'JetBrains Mono', monospace; overflow: hidden; height: 100vh; width: 100vw; }
-        
-        .dashboard { display: flex; flex-direction: column; height: 100vh; padding: 20px; box-sizing: border-box; }
-        .top-nav { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,242,255,0.1); padding-bottom: 10px; }
-        
-        /* 3-jų stulpelių logika su apsauga nuo persidengimo */
-        .main-layout { display: grid; grid-template-columns: 360px 1fr 360px; gap: 20px; flex: 1; margin: 20px 0; min-height: 0; }
-        
-        .panel { background: var(--panel); border: 1px solid rgba(0, 242, 255, 0.2); border-radius: 12px; padding: 20px; position: relative; display: flex; flex-direction: column; }
-        .cam-feed { position: relative; width: 100%; aspect-ratio: 4/3; border-radius: 8px; overflow: hidden; background: #000; }
-        #cam { width: 100%; height: 100%; object-fit: cover; }
-        #face-mesh-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-        
-        .core-visual { display: flex; justify-content: center; align-items: center; position: relative; }
-        #compass3d { width: 100%; height: 100%; max-height: 500px; }
-
-        .footer-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
-        .stat-card { background: var(--panel); padding: 15px; border-radius: 10px; border-left: 3px solid var(--cyan); }
-        .val { font-size: 2rem; color: var(--cyan); font-weight: 700; margin: 5px 0; }
-        .label { font-size: 10px; opacity: 0.5; letter-spacing: 1.5px; text-transform: uppercase; }
-        
-        .status-active { color: #00ff88; text-shadow: 0 0 8px rgba(0,255,136,0.4); font-size: 12px; }
+        /* DIZAINO BRANDUOLYS: Priverstinis atvaizdavimas be vėlavimo */
+        :root { --cyan: #00f2ff; --bg: #010307; --pnl: rgba(10, 15, 25, 0.98); }
+        body { background: var(--bg); color: #fff; margin: 0; font-family: 'JetBrains Mono', monospace; height: 100vh; overflow: hidden; }
+        .wrapper { display: flex; flex-direction: column; height: 100vh; padding: 20px; box-sizing: border-box; }
+        .grid { display: grid; grid-template-columns: 350px 1fr 350px; gap: 20px; flex: 1; align-items: center; }
+        .panel { background: var(--pnl); border: 1px solid rgba(0, 242, 255, 0.2); border-radius: 12px; padding: 20px; }
+        .cam-wrap { position: relative; width: 100%; aspect-ratio: 1.33; background: #000; border-radius: 8px; overflow: hidden; }
+        video, canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+        .val { font-size: 2.2rem; color: var(--cyan); font-weight: bold; margin: 5px 0; }
+        .label { font-size: 10px; opacity: 0.5; letter-spacing: 2px; }
+        .footer { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+        .card { background: var(--pnl); padding: 15px; border-radius: 10px; border-left: 3px solid var(--cyan); }
     </style>
-
     <script type="importmap">
-    {
-        "imports": {
-            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
-        }
-    }
+    { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }
     </script>
 </head>
 <body>
-    <div class="dashboard">
-        <header class="top-nav">
-            <div style="font-size: 1.4rem; font-weight: bold;">EMOPULSE <span style="color: var(--cyan)">V5</span></div>
-            <div class="status-active">G-CLOUD NODE: ONLINE // SYNCHRONIZED</div>
+    <div class="wrapper">
+        <header style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-size:1.4rem; letter-spacing:3px;">EMOPULSE <span style="color:var(--cyan)">V5</span></div>
+            <div style="color:#00ff88; font-size:12px;">G-CLOUD TUNNEL: ACTIVE</div>
         </header>
 
-        <main class="main-layout">
+        <main class="grid">
             <section class="panel">
-                <div class="label">Biometric Input</div>
-                <div class="cam-feed">
+                <div class="label">BIOMETRIC SCAN</div>
+                <div class="cam-wrap">
                     <video id="cam" autoplay muted playsinline></video>
-                    <canvas id="face-mesh-canvas"></canvas>
+                    <canvas id="mesh"></canvas>
                 </div>
-                <div id="neural-drift-val" class="val">+0.844</div>
-                <div class="label">Neural Drift Amplitude</div>
+                <div id="drift" class="val">+0.844</div>
+                <div class="label">NEURAL DRIFT</div>
             </section>
 
-            <section class="core-visual">
-                <canvas id="compass3d"></canvas>
-            </section>
+            <div style="height:450px;"><canvas id="compass3d"></canvas></div>
 
             <section class="panel">
-                <div class="label">Insight Engine</div>
-                <div id="aiText" style="margin: 20px 0; font-size: 1.1rem; line-height: 1.4;">System Synchronized. Monitoring facial geometry for micro-expressions.</div>
-                <div style="margin-top: auto;">
-                    <div class="label">Security Level</div>
-                    <div style="color: var(--cyan); font-size: 14px;">ENCRYPTED_GCLOUD_TUNNEL</div>
-                </div>
+                <div class="label">INSIGHT ENGINE</div>
+                <div id="msg" style="margin:20px 0; font-size:1.1rem; min-height:60px;">System Ready. Waiting for biometrics...</div>
+                <div class="label">STABILITY STATUS: <span id="stab-text" style="color:var(--cyan)">CALIBRATED</span></div>
             </section>
         </main>
 
-        <footer class="footer-metrics">
-            <div class="stat-card"><div class="label">Coherence</div><div id="scoreValue" class="val">0</div></div>
-            <div class="stat-card"><div class="label">Neural Energy</div><div id="energy" class="val">0.00</div></div>
-            <div class="stat-card"><div class="label">Stress Index</div><div id="stress-lvl" class="val" style="color: #4ade80;">LOW</div></div>
-            <div class="stat-card"><div class="label">Core Stability</div><div id="stability" class="val">112.4°</div></div>
+        <footer class="footer">
+            <div class="card"><div class="label">SCORE</div><div id="score" class="val">0</div></div>
+            <div class="card"><div class="label">ENERGY</div><div id="energy" class="val">0.00</div></div>
+            <div class="card"><div class="label">STRESS</div><div id="stress" class="val" style="color:#4ade80">LOW</div></div>
+            <div class="card"><div class="label">STABILITY</div><div id="stab-deg" class="val">112.4°</div></div>
         </footer>
     </div>
 
@@ -84,80 +60,57 @@
         import { initCompass3D, updateCompass3D } from './compas3d-v2.js';
         import { FaceLandmarker, FilesetResolver, DrawingUtils } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3";
 
-        const UI = {
-            score: document.getElementById('scoreValue'),
-            energy: document.getElementById('energy'),
-            stress: document.getElementById('stress-lvl'),
-            drift: document.getElementById('neural-drift-val'),
-            msg: document.getElementById('aiText')
+        const DOM = {
+            score: document.getElementById('score'), energy: document.getElementById('energy'),
+            stress: document.getElementById('stress'), drift: document.getElementById('drift'),
+            msg: document.getElementById('msg'), cam: document.getElementById('cam'),
+            mesh: document.getElementById('mesh'), ctx: document.getElementById('mesh').getContext('2d')
         };
 
-        async function bootstrap() {
+        async function initAI() {
             try {
                 initCompass3D();
-                
                 const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm");
-                const faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
-                    baseOptions: {
-                        modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
-                        delegate: "GPU"
-                    },
-                    outputFaceBlendshapes: true,
-                    runningMode: "VIDEO"
+                const landmarker = await FaceLandmarker.createFromOptions(vision, {
+                    baseOptions: { modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task", delegate: "GPU" },
+                    outputFaceBlendshapes: true, runningMode: "VIDEO"
                 });
 
-                const video = document.getElementById('cam');
-                const canvas = document.getElementById('face-mesh-canvas');
-                const ctx = canvas.getContext('2d');
-                const drawingUtils = new DrawingUtils(ctx);
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                DOM.cam.srcObject = stream;
 
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 } });
-                video.srcObject = stream;
+                DOM.cam.onloadeddata = () => {
+                    DOM.mesh.width = DOM.cam.offsetWidth;
+                    DOM.mesh.height = DOM.cam.offsetHeight;
+                    const utils = new DrawingUtils(DOM.ctx);
 
-                video.onloadeddata = () => {
-                    canvas.width = video.offsetWidth;
-                    canvas.height = video.offsetHeight;
-                    
-                    const runInference = () => {
-                        const results = faceLandmarker.detectForVideo(video, performance.now());
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    function render() {
+                        const results = landmarker.detectForVideo(DOM.cam, performance.now());
+                        DOM.ctx.clearRect(0, 0, DOM.mesh.width, DOM.mesh.height);
 
                         if (results.faceLandmarks?.[0]) {
-                            drawingUtils.drawConnectors(results.faceLandmarks[0], FaceLandmarker.FACE_LANDMARKS_TESSELATION, { color: "#00f2ff22", lineWidth: 1 });
-                            
+                            utils.drawConnectors(results.faceLandmarks[0], FaceLandmarker.FACE_LANDMARKS_TESSELATION, { color: "#00f2ff22", lineWidth: 1 });
                             if (results.faceBlendshapes?.[0]) {
                                 const s = results.faceBlendshapes[0].categories;
                                 const smile = s.find(x => x.categoryName === "mouthSmileLeft").score;
                                 const stress = s.find(x => x.categoryName === "browDownLeft").score;
 
-                                // Sinchronizuota logika
-                                UI.score.innerText = Math.round(70 + (smile * 30));
-                                UI.energy.innerText = (0.5 + (smile * 0.5)).toFixed(2);
-                                UI.drift.innerText = "+" + (0.840 + Math.random() * 0.008).toFixed(3);
-                                
-                                if (stress > 0.2) {
-                                    UI.stress.innerText = "HIGH";
-                                    UI.stress.style.color = "#f87171";
-                                    UI.msg.innerText = "Neural Stress Detected. G-Cloud Back-end analyzing...";
-                                } else {
-                                    UI.stress.innerText = "LOW";
-                                    UI.stress.style.color = "#4ade80";
-                                    UI.msg.innerText = "System Synchronized. Baseline Optimal.";
-                                }
+                                DOM.score.innerText = Math.round(70 + (smile * 30));
+                                DOM.energy.innerText = (0.5 + smile).toFixed(2);
+                                DOM.drift.innerText = "+" + (0.840 + Math.random() * 0.008).toFixed(3);
+                                DOM.stress.innerText = stress > 0.2 ? "HIGH" : "LOW";
+                                DOM.stress.style.color = stress > 0.2 ? "#f87171" : "#4ade80";
+                                DOM.msg.innerText = stress > 0.2 ? "Neural Stress Detected." : "System Synchronized.";
                                 updateCompass3D((smile - stress) * 2);
                             }
                         }
-                        requestAnimationFrame(runInference);
-                    };
-                    runInference();
+                        requestAnimationFrame(render);
+                    }
+                    render();
                 };
-            } catch (err) {
-                console.error("FATAL CORE ERROR:", err);
-                UI.msg.innerText = "SYSTEM ERROR: " + err.message;
-            }
+            } catch (e) { DOM.msg.innerText = "Fatal Error: AI Core failed."; }
         }
-
-        bootstrap();
+        initAI();
     </script>
 </body>
 </html>
