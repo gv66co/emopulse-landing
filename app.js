@@ -1,22 +1,21 @@
 import { initCompass3D, updateCompass3D } from "./compas3d-v2.js";
 
-// Face API inicijavimas iš globalaus window objekto
+// Face API initialization
 const faceapi = window.faceapi;
 
-// UI elementai
+// UI Elements
 const video = document.getElementById("cam");
 const overlay = document.getElementById("overlay");
 const auraCanvas = document.getElementById("auraCanvas");
 const camStatus = document.getElementById("camStatus");
 const aiTextEl = document.getElementById("aiText");
-const aiTagsEl = document.getElementById("aiTags");
 const scoreEl = document.getElementById("score");
 const energyEl = document.getElementById("energy");
 const stressEl = document.getElementById("stress");
 const stabilityEl = document.getElementById("stability");
 const intensityEl = document.getElementById("intensity");
 
-// Braižymo kontekstai
+// Drawing Contexts
 const auraCtx = auraCanvas?.getContext("2d");
 const timelineCanvas = document.getElementById("timeline");
 const pulseCanvas = document.getElementById("pulse");
@@ -27,16 +26,38 @@ let modelsReady = false;
 const history = [];
 
 /* ---------------------------------------------------------
-   KAMEROS PALEIDIMAS
+   HUMAN INSIGHT ENGINE (ENGLISH)
+--------------------------------------------------------- */
+function getHumanInsight(m, emotion) {
+    if (emotion.joy > 0.7) return "High emotional resonance detected. Your creative field is peaking—excellent for vision-building.";
+    if (emotion.stress > 0.5) return "Internal turbulence identified. Consider a brief focused breathing exercise to regain coherence.";
+    if (emotion.calm > 0.85) return "Deep physiological equilibrium. Your system is in a reflective mode—ideal for strategic focus.";
+    if (m.energy > 0.6 && m.stress < 0.2) return "You are in a high-performance flow state. Cognitive alignment is synchronized.";
+    if (m.energy < 0.3 && m.stress > 0.3) return "Bio-energetic depletion detected. System suggests a recovery phase to prevent fatigue.";
+    
+    return "Emotional field is balanced. Resonance levels are within the optimal operational range.";
+}
+
+/* ---------------------------------------------------------
+   AI VOICE SYNTHESIS
+--------------------------------------------------------- */
+function speakInsight(text) {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel(); // Stop current speech
+    const msg = new SpeechSynthesisUtterance(text);
+    msg.lang = 'en-US';
+    msg.rate = 0.9; 
+    msg.pitch = 1.0;
+    window.speechSynthesis.speak(msg);
+}
+
+/* ---------------------------------------------------------
+   CAMERA STREAMS
 --------------------------------------------------------- */
 async function startCamera() {
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ 
-            video: { 
-                width: { ideal: 640 }, 
-                height: { ideal: 480 },
-                facingMode: "user" 
-            } 
+            video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: "user" } 
         });
         video.srcObject = stream;
         
@@ -44,21 +65,18 @@ async function startCamera() {
             video.onloadedmetadata = () => {
                 video.play();
                 camStatus.innerHTML = `<span style="color: #3abff8">●</span> System online — field active`;
-                
                 if (overlay) { overlay.width = video.videoWidth; overlay.height = video.videoHeight; }
                 if (auraCanvas) { auraCanvas.width = 320; auraCanvas.height = 320; }
-                
                 resolve();
             };
         });
     } catch (err) {
-        camStatus.innerHTML = `<span style="color: #f87171">●</span> Error: ${err.message}`;
-        console.error("Camera error:", err);
+        camStatus.innerHTML = `<span style="color: #f87171">●</span> Error: Camera access denied`;
     }
 }
 
 /* ---------------------------------------------------------
-   ANALIZĖS CIKLAS (LOOP)
+   ANALYSIS LOOP
 --------------------------------------------------------- */
 async function loop() {
     if (!modelsReady || !video.videoWidth || video.paused) {
@@ -73,43 +91,59 @@ async function loop() {
 
         if (det && det.expressions) {
             const ex = det.expressions;
-            
             const joy = ex.happy + (ex.surprised * 0.2);
             const stress = ex.angry + ex.fearful + (ex.disgusted * 0.4) + (ex.sad * 0.3);
             const calm = ex.neutral;
 
             const total = joy + stress + calm || 1;
-            const currentEmotion = {
-                joy: joy / total,
-                stress: stress / total,
-                calm: calm / total
-            };
+            const currentEmotion = { joy: joy/total, stress: stress/total, calm: calm/total };
 
             const score = Math.round((currentEmotion.calm * 60 + currentEmotion.joy * 40 - currentEmotion.stress * 40 + 30));
-            const energyValue = Math.min(1, currentEmotion.joy + (currentEmotion.stress * 0.3));
-            const stressValue = currentEmotion.stress;
-
             const metrics = {
                 score: Math.min(100, Math.max(0, score)),
-                energy: energyValue,
-                stress: stressValue,
-                stability: 1 - Math.abs(energyValue - stressValue),
-                intensity: (energyValue + stressValue) / 2
+                energy: Math.min(1, currentEmotion.joy + (currentEmotion.stress * 0.3)),
+                stress: currentEmotion.stress,
+                stability: 1 - Math.abs((currentEmotion.joy + 0.1) - currentEmotion.stress),
+                intensity: (joy + stress) / 2
             };
 
-            updateUI(metrics);
+            updateUI(metrics, currentEmotion);
             drawAura(det.detection.box, currentEmotion);
         }
     } catch (e) {
-        console.warn("Detection pause", e);
+        console.warn("Detection cycle skipped");
     }
-
     requestAnimationFrame(loop);
 }
 
 /* ---------------------------------------------------------
-   VIZUALIZACIJA (AURA, TIMELINE, PULSE)
+   VISUALS & UI UPDATES
 --------------------------------------------------------- */
+function updateUI(m, currentEmotion) {
+    if (scoreEl) scoreEl.textContent = `${m.score} / 100`;
+    if (energyEl) energyEl.textContent = `${m.energy.toFixed(2)} unit`;
+    if (stressEl) stressEl.textContent = `${m.stress.toFixed(2)} ${m.stress < 0.3 ? 'low' : 'elevated'}`;
+    
+    const angleDeg = Math.round((m.energy - m.stress) * 45);
+    if (stabilityEl) stabilityEl.textContent = `${angleDeg}° focus`;
+    if (intensityEl) intensityEl.textContent = m.intensity > 0.7 ? "High Peak" : "Steady";
+
+    // Update Human Insight Text
+    const insight = getHumanInsight(m, currentEmotion);
+    if (aiTextEl) aiTextEl.textContent = insight;
+
+    // AI Voice Logic (Trigger every 45 seconds)
+    if (!window.lastSpeak || Date.now() - window.lastSpeak > 45000) {
+        speakInsight(insight);
+        window.lastSpeak = Date.now();
+    }
+
+    updateCompass3D((m.energy - m.stress) * Math.PI);
+    pushHistory(m);
+    drawTimeline();
+    drawPulse(m);
+}
+
 function drawAura(box, emotion) {
     if (!auraCtx) return;
     const { width: w, height: h } = auraCanvas;
@@ -121,7 +155,6 @@ function drawAura(box, emotion) {
 
     const centerX = w / 2;
     const centerY = h / 2;
-
     const grad = auraCtx.createRadialGradient(centerX, centerY, 20, centerX, centerY, 140);
     grad.addColorStop(0, `rgba(${color}, 0.5)`);
     grad.addColorStop(1, `rgba(${color}, 0)`);
@@ -130,28 +163,6 @@ function drawAura(box, emotion) {
     auraCtx.beginPath();
     auraCtx.arc(centerX, centerY, 100 + Math.sin(Date.now() * 0.005) * 15, 0, Math.PI * 2);
     auraCtx.fill();
-}
-
-function updateUI(m) {
-    if (scoreEl) scoreEl.textContent = `${m.score} / 100`;
-    if (energyEl) energyEl.textContent = `${m.energy.toFixed(2)} unit`;
-    if (stressEl) stressEl.textContent = `${m.stress.toFixed(2)} ${m.stress < 0.3 ? 'low' : 'elevated'}`;
-    
-    const angleDeg = Math.round((m.energy - m.stress) * 45);
-    if (stabilityEl) stabilityEl.textContent = `${angleDeg}° focus`;
-    if (intensityEl) intensityEl.textContent = m.intensity > 0.7 ? "High Peak" : "Steady";
-
-    if (aiTextEl) {
-        aiTextEl.textContent = m.score > 70 
-            ? "Coherence level optimal. Resonance is stable." 
-            : "Minor fluctuations. Practice rhythmic focus.";
-    }
-
-    updateCompass3D((m.energy - m.stress) * Math.PI);
-
-    pushHistory(m);
-    drawTimeline();
-    drawPulse(m);
 }
 
 function pushHistory(m) {
@@ -163,7 +174,6 @@ function drawTimeline() {
     if (!timelineCtx) return;
     const { width: w, height: h } = timelineCanvas;
     timelineCtx.clearRect(0, 0, w, h);
-    
     timelineCtx.beginPath();
     timelineCtx.strokeStyle = "#3abff8";
     timelineCtx.lineWidth = 2;
@@ -180,7 +190,6 @@ function drawPulse(m) {
     if (!pulseCtx) return;
     const { width: w, height: h } = pulseCanvas;
     pulseCtx.clearRect(0, 0, w, h);
-    
     pulseCtx.beginPath();
     pulseCtx.strokeStyle = "#7b5cff";
     const midY = h / 2;
@@ -194,13 +203,13 @@ function drawPulse(m) {
 }
 
 /* ---------------------------------------------------------
-   INICIALIZACIJA (SU TIESIOGINIU MODELIŲ KROVIMU)
+   INITIALIZATION
 --------------------------------------------------------- */
 async function init() {
     try {
         camStatus.textContent = "Syncing Neural Networks...";
         
-        // PAKEITIMAS: Krauname modelius tiesiai iš interneto saugyklos
+        // Loading models from a reliable remote CDN to bypass local storage issues
         const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights/';
         
         await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
@@ -213,7 +222,7 @@ async function init() {
         
         loop();
     } catch (err) {
-        camStatus.textContent = "Sync failed. System offline.";
+        camStatus.textContent = "Sync failed. Check connection.";
         console.error("Initialization Error:", err);
     }
 }
