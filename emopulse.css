@@ -13,51 +13,65 @@ body {
     background-color: var(--bg-dark);
     color: var(--text-main);
     font-family: 'Inter', sans-serif;
-    height: 100vh; /* Griežtas ekrano aukštis */
+    height: 100vh; /* Užrakiname aukštį */
     width: 100vw;
-    overflow: hidden; /* Panaikina slinkimą */
+    overflow: hidden; /* Panaikiname slinkimą */
     display: flex;
     justify-content: center;
 }
 
 .app-container {
     width: 100%;
-    max-width: 1200px;
+    max-width: 1400px;
     height: 100vh;
     padding: 20px;
     display: grid;
-    /* Sukuriame tinklelį pagal tavo pavyzdį */
+    /* Griežtas zonų suskirstymas pagal tavo pavyzdį */
     grid-template-areas: 
-        "header header header"
-        "visual visual info"
-        "drift drift info"
-        "footer footer footer";
-    grid-template-columns: 1fr 1fr 380px;
-    grid-template-rows: 50px 1fr 160px 200px; /* Tikslūs aukščiai */
+        "nav nav"
+        "visual info"
+        "drift summary"
+        "footer footer";
+    grid-template-columns: 1.2fr 0.8fr;
+    grid-template-rows: 50px 1fr 150px 180px; /* Tikslūs aukščiai, kad tilptų */
     gap: 15px;
 }
 
-/* --- VIRŠUS --- */
+/* --- NAVIGACIJA --- */
 .top-nav {
-    grid-area: header;
+    grid-area: nav;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-/* --- 3D SCENA --- */
+/* --- 3D KOMPASAS (Centras) --- */
 .visual-section {
     grid-area: visual;
-    position: relative;
-    min-height: 0; /* Leidžia grid elementui susitraukti */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 0; /* Leidžia susitraukti */
 }
 
 #compass3d {
     width: 100% !important;
     height: 100% !important;
+    max-height: 400px;
 }
 
-/* --- KAMERA (OVALAS) IR DRIFT --- */
+/* --- TEKSTAI (Dešinė viršuje) --- */
+.info-section {
+    grid-area: info;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+}
+
+.hero-title { font-size: 2.2rem; font-weight: 700; line-height: 1.1; }
+
+/* --- KAMERA (Mažas ovalas) --- */
 .drift-panel {
     grid-area: drift;
     background: var(--card-bg);
@@ -65,45 +79,31 @@ body {
     border-radius: 20px;
     display: flex;
     align-items: center;
-    padding: 15px 25px;
+    padding: 15px;
     gap: 20px;
 }
 
 .video-container {
-    width: 100px;  /* Mažas ovalas */
+    width: 100px; /* Mažas ovalas kaip pavyzdyje */
     height: 100px;
-    border-radius: 50%; /* Padaro ovalą/apskritimą */
+    border-radius: 50%; /* Padaro apskritimą */
     border: 2px solid var(--accent-blue);
     overflow: hidden;
     flex-shrink: 0;
 }
 
-#cam {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
+#cam { width: 100%; height: 100%; object-fit: cover; }
 
-/* --- DEŠINĖ PUSĖ (INFO) --- */
-.info-section {
-    grid-area: info;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.hero-title { font-size: 1.8rem; font-weight: 700; line-height: 1.2; }
-.hero-subtitle { color: var(--accent-blue); font-size: 0.9rem; }
-
+/* --- SUMMARY (Šalia kameros) --- */
 .status-card {
+    grid-area: summary;
     background: var(--card-bg);
     border: 1px solid var(--border);
-    border-radius: 15px;
+    border-radius: 20px;
     padding: 15px;
-    flex-grow: 1; /* Užpildo likusią vietą dešinėje */
 }
 
-/* --- APAČIA (METRIKOS) --- */
+/* --- APAČIA (Metrikos) --- */
 .bottom-metrics {
     grid-area: footer;
     display: grid;
@@ -116,15 +116,6 @@ body {
     border: 1px solid var(--border);
     border-radius: 15px;
     padding: 15px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
 }
 
-.metric-value { font-size: 1.8rem; font-weight: 800; }
-.metric-sub { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; }
-
-canvas.mini-chart { 
-    height: 60px !important; 
-    width: 100% !important; 
-}
+.metric-value { font-size: 1.8rem; font-weight: 800; color: #fff; }
