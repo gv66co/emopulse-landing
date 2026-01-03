@@ -2,49 +2,75 @@
 <html lang="lt">
 <head>
     <meta charset="UTF-8">
-    <title>EMOPULSE PRO - Fixed System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMOPULSE PRO - ULTIMATE TERMINAL</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
-        :root { --blue: #3abff8; --bg: #010307; --panel: rgba(10, 15, 25, 0.98); }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: var(--bg); color: white; font-family: sans-serif; height: 100vh; overflow: hidden; }
-        .app { display: flex; flex-direction: column; height: 100vh; padding: 15px; gap: 15px; }
+        :root { --cyan: #3abff8; --bg: #010307; --panel: rgba(10, 15, 25, 0.98); --glow: 0 0 15px rgba(58, 191, 248, 0.4); }
         
-        header { display: flex; justify-content: space-between; align-items: center; padding: 5px; }
-        .logo { font-size: 1.5rem; font-weight: bold; }
-        .logo span { color: var(--blue); }
-        #live-clock { font-family: monospace; font-size: 1.2rem; background: rgba(58, 191, 248, 0.1); padding: 5px 15px; border-radius: 5px; border: 1px solid var(--blue); }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; height: 100vh; overflow: hidden; }
 
+        .app-container { display: flex; flex-direction: column; height: 100vh; padding: 15px; gap: 15px; }
+
+        /* HEADER */
+        header { display: flex; justify-content: space-between; align-items: center; height: 50px; }
+        .logo { font-size: 1.8rem; font-weight: 900; letter-spacing: 2px; }
+        .logo span { color: var(--cyan); text-shadow: var(--glow); }
+        #live-clock { font-family: monospace; font-size: 1.3rem; color: var(--cyan); border: 1px solid var(--cyan); padding: 5px 15px; border-radius: 5px; box-shadow: var(--glow); }
+
+        /* GRID SYSTEM */
         .main-grid {
             display: grid;
+            flex: 1;
             grid-template-areas: "vis hero" "cam risk";
-            grid-template-columns: 1.2fr 0.8fr;
-            grid-template-rows: 1fr 160px;
-            gap: 15px; flex: 1; min-height: 0;
+            grid-template-columns: 1.3fr 0.7fr;
+            grid-template-rows: 1fr 180px;
+            gap: 15px; min-height: 0;
         }
-        .panel { background: var(--panel); border: 1px solid rgba(58, 191, 248, 0.2); border-radius: 15px; padding: 20px; position: relative; overflow: hidden; }
-        .area-vis { grid-area: vis; display: flex; flex-direction: column; }
-        .area-hero { grid-area: hero; display: flex; flex-direction: column; justify-content: center; gap: 15px; }
-        .area-cam { grid-area: cam; display: flex; align-items: center; gap: 20px; }
-        .area-risk { grid-area: risk; }
 
-        .cam-circle { width: 110px; height: 110px; border-radius: 50%; border: 3px solid var(--blue); overflow: hidden; flex-shrink: 0; }
-        #cam { width: 100%; height: 100%; object-fit: cover; }
-        
-        /* 3D Konteineris */
-        #visual-container { flex: 1; width: 100%; background: #000; border-radius: 10px; position: relative; display: flex; align-items: center; justify-content: center; }
-        #canvas3d { width: 100%; height: 100%; }
+        .panel { background: var(--panel); border: 1px solid rgba(58, 191, 248, 0.2); border-radius: 15px; position: relative; overflow: hidden; }
 
+        /* NEURAL CORE (Visual) */
+        .area-vis { grid-area: vis; background: radial-gradient(circle at center, #0a101f 0%, #010307 100%); }
+        #visual-container { width: 100%; height: 100%; }
+        .scan-line { position: absolute; width: 100%; height: 2px; background: var(--cyan); top: 0; box-shadow: var(--glow); animation: scan 4s linear infinite; z-index: 5; }
+        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
+
+        /* HERO / INPUT */
+        .area-hero { grid-area: hero; padding: 25px; display: flex; flex-direction: column; gap: 15px; }
+        h1 { font-size: 2rem; line-height: 1.1; margin-bottom: 10px; }
+        textarea { width: 100%; height: 100px; background: #000; border: 1px solid #333; border-radius: 10px; color: white; padding: 15px; resize: none; font-size: 1rem; }
+        button { padding: 15px; background: var(--cyan); color: black; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; text-transform: uppercase; }
+        button:hover { box-shadow: 0 0 20px var(--cyan); transform: translateY(-2px); }
+
+        /* CAMERA & AURA */
+        .area-cam { grid-area: cam; display: flex; align-items: center; gap: 25px; padding: 20px; }
+        .cam-box { position: relative; width: 130px; height: 130px; }
+        .cam-circle { width: 100%; height: 100%; border-radius: 50%; border: 3px solid var(--cyan); overflow: hidden; box-shadow: var(--glow); }
+        #cam { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        .aura-pulse { position: absolute; top: -5px; left: -5px; right: -5px; bottom: -5px; border: 2px solid var(--cyan); border-radius: 50%; animation: aura 2s infinite; opacity: 0; }
+        @keyframes aura { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(1.4); opacity: 0; } }
+
+        /* RISK / DRIFT */
+        .area-risk { grid-area: risk; padding: 20px; display: flex; flex-direction: column; justify-content: center; }
+        .label { font-size: 0.8rem; color: #64748b; text-transform: uppercase; margin-bottom: 5px; }
+        .big-val { font-size: 3rem; font-weight: 900; color: var(--cyan); text-shadow: var(--glow); }
+
+        /* FOOTER STATS */
         footer { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; height: 100px; }
-        .stat-card { background: var(--panel); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 15px; text-align: center; }
-        .val { font-size: 1.6rem; color: var(--blue); font-weight: bold; margin-top: 5px; }
+        .stat-card { background: var(--panel); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 15px; text-align: center; transition: 0.3s; }
+        .stat-card:hover { border-color: var(--cyan); }
+        .stat-card span { font-size: 0.7rem; color: #64748b; text-transform: uppercase; }
+        .stat-val { font-size: 1.6rem; font-weight: bold; color: var(--cyan); margin-top: 5px; }
 
-        textarea { width: 100%; height: 80px; background: #000; border: 1px solid #333; border-radius: 10px; color: white; padding: 10px; }
-        button { padding: 12px; background: var(--blue); border: none; border-radius: 5px; cursor: pointer; font-weight: bold; color: black; }
     </style>
 </head>
 <body>
 
-    <div class="app">
+    <div class="app-container">
         <header>
             <div class="logo">EMOPULSE <span>PRO</span></div>
             <div id="live-clock">00:00:00</div>
@@ -52,69 +78,142 @@
 
         <main class="main-grid">
             <section class="panel area-vis">
-                <div style="color: var(--blue); font-size: 0.7rem; margin-bottom: 10px;">NEURAL CORE: ONLINE</div>
-                <div id="visual-container">
-                    <canvas id="canvas3d"></canvas>
-                </div>
+                <div class="scan-line"></div>
+                <div id="visual-container"></div>
+                <div style="position:absolute; bottom:15px; left:15px; font-size:0.7rem; color:var(--cyan); font-family:monospace;">CORE_STATUS: ACTIVE</div>
             </section>
 
             <section class="panel area-hero">
-                <h2>Decode Your Resonance</h2>
-                <textarea placeholder="Kaip jautiesi?"></textarea>
-                <button onclick="alert('Analizuojama...')">ANALYZE FIELD</button>
+                <h1>Decode Your Resonance</h1>
+                <textarea id="userInput" placeholder="Kaip jautiesi šiuo metu?"></textarea>
+                <button onclick="startNeuralScan()">Start Neural Scan</button>
+                <div id="ai-status" style="font-size:0.8rem; color:#444;">System standby...</div>
             </section>
 
             <section class="panel area-cam">
-                <div class="cam-circle"><video id="cam" autoplay muted playsinline></video></div>
-                <div><p style="color: var(--blue);">Stability: 112°</p></div>
+                <div class="cam-box">
+                    <div class="aura-pulse"></div>
+                    <div class="cam-circle">
+                        <video id="cam" autoplay muted playsinline></video>
+                    </div>
+                </div>
+                <div>
+                    <div class="label">Emotional Drift</div>
+                    <div id="drift-status" style="font-size:1.4rem; font-weight:bold;">STABLE</div>
+                    <div style="color:var(--cyan); font-size:0.9rem;">Stability Index: 112°</div>
+                </div>
             </section>
 
             <section class="panel area-risk">
-                <div style="font-size: 0.8rem; color: #666;">STRESS RISK</div>
-                <div style="font-size: 2rem; font-weight: bold;">0.56</div>
+                <div class="label">Stress Risk Factor</div>
+                <div class="big-val" id="risk-val">0.56</div>
+                <div style="width:100%; height:4px; background:#1e293b; margin-top:10px; border-radius:2px;">
+                    <div id="risk-bar" style="width:56%; height:100%; background:var(--cyan); box-shadow:var(--glow);"></div>
+                </div>
             </section>
         </main>
 
         <footer>
-            <div class="stat-card"><span>Mood Map</span><div class="val">Positive</div></div>
-            <div class="stat-card"><span>Timeline</span><div class="val">Steady</div></div>
-            <div class="stat-card"><span>Score</span><div class="val" id="score-val">76</div></div>
-            <div class="stat-card"><span>Energy</span><div class="val" id="energy-val">0.66</div></div>
+            <div class="stat-card"><span>Mood Map</span><div class="stat-val" id="mood-val">Calm</div></div>
+            <div class="stat-card"><span>Coherence</span><div class="stat-val" id="coh-val">88%</div></div>
+            <div class="stat-card"><span>Emopulse Score</span><div class="stat-val" id="score-val">76</div></div>
+            <div class="stat-card"><span>Energy Level</span><div class="stat-val" id="energy-val">0.66</div></div>
         </footer>
     </div>
 
     <script>
-        // 1. LAIKRODIS
-        setInterval(() => {
-            document.getElementById('live-clock').textContent = new Date().toTimeString().split(' ')[0];
-        }, 1000);
-
-        // 2. KAMERA
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then(s => document.getElementById('cam').srcObject = s)
-            .catch(e => console.log("Kamera nerasta"));
-
-        // 3. STATISTIKA
-        setInterval(() => {
-            document.getElementById('score-val').textContent = Math.floor(70 + Math.random() * 10);
-            document.getElementById('energy-val').textContent = (0.6 + Math.random() * 0.1).toFixed(2);
-        }, 3000);
-
-        // 4. PAPRASTAS 3D OBJEKTAS (Kad nebūtų juoda)
-        const canvas = document.getElementById('canvas3d');
-        const ctx = canvas.getContext('2d');
-        function draw() {
-            canvas.width = canvas.clientWidth;
-            canvas.height = canvas.clientHeight;
-            const time = Date.now() * 0.002;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.strokeStyle = '#3abff8';
-            ctx.beginPath();
-            ctx.arc(canvas.width/2, canvas.height/2, 50 + Math.sin(time)*10, 0, Math.PI*2);
-            ctx.stroke();
-            requestAnimationFrame(draw);
+        // --- 1. LAIKRODIS ---
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('live-clock').textContent = now.toTimeString().split(' ')[0];
         }
-        draw();
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // --- 2. KAMERA ---
+        async function initCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                document.getElementById('cam').srcObject = stream;
+            } catch (err) {
+                console.error("Kamera nepasiekiama");
+                document.getElementById('ai-status').textContent = "Camera Error: Check Permissions";
+            }
+        }
+        initCamera();
+
+        // --- 3. GARSAS IR ANALIZĖS SIMULIACIJA ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSignal(freq) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            osc.start();
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.3);
+            osc.stop(audioCtx.currentTime + 0.3);
+        }
+
+        function startNeuralScan() {
+            audioCtx.resume();
+            playSignal(880);
+            document.getElementById('ai-status').textContent = "Scanning bio-metrics...";
+            document.getElementById('ai-status').style.color = "var(--cyan)";
+            
+            // Dinaminis skaičių kitimas
+            setInterval(() => {
+                const score = Math.floor(70 + Math.random() * 20);
+                const energy = (0.5 + Math.random() * 0.4).toFixed(2);
+                const risk = (Math.random() * 0.9).toFixed(2);
+                
+                document.getElementById('score-val').textContent = score;
+                document.getElementById('energy-val').textContent = energy;
+                document.getElementById('risk-val').textContent = risk;
+                document.getElementById('risk-bar').style.width = (risk * 100) + "%";
+                
+                if(risk > 0.7) playSignal(330); // Stress alert garsas
+            }, 3000);
+        }
+
+        // --- 4. 3D BRANDUOLYS (THREE.JS) ---
+        const container = document.getElementById('visual-container');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        container.appendChild(renderer.domElement);
+
+        // Sukuriame švytintį tinklą (Aura/Core)
+        const geometry = new THREE.IcosahedronGeometry(2, 2);
+        const material = new THREE.MeshBasicMaterial({ color: 0x3abff8, wireframe: true, transparent: true, opacity: 0.4 });
+        const core = new THREE.Mesh(geometry, material);
+        scene.add(core);
+
+        // Vidinis švytintis branduolys
+        const innerGeo = new THREE.SphereGeometry(0.8, 32, 32);
+        const innerMat = new THREE.MeshBasicMaterial({ color: 0x3abff8 });
+        const innerSphere = new THREE.Mesh(innerGeo, innerMat);
+        scene.add(innerSphere);
+
+        camera.position.z = 5;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            core.rotation.y += 0.005;
+            core.rotation.x += 0.002;
+            const pulse = 1 + Math.sin(Date.now() * 0.005) * 0.1;
+            innerSphere.scale.set(pulse, pulse, pulse);
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Responsive resize
+        window.addEventListener('resize', () => {
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        });
     </script>
 </body>
 </html>
