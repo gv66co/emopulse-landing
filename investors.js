@@ -1,6 +1,6 @@
 const THREE = window.THREE;
 
-// DOM
+// DOM Elementai
 const canvas = document.getElementById("deck3d");
 const label = document.getElementById("slideLabel");
 const btnPrev = document.getElementById("prev");
@@ -8,21 +8,21 @@ const btnNext = document.getElementById("next");
 const btnPause = document.getElementById("pause");
 
 if (!canvas) {
-  console.error("Canvas #deck3d not found.");
+    console.error("Canvas #deck3d not found.");
 }
 
-// Slides
+// Skaidrių sąrašas (SVARBU: keliai pakeisti į ./slides/ dėl stabilumo)
 const SLIDES = [
-  { name: "About us", src: "/slides/01-about.png" },
-  { name: "Problem", src: "/slides/02-problem.png" },
-  { name: "Solution", src: "/slides/03-solution.png" },
-  { name: "Product overview", src: "/slides/04-product.png" },
-  { name: "Market", src: "/slides/05-market.png" },
-  { name: "Competition", src: "/slides/06-competition.png" },
-  { name: "Financials", src: "/slides/07-financials.png" },
-  { name: "Team", src: "/slides/08-team-arvid.png" },
-  { name: "Summary", src: "/slides/09-summary.png" },
-  { name: "Thank you", src: "/slides/10-thankyou.png" }
+    { name: "About us", src: "./slides/01-about.png" },
+    { name: "Problem", src: "./slides/02-problem.png" },
+    { name: "Solution", src: "./slides/03-solution.png" },
+    { name: "Product overview", src: "./slides/04-product.png" },
+    { name: "Market", src: "./slides/05-market.png" },
+    { name: "Competition", src: "./slides/06-competition.png" },
+    { name: "Financials", src: "./slides/07-financials.png" },
+    { name: "Team", src: "./slides/08-team-arvid.png" },
+    { name: "Summary", src: "./slides/09-summary.png" },
+    { name: "Thank you", src: "./slides/10-thankyou.png" }
 ];
 
 let renderer, scene, camera;
@@ -36,217 +36,209 @@ let timer = null;
 let drag = { active: false, x: 0, y: 0 };
 let orbit = { yaw: 0, pitch: 0 };
 
-// Init
+// Inicijavimas
 init().catch((e) => {
-  console.error(e);
-  if (label) label.textContent = "Carousel failed. Check console.";
+    console.error("Init Error:", e);
+    if (label) label.textContent = "Error loading slides. Check /slides/ folder.";
 });
 
 async function init() {
-  renderer = new THREE.WebGLRenderer({
-    canvas,
-    antialias: true,
-    alpha: true
-  });
+    renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: true,
+        alpha: true
+    });
 
-  renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
-  renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.setClearColor(0x000000, 0);
+    renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.setClearColor(0x000000, 0);
 
-  scene = new THREE.Scene();
+    scene = new THREE.Scene();
 
-  camera = new THREE.PerspectiveCamera(42, 16 / 9, 0.1, 100);
-  camera.position.set(0, 0.1, 5.2);
+    camera = new THREE.PerspectiveCamera(42, canvas.clientWidth / canvas.clientHeight, 0.1, 100);
+    camera.position.set(0, 0.1, 5.2);
 
-  // Lighting
-  scene.add(new THREE.AmbientLight(0xffffff, 0.85));
+    // Apšvietimas
+    scene.add(new THREE.AmbientLight(0xffffff, 0.85));
+    const dir = new THREE.DirectionalLight(0xffffff, 0.8);
+    dir.position.set(2, 3, 3);
+    scene.add(dir);
 
-  const dir = new THREE.DirectionalLight(0xffffff, 0.8);
-  dir.position.set(2, 3, 3);
-  scene.add(dir);
+    // Pagrindinė grupė karuselei
+    group = new THREE.Group();
+    scene.add(group);
 
-  // Group
-  group = new THREE.Group();
-  scene.add(group);
+    // Užkrauname skaidres
+    await loadSlides();
+    layoutCards();
+    updateLabel();
 
-  // Load slides
-  await loadSlides();
-  layoutCards();
-  updateLabel();
+    resize();
+    window.addEventListener("resize", resize);
 
-  resize();
-  window.addEventListener("resize", resize);
-
-  bindUI();
-  startAutoRotate();
-  animate();
+    bindUI();
+    startAutoRotate();
+    animate();
 }
 
 function bindUI() {
-  btnPrev.addEventListener("click", () => go(index - 1));
-  btnNext.addEventListener("click", () => go(index + 1));
+    btnPrev?.addEventListener("click", () => go(index - 1));
+    btnNext?.addEventListener("click", () => go(index + 1));
 
-  btnPause.addEventListener("click", () => {
-    isPaused = !isPaused;
-    btnPause.setAttribute("aria-pressed", String(isPaused));
-    btnPause.textContent = isPaused ? "Resume" : "Pause";
-    if (isPaused) stopAutoRotate();
-    else startAutoRotate();
-  });
+    btnPause?.addEventListener("click", () => {
+        isPaused = !isPaused;
+        btnPause.textContent = isPaused ? "Resume" : "Pause";
+        if (isPaused) stopAutoRotate();
+        else startAutoRotate();
+    });
 
-  const wrap = canvas.parentElement;
+    const wrap = canvas.parentElement;
 
-  wrap.addEventListener("mouseenter", () => stopAutoRotate());
-  wrap.addEventListener("mouseleave", () => {
-    if (!isPaused) startAutoRotate();
-  });
+    // Pelės/Lietimo valdymas
+    wrap.addEventListener("pointerdown", (e) => {
+        drag.active = true;
+        drag.x = e.clientX;
+        drag.y = e.clientY;
+        wrap.setPointerCapture(e.pointerId);
+    });
 
-  wrap.addEventListener("pointerdown", (e) => {
-    drag.active = true;
-    drag.x = e.clientX;
-    drag.y = e.clientY;
-    wrap.setPointerCapture(e.pointerId);
-  });
+    wrap.addEventListener("pointermove", (e) => {
+        if (!drag.active) return;
+        const dx = e.clientX - drag.x;
+        const dy = e.clientY - drag.y;
+        drag.x = e.clientX;
+        drag.y = e.clientY;
 
-  wrap.addEventListener("pointermove", (e) => {
-    if (!drag.active) return;
+        orbit.yaw += dx * 0.003;
+        orbit.pitch += dy * 0.002;
+        orbit.pitch = Math.max(-0.35, Math.min(0.35, orbit.pitch));
+    });
 
-    const dx = e.clientX - drag.x;
-    const dy = e.clientY - drag.y;
+    wrap.addEventListener("pointerup", () => (drag.active = false));
 
-    drag.x = e.clientX;
-    drag.y = e.clientY;
-
-    orbit.yaw += dx * 0.003;
-    orbit.pitch += dy * 0.002;
-
-    orbit.pitch = clamp(orbit.pitch, -0.35, 0.35);
-  });
-
-  wrap.addEventListener("pointerup", () => (drag.active = false));
-  wrap.addEventListener("pointercancel", () => (drag.active = false));
-
-  wrap.addEventListener(
-    "wheel",
-    (e) => {
-      e.preventDefault();
-      camera.position.z = clamp(
-        camera.position.z + e.deltaY * 0.002,
-        3.2,
-        7.5
-      );
-    },
-    { passive: false }
-  );
+    wrap.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        camera.position.z = Math.max(3.2, Math.min(7.5, camera.position.z + e.deltaY * 0.002));
+    }, { passive: false });
 }
 
 async function loadSlides() {
-  const loader = new THREE.TextureLoader();
+    const loader = new THREE.TextureLoader();
+    const textures = await Promise.all(
+        SLIDES.map((s) =>
+            new Promise((resolve) => {
+                loader.load(s.src, (t) => {
+                    t.colorSpace = THREE.SRGBColorSpace;
+                    t.anisotropy = 8;
+                    resolve(t);
+                }, undefined, () => {
+                    console.warn(`Failed to load: ${s.src}`);
+                    resolve(null); // Tęsiam net jei viena skaidrė nerasta
+                });
+            })
+        )
+    );
 
-  const textures = await Promise.all(
-    SLIDES.map(
-      (s) =>
-        new Promise((resolve, reject) => {
-          loader.load(
-            s.src,
-            (t) => {
-              t.colorSpace = THREE.SRGBColorSpace;
-              t.anisotropy = 8;
-              resolve(t);
-            },
-            undefined,
-            (err) => reject(err)
-          );
-        })
-    )
-  );
-
-  for (const tex of textures) {
-    const card = makeCard(tex);
-    group.add(card);
-    cards.push(card);
-  }
+    textures.forEach((tex, i) => {
+        if (tex) {
+            const card = makeCard(tex);
+            group.add(card);
+            cards.push(card);
+        }
+    });
 }
 
 function makeCard(tex) {
-  const w = 3.6;
-  const h = 2.025;
+    const w = 3.6;
+    const h = 2.025;
+    const g = new THREE.Group();
 
-  const geo = new THREE.PlaneGeometry(w, h);
-  const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true });
-  const mesh = new THREE.Mesh(geo, mat);
+    // Pagrindinė skaidrė
+    const geo = new THREE.PlaneGeometry(w, h);
+    const mat = new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide });
+    const mesh = new THREE.Mesh(geo, mat);
 
-  // Neon frame
-  const frameGeo = new THREE.PlaneGeometry(w + 0.12, h + 0.12);
-  const frameMat = new THREE.MeshBasicMaterial({
-    color: 0x0a1224,
-    transparent: true,
-    opacity: 0.65
-  });
-  const frame = new THREE.Mesh(frameGeo, frameMat);
-  frame.position.z = -0.02;
+    // Neoninis rėmelis / fonas
+    const frameGeo = new THREE.PlaneGeometry(w + 0.15, h + 0.15);
+    const frameMat = new THREE.MeshBasicMaterial({
+        color: 0x3abff8,
+        transparent: true,
+        opacity: 0.15,
+        side: THREE.DoubleSide
+    });
+    const frame = new THREE.Mesh(frameGeo, frameMat);
+    frame.position.z = -0.01;
 
-  const g = new THREE.Group();
-  g.add(mesh);
-  g.add(frame);
-
-  return g;
+    g.add(mesh);
+    g.add(frame);
+    return g;
 }
 
 function layoutCards() {
-  const radius = 5.4;
-  const step = 0.42;
+    const radius = 5.0; // Karuselės spindulys
+    const step = 0.5;   // Atstumas tarp kortelių radianais
 
-  for (let i = 0; i < cards.length; i++) {
-    const rel = i - index;
-    const a = rel * step;
+    cards.forEach((card, i) => {
+        const rel = i - index;
+        const a = rel * step;
 
-    const x = Math.sin(a) * 1.9;
-    const z = Math.cos(a) * radius - radius;
-    const y = -Math.abs(rel) * 0.02;
+        const x = Math.sin(a) * 2.2;
+        const z = Math.cos(a) * radius - radius;
+        const y = -Math.abs(rel) * 0.05;
 
-    cards[i].userData.target = {
-      position: new THREE.Vector3(x, y, z),
-      rotation: new THREE.Euler(0, -a * 0.65, 0)
-    };
-  }
+        card.userData.target = {
+            position: new THREE.Vector3(x, y, z),
+            rotation: new THREE.Euler(0, -a * 0.8, 0)
+        };
+    });
 }
 
 function go(nextIdx) {
-  index = (nextIdx + cards.length) % cards.length;
-  layoutCards();
-  updateLabel();
-  if (!isPaused) resetAutoRotate();
+    index = (nextIdx + cards.length) % cards.length;
+    layoutCards();
+    updateLabel();
+    if (!isPaused) resetAutoRotate();
 }
 
 function updateLabel() {
-  label.textContent = `${index + 1}/${SLIDES.length} — ${SLIDES[index].name}`;
+    if (label) label.textContent = `${index + 1}/${SLIDES.length} — ${SLIDES[index].name}`;
 }
 
 function startAutoRotate() {
-  stopAutoRotate();
-  timer = setInterval(() => go(index + 1), 3500);
+    stopAutoRotate();
+    timer = setInterval(() => go(index + 1), 4000);
 }
 
 function stopAutoRotate() {
-  if (timer) clearInterval(timer);
-  timer = null;
+    if (timer) clearInterval(timer);
 }
 
 function resetAutoRotate() {
-  stopAutoRotate();
-  startAutoRotate();
+    stopAutoRotate();
+    startAutoRotate();
+}
+
+function resize() {
+    camera.aspect = canvas.clientWidth / canvas.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
 }
 
 function animate() {
-  requestAnimationFrame(animate);
+    requestAnimationFrame(animate);
 
-  group.rotation.y += (orbit.yaw - group.rotation.y) * 0.08;
-  group.rotation.x += (orbit.pitch - group.rotation.x) * 0.08;
+    // Sklandus grupės pasukimas pagal drag'ą
+    group.rotation.y += (orbit.yaw - group.rotation.y) * 0.08;
+    group.rotation.x += (orbit.pitch - group.rotation.x) * 0.08;
 
-  for (const c of cards) {
-    const t = c.userData.target;
-    if (!t) continue;
+    // Sklandus kortelių judėjimas į jų vietas
+    cards.forEach((c) => {
+        const t = c.userData.target;
+        if (t) {
+            c.position.lerp(t.position, 0.1);
+            c.rotation.y += (t.rotation.y - c.rotation.y) * 0.1;
+        }
+    });
 
-    c.position.lerp(t.position, 0.10);
-    c.rotation.x += (t.rotation
+    renderer.render(scene, camera);
+}
