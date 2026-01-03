@@ -1,69 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Emopulse — Real-Time Emotional Intelligence</title>
-
-  <meta name="description" content="Advanced AI that reads biological signals and maps your emotional field in real-time.">
-  <link rel="stylesheet" href="styles.css">
-  
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;800&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emopulse Live – AI Interface</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 </head>
-
 <body>
 
-  <section class="hero section reveal">
-    <div class="logo-container">
-        <div class="logo-dot" style="width: 50px; height: 50px; background: linear-gradient(135deg, #3abff8, #7b5cff); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 900; margin: 0 auto 20px;">E</div>
-    </div>
-    
-    <h1>Emotional AI</h1>
-    <p class="lead">Harnessing real-time emotional resonance through neural signal processing.</p>
-
-    <div class="hero-buttons">
-      <a href="live.html" style="text-decoration: none;">
-        <button class="btn big interactive glide">Enter Live Experience</button>
-      </a>
-
-      <a href="investors.html" style="text-decoration: none;">
-        <button class="btn ghost interactive glide">Pitch Deck</button>
-      </a>
-    </div>
-  </section>
-
-  <div class="spiral-container reveal">
-    <div id="aura"></div>
-    <div class="visual-core">
-        <canvas id="pulseCanvas" width="700" height="200"></canvas>
-    </div>
-  </div>
-
-  <section class="analysis-block section-tight reveal">
-    <div class="coach-box card-physics tilt">
-      <div class="coach-header">
-        <span class="status-dot"></span> AI ANALYST
-      </div>
-      <div id="coachText" class="coach-text">Waiting for resonance input...</div>
-    </div>
-  </section>
-
-  <div class="emopulse-box reveal section-tight">
-    <textarea id="userInput" placeholder="Describe your current state or thoughts..." aria-label="Text input"></textarea>
-    <button id="sendBtn" class="btn big interactive glide">Analyze Resonance</button>
-  </div>
-
-  <footer>
-    <div class="footer-content">
-        <span>© 2026 Emopulse Global.</span>
-        <div class="footer-links">
-            <a href="live.html">Live Model</a>
-            <a href="investors.html">Investors</a>
+<div class="app-container">
+    <div class="visual-section">
+        <div class="stage-3d">
+            <video id="cam" autoplay muted playsinline></video>
+            <canvas id="auraCanvas" class="aura-layer" width="320" height="320"></canvas>
+        </div>
+        
+        <div class="drift-panel">
+            <div class="drift-circle" id="auraIndicator"></div>
+            <div>
+                <h3 id="camStatus">Initializing field...</h3>
+                <div class="tags" id="aiTags"></div>
+            </div>
         </div>
     </div>
-  </footer>
 
-  <script src="app.js" defer></script>
+    <div class="info-section">
+        <h1 class="hero-title">Aura <span style="color:var(--accent-blue)">Sync</span></h1>
+        <p class="hero-subtitle">Real-time emotional resonance monitoring.</p>
+        
+        <div class="status-card">
+            <h3>Natasha's Insight</h3>
+            <div class="signature-text" id="aiText">Establishing baseline...</div>
+            <div class="metric-value" id="scoreValue">0</div>
+        </div>
+    </div>
 
+    <div class="bottom-metrics">
+        <div class="metric-box">
+            <h4>Energy Level</h4>
+            <div class="metric-value" id="energy">0.00</div>
+            <canvas id="pulse" class="mini-chart"></canvas>
+        </div>
+        <div class="metric-box">
+            <h4>Stress Index</h4>
+            <div class="metric-value" id="stress">0.00</div>
+            <div id="stressIcon" style="font-size: 2rem;">☀️</div>
+        </div>
+        <div class="metric-box">
+            <h4>Stability Score</h4>
+            <div class="metric-value" id="score">0 / 100</div>
+            <canvas id="timeline" class="mini-chart"></canvas>
+        </div>
+    </div>
+</div>
+
+<script type="module" src="app.js"></script>
 </body>
 </html>
