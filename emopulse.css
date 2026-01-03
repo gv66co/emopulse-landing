@@ -1,121 +1,107 @@
 :root {
-    --bg-dark: #02040a;
-    --card-bg: rgba(13, 17, 23, 0.7);
-    --accent-blue: #3abff8;
-    --text-main: #ffffff;
-    --text-muted: #7d8590;
+    --bg: #02040a;
+    --card: rgba(13, 17, 23, 0.9);
+    --accent: #3abff8;
     --border: rgba(255, 255, 255, 0.05);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-    background-color: var(--bg-dark);
-    color: var(--text-main);
+    background: var(--bg);
+    color: #fff;
     font-family: 'Inter', sans-serif;
-    height: 100vh; /* Užrakiname aukštį */
-    width: 100vw;
-    overflow: hidden; /* Panaikiname slinkimą */
-    display: flex;
-    justify-content: center;
+    height: 100vh;
+    overflow: hidden;
 }
 
 .app-container {
-    width: 100%;
-    max-width: 1400px;
-    height: 100vh;
-    padding: 20px;
-    display: grid;
-    /* Griežtas zonų suskirstymas pagal tavo pavyzdį */
-    grid-template-areas: 
-        "nav nav"
-        "visual info"
-        "drift summary"
-        "footer footer";
-    grid-template-columns: 1.2fr 0.8fr;
-    grid-template-rows: 50px 1fr 150px 180px; /* Tikslūs aukščiai, kad tilptų */
-    gap: 15px;
-}
-
-/* --- NAVIGACIJA --- */
-.top-nav {
-    grid-area: nav;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-/* --- 3D KOMPASAS (Centras) --- */
-.visual-section {
-    grid-area: visual;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 0; /* Leidžia susitraukti */
-}
-
-#compass3d {
-    width: 100% !important;
-    height: 100% !important;
-    max-height: 400px;
-}
-
-/* --- TEKSTAI (Dešinė viršuje) --- */
-.info-section {
-    grid-area: info;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    gap: 10px;
-}
-
-.hero-title { font-size: 2.2rem; font-weight: 700; line-height: 1.1; }
-
-/* --- KAMERA (Mažas ovalas) --- */
-.drift-panel {
-    grid-area: drift;
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    display: flex;
-    align-items: center;
-    padding: 15px;
+    height: 100vh;
+    padding: 20px;
     gap: 20px;
 }
 
-.video-container {
-    width: 100px; /* Mažas ovalas kaip pavyzdyje */
-    height: 100px;
-    border-radius: 50%; /* Padaro apskritimą */
-    border: 2px solid var(--accent-blue);
-    overflow: hidden;
-    flex-shrink: 0;
+/* --- NAV --- */
+.top-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 50px;
+}
+.logo-text { font-size: 1.4rem; font-weight: 800; letter-spacing: 1px; }
+.pro { color: var(--accent); }
+.nav-links { display: flex; gap: 25px; align-items: center; color: #7d8590; }
+.nav-links a { color: inherit; text-decoration: none; font-size: 0.9rem; }
+.nav-links a.active { color: #fff; font-weight: bold; }
+
+/* --- MAIN CONTENT (3 STULPELIAI) --- */
+.main-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr 0.8fr;
+    gap: 20px;
+    flex: 1; /* Užpildo visą likusią vietą virš footerio */
+    min-height: 0;
 }
 
-#cam { width: 100%; height: 100%; object-fit: cover; }
-
-/* --- SUMMARY (Šalia kameros) --- */
-.status-card {
-    grid-area: summary;
-    background: var(--card-bg);
+/* Kairė */
+.left-col { display: flex; flex-direction: column; gap: 20px; }
+.visual-engine { 
+    flex: 1; 
+    background: radial-gradient(circle, rgba(58, 191, 248, 0.05) 0%, transparent 80%);
     border: 1px solid var(--border);
     border-radius: 20px;
-    padding: 15px;
+    position: relative;
 }
+.engine-label { position: absolute; bottom: 15px; left: 20px; font-size: 0.7rem; color: var(--accent); opacity: 0.6; }
 
-/* --- APAČIA (Metrikos) --- */
-.bottom-metrics {
-    grid-area: footer;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 15px;
+.drift-panel {
+    height: 150px;
+    background: var(--card);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    gap: 20px;
 }
+.video-container {
+    width: 100px; height: 100px;
+    border-radius: 50%; /* Ovalas */
+    border: 2px solid var(--accent);
+    overflow: hidden;
+}
+#cam { width: 100%; height: 100%; object-fit: cover; }
 
-.metric-box {
-    background: var(--card-bg);
+/* Centras */
+.mid-col { display: flex; flex-direction: column; justify-content: center; gap: 30px; }
+.hero-text h1 { font-size: 2.5rem; line-height: 1.1; }
+.input-area textarea {
+    width: 100%; height: 100px;
+    background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 15px;
-    padding: 15px;
+    border-radius: 12px;
+    padding: 15px; color: #fff; margin-bottom: 15px;
+}
+.analyze-btn {
+    width: 100%; padding: 15px;
+    background: #0f172a; border: 1px solid var(--accent);
+    color: var(--accent); border-radius: 8px; cursor: pointer;
 }
 
-.metric-value { font-size: 1.8rem; font-weight: 800; color: #fff; }
+/* Dešinė */
+.right-col { display: flex; flex-direction: column; gap: 20px; }
+.info-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 20px; flex: 1; }
+.card-header { color: var(--accent); margin-bottom: 15px; font-size: 0.9rem; text-transform: uppercase; }
+
+/* --- APAČIA --- */
+.bottom-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    height: 180px;
+}
+.metric-box { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 20px; }
+.m-label { font-size: 0.75rem; color: #7d8590; text-transform: uppercase; }
+.m-value { display: block; font-size: 2rem; font-weight: 800; color: var(--accent); margin-top: 10px; }
+.accent { color: var(--accent); }
