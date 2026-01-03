@@ -1,90 +1,56 @@
-<!DOCTYPE html>
-<html lang="lt">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Emopulse PRO - Live Terminal</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="emopulse.css">
-</head>
-<body>
-    <div class="app-container">
-        <header class="top-nav">
-            <div class="logo-group">
-                <i class="fa-solid fa-circle-nodes logo-icon"></i>
-                <span class="logo-text">Emopulse <span class="pro">PRO</span></span>
-            </div>
-            <nav class="nav-links">
-                <a href="#" class="active">Live Terminal</a>
-                <a href="#">Investors</a>
-                <a href="#">Technology</a>
-                <span class="clock">17:45:12</span>
-            </nav>
-        </header>
+<div class="app-container">
+    <header class="top-nav">
+        <div class="logo">Emopulse <span>PRO</span></div>
+        <div class="nav-links">
+            <a href="#" class="active">Live Terminal</a>
+            <a href="investors.html">Investors</a>
+            <span id="live-clock">00:00:00</span>
+        </div>
+    </header>
 
-        <main class="main-content">
-            <section class="left-col">
-                <div class="visual-engine">
-                    <div id="compass3d"></div> <div class="engine-label">NEURAL RESONANCE CORE</div>
+    <main class="content-grid">
+        <div class="left-section">
+            <div id="visual-container" class="canvas-wrapper">
+                <canvas id="compass3d"></canvas>
+                <div class="overlay-label">NEURAL CORE ACTIVE</div>
+            </div>
+            
+            <div class="camera-panel">
+                <div class="video-circle">
+                    <video id="cam" autoplay muted playsinline></video>
                 </div>
-                
-                <div class="drift-panel">
-                    <div class="video-container">
-                        <video id="cam" autoplay muted playsinline></video>
-                    </div>
-                    <div class="drift-stats">
-                        <h3>Emotional Drift</h3>
-                        <p>Stability: <span class="accent">112° toward Calm</span></p>
-                        <p>Intensity: <span class="accent">Low</span></p>
-                        <p>Score: <span class="accent">76/100</span></p>
-                    </div>
+                <div class="camera-stats">
+                    <p>Stability: <span class="blue" id="stab-val">0°</span></p>
+                    <p>Coherence: <span class="blue" id="coh-val">0%</span></p>
                 </div>
-            </section>
+            </div>
+        </div>
 
-            <section class="mid-col">
-                <div class="hero-text">
-                    <h1>Understand your emotional field in real time</h1>
-                    <p>Our neural engine maps micro-expressions to decode your internal resonance.</p>
-                </div>
-                <div class="input-area">
-                    <textarea placeholder="Type anything you're feeling..."></textarea>
-                    <button class="analyze-btn">Analyze my emotional field</button>
-                </div>
-            </section>
+        <div class="right-section">
+            <div class="hero-block">
+                <h1>Decode Your Emotional Resonance</h1>
+                <p>Real-time micro-expression analysis via neural engine v2.1</p>
+            </div>
 
-            <section class="right-col">
-                <div class="info-card ai-summary">
-                    <div class="card-header"><i class="fa-solid fa-microchip"></i> AI Summary</div>
-                    <p>Biometric tension detected. System recommends immediate re-centering. #STRESS_ALERT</p>
-                </div>
-                <div class="info-card stress-risk">
-                    <div class="card-header"><i class="fa-solid fa-bolt"></i> Stress Risk</div>
-                    <div class="chart-placeholder">
-                        <canvas id="stressChart"></canvas>
-                    </div>
-                    <div class="risk-footer">Factor: <span class="accent">0.56</span></div>
-                </div>
-            </section>
-        </main>
+            <div class="ai-box">
+                <div class="box-tag">AI SUMMARY</div>
+                <p id="ai-text">System ready. Waiting for biometric input...</p>
+            </div>
 
-        <footer class="bottom-metrics">
-            <div class="metric-box">
-                <span class="m-label">Mood Map</span>
-                <div class="mini-plot"></div>
+            <div class="risk-card">
+                <div class="box-tag">STRESS RISK</div>
+                <div class="risk-value" id="risk-score">0.00</div>
+                <div class="mini-wave-container">
+                   <canvas id="stressChart"></canvas>
+                </div>
             </div>
-            <div class="metric-box">
-                <span class="m-label">Emotional Timeline</span>
-                <div class="mini-plot"></div>
-            </div>
-            <div class="metric-box">
-                <span class="m-label">Emopulse Score</span>
-                <span class="m-value">76<small>/100</small></span>
-            </div>
-            <div class="metric-box">
-                <span class="m-label">Energy Level</span>
-                <span class="m-value">0.66 <small>rising</small></span>
-            </div>
-        </footer>
-    </div>
-</body>
-</html>
+        </div>
+    </main>
+
+    <footer class="bottom-bar">
+        <div class="stat-card"><span>Mood Map</span><div class="chart-slot"></div></div>
+        <div class="stat-card"><span>Timeline</span><div class="chart-slot"></div></div>
+        <div class="stat-card"><span>Score</span><div class="big-num" id="score-val">0</div></div>
+        <div class="stat-card"><span>Energy</span><div class="big-num" id="energy-val">0.00</div></div>
+    </footer>
+</div>
