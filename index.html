@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="lt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EMOPULSE V5 // PRO DASHBOARD</title>
-    <link rel="stylesheet" href="./emopulse.css">
+    <link rel="stylesheet" href="emopulse.css">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     
     <script type="importmap">
@@ -20,34 +20,35 @@
     <div class="pro-container">
         <header class="top-bar">
             <div class="logo">EMOPULSE <span class="cyan">V5</span></div>
-            <div class="system-status">SYSTEM STATUS: <span id="status-text" class="cyan">SYNCHRONIZED</span></div>
+            <div class="system-status">STATUS: <span id="status-text" class="online-status">ONLINE</span></div>
         </header>
 
-        <main class="pro-grid">
-            <section class="panel camera-panel">
+        <div class="pro-grid">
+            <div class="panel camera-panel">
                 <div class="cam-container">
                     <video id="cam" autoplay muted playsinline></video>
-                    <canvas id="face-mesh-canvas"></canvas> </div>
+                    <canvas id="face-mesh-canvas"></canvas>
+                </div>
                 <div class="data-block">
                     <div class="label">NEURAL DRIFT</div>
-                    <div id="neural-drift-val" class="val-large">+0.000</div>
-                    <div class="progress-bar"><div id="drift-bar" class="fill"></div></div>
+                    <div id="neural-drift-val" class="val-large">+0.842</div>
+                    <div class="progress-bar"><div class="fill"></div></div>
                 </div>
-            </section>
+            </div>
 
-            <section class="main-visual">
+            <div class="main-visual">
                 <canvas id="compass3d"></canvas>
-            </section>
+            </div>
 
-            <section class="panel analysis-panel">
+            <div class="panel analysis-panel">
                 <div class="label">EMOTIONAL SUMMARY</div>
                 <div id="aiText" class="status-msg">Analyzing facial features...</div>
                 <div class="tag-cloud">
                     <span class="tag">#monitoring</span>
                     <span class="tag">#biometric</span>
                 </div>
-            </section>
-        </main>
+            </div>
+        </div>
 
         <footer class="pro-footer">
             <div class="stat-card">
@@ -56,7 +57,7 @@
             </div>
             <div class="stat-card">
                 <div class="label">ENERGY</div>
-                <div class="val"><span id="energy">0.00</span> <small>rising</small></div>
+                <div class="val" id="energy">0.00</div>
             </div>
             <div class="stat-card">
                 <div class="label">STRESS RISK</div>
@@ -64,11 +65,10 @@
             </div>
             <div class="stat-card">
                 <div class="label">STABILITY</div>
-                <div class="val"><span id="stability">112°</span> <small>toward Calm</small></div>
+                <div class="val" id="stability">112°</div>
             </div>
         </footer>
     </div>
-
-    <script type="module" src="./app.js"></script>
+    <script type="module" src="app.js"></script>
 </body>
 </html>
