@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en" class="emopulse-theme">
+<head>
+  <meta charset="UTF-8">
+  <title>Emopulse – Dashboard & Analysis</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <style>
+    /* Greitas pataisymas, kad matytųsi pulsacija */
+    .ai-coach-pulse {
+      width: 10px; height: 10px; background: #3abff8;
+      border-radius: 50%; margin-right: 10px;
+      animation: pulse-ring 1.5s infinite;
+    }
+    @keyframes pulse-ring { 0% { transform: scale(0.8); opacity: 0.7; } 100% { transform: scale(1.5); opacity: 0; } }
+  </style>
+</head>
+
+<body class="emopulse-theme">
+  <header class="emo-page-header">
+    <div class="emo-header-inner">
+      <div class="emo-logo-block">
+        <div class="emo-logo-mark"></div>
+        <div class="emo-logo-text">
+          <span class="emo-logo-title">Emopulse</span>
+          <span class="emo-logo-sub">Emotional AI Assistant</span>
+        </div>
+      </div>
+      <button class="ai-coach-button" onclick="natashaSpeak('Hello. I am Natasha. I am monitoring your emotional field resonance now.')">
+        <div class="ai-coach-pulse"></div>
+        <span>Ask Natasha</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="emo-main">
+    <section class="hero-section">
+      <div class="hero-grid">
+        <div class="hero-visual">
+          <div class="emo-card">
+            <div class="emo-card-header">
+              <div class="emo-card-title">Live emotional radar</div>
+              <span class="emo-pill emo-tag-soft">Simulation Mode</span>
+            </div>
+            <div class="emo-hero-visual-row">
+              <div class="emo-aura-wrapper calm">
+                <div class="emo-aura-core"></div>
+              </div>
+              <div class="drift-core">
+                <div class="drift-label">Emotional drift</div>
+                <div class="drift-value positive">+12%</div>
+              </div>
+            </div>
+            <div class="scenario-buttons">
+              <button class="scenario-button" onclick="natashaSpeak('I detect a positive shift in your energy. Joy levels are rising.')">Smile</button>
+              <button class="scenario-button" onclick="natashaSpeak('System alert. High stress detected. Please focus on your breathing.')">Stress</button>
+              <button class="scenario-button" onclick="natashaSpeak('Baseline established. Field is now stable.')">Neutral</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-copy">
+          <div class="emo-card">
+            <h1 class="hero-title">Emotional Dashboard</h1>
+            <p class="hero-subtitle">Comprehensive analysis of your cognitive and emotional trajectory.</p>
+            <div class="hero-cta-row">
+              <a href="live.html" class="ai-coach-button" style="text-decoration:none">
+                <span>Try Live Scanner</span>
+              </a>
+            </div>
+          </div>
+          
+          <div class="emotional-weather-card">
+            <div class="emo-card-title">Current Outlook</div>
+            <div class="emotional-weather-main">Clear with rising focus</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    </main>
+
+  <script>
+    // NATASHA VOICE ENGINE
+    function natashaSpeak(text) {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const msg = new SpeechSynthesisUtterance(text);
+      msg.lang = 'en-US';
+      msg.rate = 0.9; 
+      msg.pitch = 1.1; // Šiek tiek aukštesnis moteriškas tonas
+      window.speechSynthesis.speak(msg);
+    }
+  </script>
+</body>
+</html>
