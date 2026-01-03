@@ -1,107 +1,151 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Emopulse PRO – Advanced Emotional AI</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Emopulse PRO – Advanced Biometric Resonance Interface" />
+    <title>Emopulse PRO // Neural Interface</title>
 
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
-  <link rel="stylesheet" href="./emopulse.css" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
 
-  <script type="importmap">
+    <link rel="stylesheet" href="./emopulse.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+
+    <script type="importmap">
     {
-      "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
-      }
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+        }
     }
-  </script>
+    </script>
 
-  <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 </head>
 
 <body>
-  <div class="app-container">
-    
-    <section class="visual-section">
-      <div class="stage-3d">
-        <canvas id="compass3d"></canvas>
-        <div class="vignette"></div>
-        <div class="brand">
-          <div class="name">Emopulse PRO</div>
-        </div>
-      </div>
+    <div class="app-container">
+        
+        <header class="top-nav">
+            <div class="logo-group">
+                <div class="logo-icon"></div>
+                <div class="logo-text">EMOPULSE <span class="pro-badge">PRO</span></div>
+            </div>
+            <nav class="nav-links">
+                <a href="index.html" class="nav-item active">Live Terminal</a>
+                <a href="investors.html" class="nav-item">Investors</a>
+                <a href="#" class="nav-item">Technology</a>
+                <div class="system-time" id="clock">00:00:00</div>
+            </nav>
+        </header>
 
-      <div class="drift-panel">
-        <div class="video-container">
-          <video id="cam" autoplay muted playsinline width="120" height="120"></video>
-          <canvas id="overlay"></canvas>
-        </div>
-        <div>
-          <h3 style="color: var(--text-muted); font-size: 0.75rem; margin: 0 0 10px 0; letter-spacing: 1px; text-transform: uppercase;">Emotional Drift</h3>
-          <div class="tag">Stability: <span id="stability" style="color: #fff;">Initializing...</span></div>
-          <div class="tag">Intensity: <span id="intensity" style="color: #fff;">Calibrating</span></div>
-          <div class="tag">Score: <span id="score" style="color: #fff;">0 / 100</span></div>
-        </div>
-      </div>
-      
-      <div id="camStatus" style="font-size: 0.7rem; color: var(--text-muted); opacity: 0.6; margin-top: 10px;">
-        System Status: Initializing AI Core...
-      </div>
-    </section>
+        <main class="main-layout">
+            <section class="visual-engine">
+                <div class="stage-3d">
+                    <canvas id="compass3d"></canvas>
+                    <div class="vignette"></div>
+                    
+                    <div class="core-label">
+                        <span class="label-sub">NEURAL RESONANCE CORE</span>
+                        <h2 class="label-main">ACTIVE FIELD</h2>
+                    </div>
+                </div>
 
-    <section class="info-section">
-      <nav style="display: flex; gap: 25px; margin-bottom: 40px; justify-content: flex-end; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
-        <span style="color: #fff; border-bottom: 2px solid var(--accent-purple); padding-bottom: 5px;">Live model</span>
-        <a href="investors.html" style="color: var(--text-muted); text-decoration: none; transition: 0.3s;" onmouseover="this.style.color='var(--accent-blue)'" onmouseout="this.style.color='var(--text-muted)'">Investors</a>
-      </nav>
+                <div class="drift-panel">
+                    <div class="sensor-group">
+                        <div class="video-wrap">
+                            <video id="cam" autoplay muted playsinline></video>
+                            <canvas id="overlay"></canvas>
+                        </div>
+                        <div class="sensor-stats">
+                            <div class="stat-row">
+                                <span class="s-label">DRIFT:</span>
+                                <span id="stability" class="s-value">CALIBRATING</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="s-label">STATE:</span>
+                                <span id="intensity" class="s-value">STABLE</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="s-label">COHERENCE:</span>
+                                <span id="score" class="s-value">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="camStatus" class="pulse-status">SYSTEM ONLINE</div>
+                </div>
+            </section>
 
-      <h1 class="hero-title">Understand your emotional field in real time</h1>
-      <p class="hero-subtitle">
-        Your internal resonance is mapped through our camera-linked AI to analyze micro-expressions and field coherence.
-      </p>
+            <section class="data-engine">
+                <div class="hero-text">
+                    <h1 class="glitch-text">Decode Your Emotional Resonance</h1>
+                    <p>Utilizing high-frequency micro-expression analysis to map your internal biological field in real-time.</p>
+                </div>
 
-      <div class="status-card">
-        <h3 style="margin-top:0; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Emotional Summary</h3>
-        <div id="aiText" class="signature-text">Syncing with biological field sensors...</div>
-        <div id="aiTags" class="tags">
-          </div>
-      </div>
-    </section>
+                <div class="insight-card">
+                    <div class="card-glow"></div>
+                    <div class="card-content">
+                        <div class="ai-header">
+                            <div class="ai-avatar">AI</div>
+                            <div class="ai-meta">
+                                <span class="ai-name">Natasha v2.1</span>
+                                <span class="ai-status">Processing Biometrics...</span>
+                            </div>
+                        </div>
+                        <div id="aiText" class="insight-text">Awaiting facial lock-on for field analysis...</div>
+                        <div id="aiTags" class="tag-cloud">
+                            </div>
+                    </div>
+                </div>
 
-    <footer class="bottom-metrics">
-      <div class="metric-box">
-        <h4>Mood Map</h4>
-        <canvas id="auraCanvas" width="150" height="60" style="margin: 10px auto;"></canvas>
-        <div>
-          <div class="metric-sub">Coherence Score</div>
-          <div class="metric-value" id="scoreValue">0</div>
-        </div>
-      </div>
+                <div class="score-display">
+                    <div class="score-label">FIELD STABILITY SCORE</div>
+                    <div class="score-value-wrap">
+                        <span id="scoreValue" class="big-score">0</span>
+                        <span class="score-unit">%</span>
+                    </div>
+                </div>
+            </section>
+        </main>
 
-      <div class="metric-box">
-        <h4>Resonance Timeline</h4>
-        <canvas id="timelineCanvas" width="200" height="60" style="width: 100%; height: 60px;"></canvas>
-        <div>
-          <div class="metric-sub">Energy Level</div>
-          <div id="energy" class="metric-value">0.00</div>
-        </div>
-      </div>
+        <footer class="metrics-grid">
+            <div class="m-card">
+                <div class="m-header">MOOD SPECTRUM</div>
+                <canvas id="auraCanvas"></canvas>
+            </div>
+            
+            <div class="m-card">
+                <div class="m-header">ENERGY TIMELINE</div>
+                <canvas id="timelineCanvas"></canvas>
+                <div class="m-footer">
+                    <span class="m-sub">VAL:</span>
+                    <span id="energy" class="m-val">0.00</span>
+                </div>
+            </div>
 
-      <div class="metric-box">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-          <h4>Stress Risk</h4>
-          <span id="stressIcon" style="font-size: 1.5rem;">☀️</span>
-        </div>
-        <canvas id="pulseCanvas" width="200" height="60" style="width: 100%; height: 60px;"></canvas>
-        <div>
-          <div class="metric-sub">Stress Factor</div>
-          <div id="stress" class="metric-value">0.00</div>
-        </div>
-      </div>
-    </footer>
-  </div>
+            <div class="m-card">
+                <div class="m-header">
+                    STRESS MARKERS 
+                    <span id="stressIcon">☀️</span>
+                </div>
+                <canvas id="pulseCanvas"></canvas>
+                <div class="m-footer">
+                    <span class="m-sub">RISK:</span>
+                    <span id="stress" class="m-val">0.00</span>
+                </div>
+            </div>
+        </footer>
+    </div>
 
-  <script type="module" src="./app.js"></script>
+    <script type="module" src="./app.js"></script>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString('en-GB', { hour12: false });
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+    </script>
 </body>
 </html>
