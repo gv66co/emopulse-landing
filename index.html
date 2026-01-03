@@ -1,67 +1,50 @@
-<!DOCTYPE html>
-<html lang="lt">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EMOPULSE V5 // PRO DASHBOARD</title>
-    <link rel="stylesheet" href="emopulse.css">
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-    
-    <script type="importmap">
-    {
-        "imports": {
-            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
-        }
-    }
-    </script>
-</head>
-<body>
+<body class="emopulse-body">
     <div class="pro-container">
         <header class="top-bar">
             <div class="logo">EMOPULSE <span class="cyan">V5</span></div>
-            <div class="system-status">STATUS: <span id="status-text" class="online-status">ONLINE</span></div>
+            <div class="status-box">STATUS: <span class="online-text">SYNCHRONIZED</span></div>
         </header>
 
-        <div class="pro-grid">
-            <div class="panel camera-panel">
+        <main class="pro-grid">
+            <section class="panel camera-panel">
+                <div class="panel-label">BIOMETRIC FEED</div>
                 <div class="cam-container">
                     <video id="cam" autoplay muted playsinline></video>
                     <canvas id="face-mesh-canvas"></canvas>
                 </div>
-                <div class="data-block">
+                <div class="neural-drift-zone">
                     <div class="label">NEURAL DRIFT</div>
-                    <div id="neural-drift-val" class="val-large">+0.842</div>
-                    <div class="progress-bar"><div class="fill"></div></div>
+                    <div id="neural-drift-val" class="val-xl">+0.842</div>
+                    <div class="drift-bar"><div class="drift-fill"></div></div>
                 </div>
-            </div>
+            </section>
 
-            <div class="main-visual">
+            <section class="core-visual">
                 <canvas id="compass3d"></canvas>
-            </div>
+            </section>
 
-            <div class="panel analysis-panel">
-                <div class="label">EMOTIONAL SUMMARY</div>
-                <div id="aiText" class="status-msg">Analyzing facial features...</div>
-                <div class="tag-cloud">
+            <section class="panel analysis-panel">
+                <div class="panel-label">EMOTIONAL SUMMARY</div>
+                <div id="aiText" class="ai-status-text">Analyzing facial features...</div>
+                <div class="tag-row">
                     <span class="tag">#monitoring</span>
                     <span class="tag">#biometric</span>
                 </div>
-            </div>
-        </div>
+            </section>
+        </main>
 
         <footer class="pro-footer">
             <div class="stat-card">
                 <div class="label">EMOPULSE SCORE</div>
-                <div class="val"><span id="scoreValue">0</span>/100</div>
+                <div class="val"><span id="scoreValue">76</span>/100</div>
             </div>
             <div class="stat-card">
                 <div class="label">ENERGY</div>
-                <div class="val" id="energy">0.00</div>
+                <div class="val" id="energy">0.66</div>
             </div>
             <div class="stat-card">
                 <div class="label">STRESS RISK</div>
-                <div id="stress-lvl" class="val green">Low</div>
+                <div id="stress-lvl" class="val stress-low">Low</div>
             </div>
             <div class="stat-card">
                 <div class="label">STABILITY</div>
@@ -69,6 +52,4 @@
             </div>
         </footer>
     </div>
-    <script type="module" src="app.js"></script>
 </body>
-</html>
