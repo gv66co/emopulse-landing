@@ -12,7 +12,8 @@
   <script type="importmap">
     {
       "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
       }
     }
   </script>
@@ -20,10 +21,12 @@
   <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 
   <style>
+    /* Užtikriname, kad visi canvas būtų matomi ir teisingo dydžio */
     canvas, video { max-width: 100%; height: auto; display: block; }
-    .video-container { position: relative; display: inline-block; }
+    .video-container { position: relative; display: inline-block; background: #000; }
     #overlay { position: absolute; top: 0; left: 0; pointer-events: none; }
-    #auraCanvas { margin: 10px auto; display: block; background: rgba(0,0,0,0.1); border-radius: 50%; }
+    #auraCanvas { margin: 10px auto; display: block; background: rgba(255,255,255,0.05); border-radius: 50%; }
+    #compass3d { background: radial-gradient(circle, #1a1a2e 0%, #16213e 100%); }
   </style>
 </head>
 
@@ -52,7 +55,7 @@
       </div>
 
       <div id="camStatus" class="camera-indicator">
-        <div class="cam-dot"></div> Initializing system...
+        <div class="cam-dot"></div> System Status: Initializing...
       </div>
 
       <canvas id="auraCanvas" width="320" height="320"></canvas>
@@ -67,8 +70,8 @@
 
       <div class="card">
         <h4>AI Insight</h4>
-        <p id="aiText">Waiting for face detection...</p>
-        <p id="aiTags">#emopulse #analysis</p>
+        <p id="aiText">Waiting for visual processing...</p>
+        <p id="aiTags">#emopulse #aura #3d</p>
       </div>
 
       <canvas id="timeline" width="320" height="60"></canvas>
@@ -81,7 +84,9 @@
   </div>
 
   <script type="module">
-    // Užtikriname, kad bibliotekos užkrautos
+    // Importuojame kompasą ir pagrindinę logiką atskirai, 
+    // kad net jei veido modeliai lūžtų, 3D dalis užsikrautų.
+    import './compas3d-v2.js'; 
     import './app.js';
   </script>
 </body>
