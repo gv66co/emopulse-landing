@@ -2,24 +2,42 @@
 <html lang="lt">
 <head>
     <meta charset="UTF-8">
-    <title>EMOPULSE V5 - FINAL FIX</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMOPULSE V5 - FULL SYSTEM</title>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_landmarker@0.10.0/face_landmarker.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/vision_bundle.js"></script>
-    
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@100;300;600&display=swap" rel="stylesheet">
-    
     <style>
-        :root { --neon: #00f2ff; --glass: rgba(0, 10, 20, 0.9); }
+        :root { --neon: #00f2ff; --glass: rgba(0, 10, 20, 0.85); }
         body, html { margin: 0; padding: 0; background: #000; overflow: hidden; font-family: 'Inter', sans-serif; color: white; height: 100vh; }
-        canvas#bg-canvas { position: absolute; inset: 0; z-index: 1; }
-        #ui-interface { position: relative; z-index: 10; height: 100vh; display: grid; grid-template-columns: 380px 1fr 380px; grid-template-rows: 80px 1fr 200px; padding: 30px; gap: 20px; pointer-events: none; }
-        .panel { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid rgba(0, 242, 255, 0.15); border-radius: 20px; padding: 25px; pointer-events: auto; }
-        .cam-container { position: relative; width: 100%; height: 200px; border-radius: 15px; overflow: hidden; border: 1px solid var(--neon); background: #111; }
-        #webcam { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
-        #face-canvas { position: absolute; inset: 0; width: 100%; height: 100%; transform: scaleX(-1); }
-        .stat-value { font-family: 'Orbitron'; font-size: 28px; color: var(--neon); }
         
+        canvas#bg-canvas { position: absolute; inset: 0; z-index: 1; }
+
+        #ui-interface {
+            position: relative; z-index: 10; height: 100vh;
+            display: grid; grid-template-columns: 400px 1fr 400px;
+            grid-template-rows: 100px 1fr 220px; padding: 40px; gap: 25px;
+            pointer-events: none;
+        }
+
+        .panel { 
+            background: var(--glass); backdrop-filter: blur(40px); 
+            border: 1px solid rgba(0, 242, 255, 0.15); border-radius: 30px; 
+            padding: 30px; pointer-events: auto;
+        }
+
+        .header { grid-column: 1 / 4; display: flex; justify-content: space-between; align-items: baseline; }
+        .logo { font-family: 'Orbitron'; letter-spacing: 12px; font-size: 28px; color: var(--neon); }
+
+        .cam-frame { position: relative; width: 100%; height: 230px; border-radius: 20px; overflow: hidden; border: 1px solid var(--neon); }
+        #webcam { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); opacity: 0.6; }
+        #face-overlay { position: absolute; inset: 0; width: 100%; height: 100%; transform: scaleX(-1); }
+
+        .stat-label { font-size: 11px; letter-spacing: 3px; opacity: 0.5; text-transform: uppercase; margin-bottom: 5px; }
+        .stat-value { font-family: 'Orbitron'; font-size: 34px; color: #fff; }
+
+        .bottom-shelf { grid-column: 1 / 4; grid-row: 3; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        .card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 25px; padding: 25px; }
+
         #loading-screen { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .ring { width: 50px; height: 50px; border: 3px solid rgba(0,242,255,0.1); border-top: 3px solid var(--neon); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -29,54 +47,80 @@
 
     <div id="loading-screen">
         <div class="ring"></div>
-        <p id="load-msg" style="margin-top: 20px; font-family: 'Orbitron'; font-size: 10px; letter-spacing: 2px;">SYNCING WITH EMOPULSE CLOUD...</p>
+        <p style="margin-top: 20px; font-family: 'Orbitron'; font-size: 10px; letter-spacing: 2px;">SYNCHRONIZING NEURAL CORE...</p>
     </div>
 
     <canvas id="bg-canvas"></canvas>
 
     <div id="ui-interface">
-        <div style="grid-column: 1/4; display: flex; justify-content: space-between;">
-            <div style="font-family: 'Orbitron'; font-size: 24px; color: var(--neon);">EMOPULSE V5</div>
-            <div id="status">STATUS: <span style="color:red">OFFLINE</span></div>
+        <div class="header">
+            <div class="logo">EMOPULSE V5</div>
+            <div id="status" style="font-size: 12px; opacity: 0.6; letter-spacing: 2px;">SYSTEM STATUS: <span style="color:red">OFFLINE</span></div>
         </div>
 
         <div class="panel">
-            <div class="cam-container">
+            <div class="cam-frame">
                 <video id="webcam" autoplay playsinline muted></video>
-                <canvas id="face-canvas"></canvas>
+                <canvas id="face-overlay"></canvas>
             </div>
-            <div style="margin-top: 15px;">
-                <div style="font-size: 10px; opacity: 0.5;">NEURAL DRIFT</div>
-                <div class="stat-value" id="drift">+0.842</div>
+            <div style="margin-top: 30px;">
+                <div class="stat-label">Neural Drift</div>
+                <div class="stat-value" id="drift-val">+0.842</div>
+                <div style="width: 100%; height: 4px; background: rgba(255,255,255,0.1); margin-top: 15px; border-radius: 2px;">
+                    <div id="drift-bar" style="width: 76%; height: 100%; background: var(--neon); box-shadow: 0 0 15px var(--neon); transition: 0.3s;"></div>
+                </div>
             </div>
         </div>
 
-        <div></div>
+        <div></div> <div class="panel" style="border-right: 4px solid var(--neon);">
+            <div class="stat-label">Emotional Summary</div>
+            <div id="summary-text" style="font-size: 24px; margin: 20px 0; font-weight: 300; line-height: 1.4;">Analyzing facial features...</div>
+            <div id="tags">
+                <span style="display:inline-block; padding:5px 12px; background:rgba(0,242,255,0.1); border-radius:10px; font-size:11px; color:var(--neon); border:1px solid rgba(0,242,255,0.2);">#monitoring</span>
+            </div>
+        </div>
 
-        <div class="panel">
-            <div style="font-size: 10px; opacity: 0.5;">EMOTIONAL SUMMARY</div>
-            <div id="summary" style="font-size: 18px; margin-top: 10px;">Initializing AI...</div>
+        <div class="bottom-shelf">
+            <div class="card">
+                <div class="stat-label">Emopulse Score</div>
+                <div class="stat-value" id="score-val">76<small style="font-size: 14px; opacity:0.3"> / 100</small></div>
+            </div>
+            <div class="card">
+                <div class="stat-label">Energy Level</div>
+                <div class="stat-value" id="energy-val">0.66 <small id="energy-trend" style="font-size: 12px; color:var(--neon)">▲</small></div>
+            </div>
+            <div class="card">
+                <div class="stat-label">Stress Risk</div>
+                <div class="stat-value" id="stress-lvl" style="color: #44ff44;">Low</div>
+            </div>
+            <div class="card">
+                <div class="stat-label">Stability</div>
+                <div class="stat-value" id="stability-val">112.0°</div>
+            </div>
         </div>
     </div>
 
     <script type="module">
-        // Svarbu: Naudojame tiesioginį importą iš CDN, kad išvengtume 404 klaidų
         import { FaceLandmarker, FilesetResolver, DrawingUtils } from "https://cdn.skypack.dev/@mediapipe/tasks-vision@0.10.0";
 
         const video = document.getElementById("webcam");
-        const canvas = document.getElementById("face-canvas");
+        const canvas = document.getElementById("face-overlay");
         const ctx = canvas.getContext("2d");
         let faceLandmarker;
 
-        // --- THREE.JS FONAS ---
+        // --- THREE.JS: CORE VISUALS ---
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('bg-canvas'), alpha: true });
+        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('bg-canvas'), antialias: true, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        const core = new THREE.Mesh(new THREE.IcosahedronGeometry(4, 2), new THREE.MeshBasicMaterial({ color: 0x00f2ff, wireframe: true }));
-        scene.add(core);
-        camera.position.z = 15;
+        camera.position.z = 20;
 
+        const coreGeo = new THREE.IcosahedronGeometry(5, 2);
+        const coreMat = new THREE.MeshBasicMaterial({ color: 0x00f2ff, wireframe: true, transparent: true, opacity: 0.3 });
+        const core = new THREE.Mesh(coreGeo, coreMat);
+        scene.add(core);
+
+        // --- AI ENGINE ---
         async function init() {
             try {
                 const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm");
@@ -93,12 +137,12 @@
                 video.srcObject = stream;
                 video.onloadeddata = () => {
                     document.getElementById("loading-screen").style.display = "none";
-                    document.getElementById("status").innerHTML = "STATUS: <span style='color:#00f2ff'>ONLINE</span>";
+                    document.getElementById("status").innerHTML = "SYSTEM STATUS: <span style='color:#00f2ff'>SYNCHRONIZED</span>";
                     detect();
                 };
             } catch (err) {
-                document.getElementById("load-msg").innerHTML = "ERROR: Camera access denied or AI failed.";
                 console.error(err);
+                document.getElementById("loading-screen").innerHTML = "CAMERA ERROR: PLEASE REFRESH";
             }
         }
 
@@ -108,27 +152,74 @@
             const results = faceLandmarker.detectForVideo(video, performance.now());
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
             if (results.faceLandmarks && results.faceLandmarks[0]) {
                 const utils = new DrawingUtils(ctx);
-                utils.drawConnectors(results.faceLandmarks[0], FaceLandmarker.FACE_LANDMARKS_TESSELATION, { color: "#00f2ff33", lineWidth: 1 });
+                utils.drawConnectors(results.faceLandmarks[0], FaceLandmarker.FACE_LANDMARKS_TESSELATION, { color: "#00f2ff22", lineWidth: 1 });
                 
-                // Emocijos
-                if (results.faceBlendshapes[0]) {
-                    const stress = results.faceBlendshapes[0].categories.find(c => c.categoryName === "browDownLeft")?.score || 0;
-                    document.getElementById("summary").innerText = stress > 0.2 ? "Elevated Stress" : "Stable State";
+                if (results.faceBlendshapes && results.faceBlendshapes[0]) {
+                    updateUI(results.faceBlendshapes[0].categories);
                 }
             }
             requestAnimationFrame(detect);
         }
 
+        function updateUI(shapes) {
+            // Ištraukiame emocijų koeficientus
+            const smile = shapes.find(s => s.categoryName === "mouthSmileLeft")?.score || 0;
+            const browDown = shapes.find(s => s.categoryName === "browDownLeft")?.score || 0;
+            const eyesWide = shapes.find(s => s.categoryName === "eyeWideLeft")?.score || 0;
+
+            // Elementai
+            const summary = document.getElementById("summary-text");
+            const stressLvl = document.getElementById("stress-lvl");
+            const driftVal = document.getElementById("drift-val");
+            const driftBar = document.getElementById("drift-bar");
+            const scoreVal = document.getElementById("score-val");
+            const energyVal = document.getElementById("energy-val");
+            const stability = document.getElementById("stability-val");
+
+            // 1. Stress Logic
+            if (browDown > 0.2) {
+                summary.innerText = "Elevated Stress Risk";
+                stressLvl.innerText = "High";
+                stressLvl.style.color = "#ff3e3e";
+                core.material.color.setHex(0xff3e3e);
+            } else {
+                summary.innerText = smile > 0.2 ? "Positive Flow State" : "Stable Neural Activity";
+                stressLvl.innerText = "Low";
+                stressLvl.style.color = "#44ff44";
+                core.material.color.setHex(0x00f2ff);
+            }
+
+            // 2. Drift & Bar
+            const driftNum = (0.8 + browDown).toFixed(3);
+            driftVal.innerText = "+" + driftNum;
+            driftBar.style.width = Math.min(100, (60 + browDown * 40)) + "%";
+
+            // 3. Score & Energy
+            scoreVal.innerHTML = Math.floor(75 + (smile * 20) - (browDown * 15)) + "<small style='opacity:0.3'> / 100</small>";
+            energyVal.innerHTML = (0.6 + eyesWide * 0.4).toFixed(2) + " <small style='color:#00f2ff'>▲</small>";
+
+            // 4. Stability (su lengvu virpėjimu dėl tikroviškumo)
+            stability.innerText = (112 + (Math.random() * 0.5)).toFixed(1) + "°";
+        }
+
         function animate() {
-            core.rotation.y += 0.01;
+            core.rotation.y += 0.005;
+            core.rotation.x += 0.002;
             renderer.render(scene, camera);
             requestAnimationFrame(animate);
         }
 
         init();
         animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
     </script>
 </body>
 </html>
