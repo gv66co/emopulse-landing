@@ -3,49 +3,43 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Emopulse – Real-time emotional field analyzer using Face-API" />
+  <meta name="description" content="Emopulse – Real-time emotional field analyzer" />
   <title>Emopulse – Emotional Field Analyzer</title>
 
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
-
   <link rel="stylesheet" href="./emopulse.css" />
 
-  <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js" defer></script>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+      }
+    }
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 
   <style>
-    /* Minimalūs pataisymai užtikrinantys, kad vaizdas nebūtų iškraipytas */
-    canvas, video {
-      max-width: 100%;
-      height: auto;
-      display: block;
-    }
-    .video-container {
-      position: relative;
-      display: inline-block;
-    }
-    #overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      pointer-events: none;
-    }
+    canvas, video { max-width: 100%; height: auto; display: block; }
+    .video-container { position: relative; display: inline-block; }
+    #overlay { position: absolute; top: 0; left: 0; pointer-events: none; }
+    #auraCanvas { margin: 10px auto; display: block; background: rgba(0,0,0,0.1); border-radius: 50%; }
   </style>
 </head>
 
 <body>
   <div class="app">
-    <div class="stage" aria-hidden="false">
-      <canvas id="compass3d" width="640" height="360" role="img" aria-label="3D Emotion Compass"></canvas>
-      <div class="vignette" aria-hidden="true"></div>
+    <div class="stage">
+      <canvas id="compass3d" width="640" height="360"></canvas>
       <div class="brand">
         <div class="name">Emopulse</div>
         <div class="subtitle">Real-time Emotional Compass</div>
       </div>
     </div>
 
-    <div class="panel" role="region" aria-label="Control Panel">
+    <div class="panel">
       <div class="header">
-        <div class="logo-dot" aria-hidden="true">E</div>
+        <div class="logo-dot">E</div>
         <div>
           <div class="title">Emopulse</div>
           <div class="subtitle">Analyze your emotional field</div>
@@ -53,44 +47,42 @@
       </div>
 
       <div class="video-container">
-        <video id="cam" autoplay muted playsinline width="520" height="360" aria-label="Camera Feed"></video>
-        <canvas id="overlay" width="520" height="360" aria-hidden="true"></canvas>
+        <video id="cam" autoplay muted playsinline width="520" height="360"></video>
+        <canvas id="overlay" width="520" height="360"></canvas>
       </div>
 
-      <div id="camStatus" class="camera-indicator" role="status" aria-live="polite">
-        <div class="cam-dot" aria-hidden="true"></div> Initializing camera...
+      <div id="camStatus" class="camera-indicator">
+        <div class="cam-dot"></div> Initializing system...
       </div>
 
-      <canvas id="auraCanvas" width="320" height="320" role="img" aria-label="Aura Visualization"></canvas>
+      <canvas id="auraCanvas" width="320" height="320"></canvas>
 
-      <div class="input-row">
-        <input id="textInput" class="text-input" placeholder="Type your feeling..." aria-label="Input feeling" />
-        <button id="analyzeBtn" class="btn" type="button">Analyze</button>
-      </div>
-
-      <div class="metrics" role="list">
-        <div class="card" role="listitem"><h4>Score</h4><div id="score">0 / 100</div></div>
-        <div class="card" role="listitem"><h4>Energy</h4><div id="energy">0.00 rising</div></div>
-        <div class="card" role="listitem"><h4>Stress</h4><div id="stress">0.00 low</div></div>
-        <div class="card" role="listitem"><h4>Stability</h4><div id="stability">0° toward Joy</div></div>
-        <div class="card" role="listitem"><h4>Intensity</h4><div id="intensity">Low</div></div>
+      <div class="metrics">
+        <div class="card"><h4>Score</h4><div id="score">0 / 100</div></div>
+        <div class="card"><h4>Energy</h4><div id="energy">0.00 unit</div></div>
+        <div class="card"><h4>Stress</h4><div id="stress">0.00 low</div></div>
+        <div class="card"><h4>Stability</h4><div id="stability">0° focus</div></div>
+        <div class="card"><h4>Intensity</h4><div id="intensity">Stable</div></div>
       </div>
 
       <div class="card">
         <h4>AI Insight</h4>
-        <p id="aiText">Waiting for analysis...</p>
-        <p id="aiTags">#calm #focus</p>
+        <p id="aiText">Waiting for face detection...</p>
+        <p id="aiTags">#emopulse #analysis</p>
       </div>
 
-      <canvas id="timeline" width="320" height="60" aria-hidden="true"></canvas>
-      <canvas id="pulse" width="320" height="60" aria-hidden="true"></canvas>
+      <canvas id="timeline" width="320" height="60"></canvas>
+      <canvas id="pulse" width="320" height="60"></canvas>
+      
+      <div style="margin-top: 20px; text-align: center;">
+        <a href="investors.html" class="btn" style="text-decoration: none; display: inline-block;">View Pitch Deck</a>
+      </div>
     </div>
   </div>
 
   <script type="module">
-    // Loading logic can be added here or kept in external files
+    // Užtikriname, kad bibliotekos užkrautos
     import './app.js';
-    import './compas3d-v2.js';
   </script>
 </body>
 </html>
