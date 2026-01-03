@@ -2,151 +2,122 @@
 <html lang="lt">
 <head>
     <meta charset="UTF-8">
-    <title>Emopulse - Original V3 Core</title>
+    <title>Emopulse - Deep Corner Resonance</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;300;600&display=swap');
-
-        body, html { 
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            background: #000205; font-family: 'Inter', sans-serif;
-            overflow: hidden; color: white;
-        }
-
-        #canvas-container { position: absolute; inset: 0; z-index: 1; }
-
-        /* Originalus Emopulse UI išdėstymas */
-        #ui-overlay {
-            position: relative; z-index: 10;
-            display: flex; flex-direction: column;
-            height: 100vh; padding: 60px;
-            box-sizing: border-box;
+        body, html { margin: 0; padding: 0; background: #000; overflow: hidden; font-family: 'Inter', sans-serif; }
+        
+        /* UI sluoksnis */
+        #ui {
+            position: absolute; inset: 0; z-index: 10;
+            display: flex; flex-direction: column; padding: 60px;
             pointer-events: none;
         }
 
-        .header { display: flex; align-items: center; gap: 15px; }
-        .logo-symbol { width: 24px; height: 24px; border: 2px solid white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; }
-        .logo-text { font-size: 22px; font-weight: 300; letter-spacing: 1px; }
-
-        .main-layout { display: flex; justify-content: space-between; margin-top: auto; align-items: flex-end; }
-
-        /* Dešinė panelė - identiška Copilot dizainui */
-        .data-panel {
-            width: 380px; background: rgba(2, 8, 18, 0.7);
-            backdrop-filter: blur(30px); border-radius: 30px;
-            padding: 40px; border: 1px solid rgba(255, 255, 255, 0.05);
+        .data-card {
+            margin-left: auto; width: 360px;
+            background: rgba(0, 5, 15, 0.6);
+            backdrop-filter: blur(50px);
+            border-radius: 40px; padding: 40px;
+            border: 1px solid rgba(58, 141, 255, 0.1);
             pointer-events: auto;
         }
 
-        .user-cam {
-            width: 220px; height: 220px; border-radius: 50%;
-            border: 2px solid #3a8dff; margin: 0 auto 40px;
-            overflow: hidden; position: relative;
-            box-shadow: 0 0 50px rgba(58, 141, 255, 0.2);
+        .cam-circle {
+            width: 180px; height: 180px; border-radius: 50%;
+            border: 1px solid rgba(58, 141, 255, 0.4);
+            margin: 0 auto 30px; overflow: hidden;
+            box-shadow: 0 0 60px rgba(58, 141, 255, 0.15);
         }
-        #webcam { width: 100%; height: 100%; object-fit: cover; }
+        #video { width: 100%; height: 100%; object-fit: cover; }
 
-        .status-label { font-size: 11px; opacity: 0.5; letter-spacing: 2px; text-transform: uppercase; }
-        .status-value { font-size: 32px; font-weight: 300; margin: 10px 0; }
-        .tags { color: #ff9f1c; font-size: 14px; opacity: 0.8; }
-
-        .metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 40px; }
-        .metric-item div:first-child { font-size: 10px; opacity: 0.4; margin-bottom: 5px; }
-        .metric-item div:last-child { font-size: 24px; font-weight: 600; }
-
+        .resonance-label { font-size: 10px; color: #3a8dff; letter-spacing: 4px; font-weight: 800; }
+        .status-text { font-size: 32px; font-weight: 200; color: #fff; margin: 10px 0; }
+        
+        /* Kampo švytėjimo tekstas */
+        .corner-tag {
+            position: absolute; bottom: 80px; left: 80px;
+            font-size: 9px; letter-spacing: 6px; color: #3a8dff;
+            text-shadow: 0 0 20px #3a8dff;
+        }
     </style>
 </head>
 <body>
 
-    <div id="canvas-container"></div>
-
-    <div id="ui-overlay">
-        <div class="header">
-            <div class="logo-symbol">E</div>
-            <div class="logo-text">Emopulse</div>
-        </div>
-
-        <div class="main-layout">
-            <div style="max-width: 400px; padding-bottom: 40px;">
-                <h1 style="font-size: 48px; font-weight: 100; line-height: 1.1;">Understand your emotional field</h1>
-                <p style="opacity: 0.6; font-weight: 300; margin-top: 20px;">Real-time neural analysis through advanced biometric resonance.</p>
-            </div>
-
-            <div class="data-panel">
-                <div class="user-cam">
-                    <video id="webcam" autoplay muted playsinline></video>
-                </div>
-
-                <div class="status-label">Emotional Signature</div>
-                <div class="status-value">Calm focused energy</div>
-                <div class="tags">#calm #focused #energy</div>
-
-                <div class="metrics">
-                    <div class="metric-item">
-                        <div>STRESS RISK</div>
-                        <div style="color: #ff3b3b;">0.21 low</div>
-                    </div>
-                    <div class="metric-item">
-                        <div>EMOPULSE SCORE</div>
-                        <div style="color: #3a8dff;">76 /100</div>
-                    </div>
-                </div>
+    <div id="ui">
+        <div style="font-size: 20px; font-weight: 100; letter-spacing: 5px;">EMOPULSE</div>
+        
+        <div style="margin-top: auto; display: flex; align-items: flex-end;">
+            <div class="corner-tag">NEURAL_DRIFT_V4</div>
+            
+            <div class="data-card">
+                <div class="cam-circle"><video id="video" autoplay muted playsinline></video></div>
+                <div class="resonance-label">RESONANCE STATE</div>
+                <div class="status-text">Deep Calm</div>
+                <div style="color: #ff9f1c; font-size: 13px;">#tranquility #stability</div>
             </div>
         </div>
     </div>
 
     <script>
-        let scene, camera, renderer, coreGroup;
+        let scene, camera, renderer, group, floorGlow;
 
         function init() {
             scene = new THREE.Scene();
+            // Pridedame rūką gyliui sukurti
+            scene.fog = new THREE.Fog(0x000000, 5, 15);
+
             camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.z = 12;
+            camera.position.set(0, 0, 10);
 
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(window.devicePixelRatio);
-            document.getElementById('canvas-container').appendChild(renderer.domElement);
+            document.body.appendChild(renderer.domElement);
 
-            // PAGRINDINIS KOMPASAS (Emopulse Core)
-            coreGroup = new THREE.Group();
-            scene.add(coreGroup);
+            group = new THREE.Group();
+            // Pozicija apatiniame kairiajame kampe
+            group.position.set(-6, -4, 0);
+            scene.add(group);
 
-            // 1. Vidinis šviečiantis rutulys (Aura)
-            const innerGeo = new THREE.SphereGeometry(2, 32, 32);
-            const innerMat = new THREE.MeshBasicMaterial({
-                color: 0x3a8dff,
+            // 1. APAČIOS ŠVYTĖJIMAS (Glow Plate)
+            const glowGeo = new THREE.CircleGeometry(6, 64);
+            const glowMat = new THREE.ShaderMaterial({
                 transparent: true,
-                opacity: 0.05
+                uniforms: {
+                    color: { value: new THREE.Color(0x0033ff) }
+                },
+                vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+                fragmentShader: `varying vec2 vUv; uniform vec3 color; void main() { float dist = distance(vUv, vec2(0.5)); gl_FragColor = vec4(color, (0.5 - dist) * 0.6); }`,
+                blending: THREE.AdditiveBlending
             });
-            const innerSphere = new THREE.Mesh(innerGeo, innerMat);
-            coreGroup.add(innerSphere);
+            floorGlow = new THREE.Mesh(glowGeo, glowMat);
+            floorGlow.rotation.x = -Math.PI / 2.2;
+            floorGlow.position.y = -2;
+            group.add(floorGlow);
 
-            // 2. Pagrindinis Wireframe (Tinklelis)
-            const wireGeo = new THREE.IcosahedronGeometry(2.1, 2);
-            const wireMat = new THREE.MeshBasicMaterial({
-                color: 0x3a8dff,
-                wireframe: true,
-                transparent: true,
-                opacity: 0.2
-            });
-            const wireSphere = new THREE.Mesh(wireGeo, wireMat);
-            coreGroup.add(wireSphere);
-
-            // 3. Orbitos (Copilot stiliaus žiedai)
-            const ringColors = [0x3a8dff, 0xff9f1c, 0x7b5cff];
-            ringColors.forEach((color, i) => {
-                const ringGeo = new THREE.TorusGeometry(3.5 + (i * 0.4), 0.01, 16, 100);
-                const ringMat = new THREE.MeshBasicMaterial({ 
-                    color: color, 
-                    transparent: true, 
-                    opacity: 0.3 
-                });
-                const ring = new THREE.Mesh(ringGeo, ringMat);
+            // 2. AURA DRIFT CORE (Susiliejusios spalvos)
+            const ringColors = [0x3a8dff, 0x7b5cff, 0xff9f1c];
+            ringColors.forEach((col, i) => {
+                const ring = new THREE.Mesh(
+                    new THREE.TorusGeometry(3 + i*0.4, 0.02, 16, 100),
+                    new THREE.MeshBasicMaterial({ 
+                        color: col, 
+                        transparent: true, 
+                        opacity: 0.4,
+                        blending: THREE.AdditiveBlending 
+                    })
+                );
                 ring.rotation.x = Math.random() * Math.PI;
                 ring.rotation.y = Math.random() * Math.PI;
-                coreGroup.add(ring);
+                group.add(ring);
             });
+
+            // Vidinis branduolys (Wireframe)
+            const core = new THREE.Mesh(
+                new THREE.IcosahedronGeometry(2, 2),
+                new THREE.MeshBasicMaterial({ color: 0x3a8dff, wireframe: true, transparent: true, opacity: 0.1 })
+            );
+            group.add(core);
 
             animate();
         }
@@ -155,17 +126,27 @@
             requestAnimationFrame(animate);
             const time = Date.now() * 0.0005;
 
-            // EMOTIONAL DRIFT: lėtas, stabilus plūduriavimas
-            coreGroup.position.y = Math.sin(time) * 0.3;
-            coreGroup.position.x = Math.cos(time * 0.8) * 0.2;
-            coreGroup.rotation.y += 0.001;
+            // DRIFT: Lėtas pulsavimas ir plaukiojimas
+            group.position.y = -3.5 + Math.sin(time) * 0.4;
+            group.position.x = -6.5 + Math.cos(time * 0.6) * 0.2;
+
+            // Žiedų sukimasis ir spalvų liejimasis
+            group.children.forEach((obj, i) => {
+                if (i > 0) { // Praleidžiam glow plate
+                    obj.rotation.y += 0.001 * i;
+                    obj.rotation.z += 0.0005;
+                }
+            });
+
+            // Apačios švytėjimo pulsacija
+            floorGlow.scale.setScalar(1 + Math.sin(time * 2) * 0.05);
 
             renderer.render(scene, camera);
         }
 
         // Kamera
         navigator.mediaDevices.getUserMedia({ video: true }).then(s => {
-            document.getElementById('webcam').srcObject = s;
+            document.getElementById('video').srcObject = s;
         });
 
         window.addEventListener('resize', () => {
