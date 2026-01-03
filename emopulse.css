@@ -1,4 +1,4 @@
-/* --- PAGRINDINIAI KINTAMIEJI --- */
+/* --- PAGRINDINIAI NUSTATYMAI --- */
 :root {
     --bg-dark: #020617;
     --card-bg: rgba(15, 23, 42, 0.7);
@@ -16,52 +16,35 @@ body {
     color: var(--text-main);
     font-family: 'Inter', sans-serif;
     height: 100vh;
-    overflow: hidden; /* Užrakina ekraną viename lange */
+    overflow: hidden; /* Neleidžia puslapiui slinkti, viskas telpa ekrane */
 }
 
-/* --- KONTEINERIO STRUKTŪRA (Pagal tavo HTML) --- */
+/* --- KONTEINERIO STRUKTŪRA --- */
 .app-container {
     display: grid;
     grid-template-areas: 
-        "nav nav"
         "visual info"
         "footer footer";
-    grid-template-columns: 1.2fr 0.8fr;
-    grid-template-rows: 60px 1fr 180px;
+    grid-template-columns: 1.1fr 0.9fr;
+    grid-template-rows: 1fr 220px; /* Viršus užima pagrindinę vietą, apačia fiksuota */
     height: 100vh;
-    gap: 15px;
-    padding: 15px;
+    gap: 20px;
+    padding: 20px;
 }
 
-/* --- NAVIGACIJA --- */
-.top-nav {
-    grid-area: nav;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid var(--border);
-}
-
-.logo-group { font-weight: 800; font-size: 1.2rem; }
-.pro-badge { background: var(--accent-purple); font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; vertical-align: middle; }
-.nav-links { display: flex; gap: 20px; align-items: center; }
-.nav-item { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; }
-.nav-item.active { color: var(--accent-blue); font-weight: 600; }
-.system-time { font-family: 'JetBrains Mono'; color: var(--accent-blue); }
-
-/* --- KAIRĖ: VIZUALINIS VARIKLIS --- */
-.visual-engine {
+/* --- KAIRĖ PUSĖ: 3D IR KAMERA --- */
+.visual-section {
     grid-area: visual;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    min-height: 0; /* Neleidžia išsipūsti */
+    gap: 15px;
+    min-height: 0;
 }
 
 .stage-3d {
     flex: 1;
     background: radial-gradient(circle, rgba(58, 191, 248, 0.05) 0%, transparent 80%);
-    border-radius: 20px;
+    border-radius: 24px;
     border: 1px solid var(--border);
     position: relative;
     overflow: hidden;
@@ -69,94 +52,98 @@ body {
 
 #compass3d { width: 100% !important; height: 100% !important; }
 
-.core-label { position: absolute; top: 20px; left: 20px; pointer-events: none; }
-.label-sub { font-size: 0.7rem; color: var(--accent-blue); letter-spacing: 2px; }
+/* Prekės ženklo tekstas ant 3D scenos */
+.brand {
+    position: absolute;
+    top: 25px;
+    left: 25px;
+    pointer-events: none;
+}
+.brand .name { font-size: 1.2rem; font-weight: 800; letter-spacing: 2px; }
+.brand .version { font-size: 0.6rem; color: var(--accent-blue); opacity: 0.8; }
 
-/* KAMERA (Mažas skydelis apačioje kairėje) */
+/* Kameros skydelis (Kaip nuotraukoje) */
 .drift-panel {
+    height: 130px;
     background: var(--card-bg);
     border: 1px solid var(--border);
-    border-radius: 15px;
-    padding: 10px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    gap: 20px;
     backdrop-filter: blur(10px);
 }
 
-.sensor-group { display: flex; align-items: center; gap: 15px; }
-
-.video-wrap {
-    width: 80px;
-    height: 80px;
+.video-container {
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
     overflow: hidden;
     border: 2px solid var(--accent-blue);
     position: relative;
+    flex-shrink: 0;
 }
 
 #cam { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
 #overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
 
-.sensor-stats { flex: 1; font-family: 'JetBrains Mono'; font-size: 0.75rem; }
-.stat-row { display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 2px 0; }
-.s-label { color: var(--text-muted); }
-.s-value { color: var(--accent-blue); font-weight: bold; }
+.drift-info { flex: 1; }
+.panel-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
+.tag { font-size: 0.85rem; margin-bottom: 4px; color: var(--text-muted); }
+.value-highlight { color: var(--accent-blue); font-weight: bold; }
 
-/* --- DEŠINĖ: DUOMENŲ VARIKLIS --- */
-.data-engine {
+/* --- DEŠINĖ PUSĖ: TEKSTAI --- */
+.info-section {
     grid-area: info;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    gap: 20px;
-    padding-left: 20px;
+    gap: 30px;
+    padding: 10px 0 10px 20px;
 }
 
-.hero-text h1 { font-size: 2rem; line-height: 1.1; margin-bottom: 10px; }
-.hero-text p { color: var(--text-muted); font-size: 0.9rem; }
+.top-nav { display: flex; gap: 20px; align-items: center; }
+.nav-link { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; transition: 0.3s; }
+.nav-link.active { color: #fff; font-weight: bold; border-bottom: 2px solid var(--accent-blue); }
 
-.insight-card {
+.hero-title { font-size: 2.5rem; font-weight: 800; line-height: 1.1; margin-bottom: 15px; }
+.hero-subtitle { color: var(--text-muted); font-size: 1rem; line-height: 1.5; }
+
+.status-card {
     background: var(--card-bg);
     border: 1px solid var(--border);
-    border-radius: 15px;
-    padding: 20px;
-    position: relative;
+    border-radius: 20px;
+    padding: 25px;
 }
+.card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.signature-text { font-size: 1.2rem; color: var(--accent-blue); font-weight: 600; }
 
-.ai-header { display: flex; gap: 12px; margin-bottom: 10px; }
-.ai-avatar { background: var(--accent-purple); padding: 4px 8px; border-radius: 6px; font-weight: 800; font-size: 0.8rem; }
-.ai-name { display: block; font-size: 0.9rem; font-weight: bold; }
-.ai-status { font-size: 0.7rem; color: var(--accent-blue); }
-
-.insight-text { font-size: 1.1rem; color: #fff; line-height: 1.4; }
-
-.score-display { text-align: right; }
-.score-label { font-size: 0.7rem; color: var(--text-muted); letter-spacing: 1px; }
-.big-score { font-size: 4rem; font-weight: 800; color: var(--accent-blue); }
-
-/* --- APAČIA: GRAFIKAI --- */
-.metrics-grid {
+/* --- APAČIA: METRIKŲ SKYDELIAI --- */
+.bottom-metrics {
     grid-area: footer;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 15px;
 }
 
-.m-card {
+.metric-box {
     background: var(--card-bg);
     border: 1px solid var(--border);
-    border-radius: 15px;
-    padding: 12px;
+    border-radius: 20px;
+    padding: 20px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
 }
 
-.m-header { font-size: 0.65rem; color: var(--text-muted); letter-spacing: 1px; margin-bottom: 8px; }
-canvas { width: 100% !important; height: 50px !important; }
+.metric-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.metric-header h4 { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; }
+.trend { font-size: 0.7rem; color: var(--accent-blue); background: rgba(58, 191, 248, 0.1); padding: 2px 8px; border-radius: 10px; }
 
-.m-footer { display: flex; justify-content: space-between; align-items: baseline; margin-top: 5px; }
-.m-sub { font-size: 0.7rem; color: var(--text-muted); }
-.m-val { font-size: 1.1rem; font-weight: bold; color: var(--accent-blue); }
+.mini-chart { width: 100% !important; height: 60px !important; margin: 10px 0; }
 
-/* --- ANIMACIJOS --- */
-.pulse-status { font-size: 0.6rem; color: var(--accent-blue); margin-top: 5px; animation: blink 2s infinite; }
-@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+.metric-footer { display: flex; justify-content: space-between; align-items: flex-end; }
+.metric-sub { font-size: 0.75rem; color: var(--text-muted); }
+.metric-value { font-size: 1.8rem; font-weight: 800; color: var(--accent-blue); line-height: 1; }
+
+.status-indicator { font-size: 0.7rem; color: var(--accent-blue); padding: 5px 0; }
