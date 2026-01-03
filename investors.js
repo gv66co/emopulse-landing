@@ -1,6 +1,6 @@
-const THREE = window.THREE;
+import * as THREE from 'three';
 
-// DOM Elementai
+// DOM Elements
 const canvas = document.getElementById("deck3d");
 const label = document.getElementById("slideLabel");
 const btnPrev = document.getElementById("prev");
@@ -8,38 +8,36 @@ const btnNext = document.getElementById("next");
 const btnPause = document.getElementById("pause");
 
 if (!canvas) {
-    console.error("Canvas #deck3d not found.");
+    console.error("Canvas #deck3d not found. Ensure it exists in investors.html");
 }
 
-// Skaidrių sąrašas (SVARBU: keliai pakeisti į ./slides/ dėl stabilumo)
+// Slides List (Professional English titles)
 const SLIDES = [
-    { name: "About us", src: "./slides/01-about.png" },
-    { name: "Problem", src: "./slides/02-problem.png" },
-    { name: "Solution", src: "./slides/03-solution.png" },
-    { name: "Product overview", src: "./slides/04-product.png" },
-    { name: "Market", src: "./slides/05-market.png" },
-    { name: "Competition", src: "./slides/06-competition.png" },
-    { name: "Financials", src: "./slides/07-financials.png" },
-    { name: "Team", src: "./slides/08-team-arvid.png" },
-    { name: "Summary", src: "./slides/09-summary.png" },
-    { name: "Thank you", src: "./slides/10-thankyou.png" }
+    { name: "Vision & Mission", src: "./slides/01-about.png" },
+    { name: "The Core Problem", src: "./slides/02-problem.png" },
+    { name: "The Emopulse Solution", src: "./slides/03-solution.png" },
+    { name: "Product Architecture", src: "./slides/04-product.png" },
+    { name: "Market Opportunity", src: "./slides/05-market.png" },
+    { name: "Competitive Analysis", src: "./slides/06-competition.png" },
+    { name: "Financial Projections", src: "./slides/07-financials.png" },
+    { name: "Leadership Team", src: "./slides/08-team-arvid.png" },
+    { name: "Strategic Roadmap", src: "./slides/09-summary.png" },
+    { name: "Investment Opportunity", src: "./slides/10-thankyou.png" }
 ];
 
-let renderer, scene, camera;
-let group;
+let renderer, scene, camera, group;
 let cards = [];
 let index = 0;
-
 let isPaused = false;
 let timer = null;
 
 let drag = { active: false, x: 0, y: 0 };
 let orbit = { yaw: 0, pitch: 0 };
 
-// Inicijavimas
+// Initialization
 init().catch((e) => {
-    console.error("Init Error:", e);
-    if (label) label.textContent = "Error loading slides. Check /slides/ folder.";
+    console.error("3D Deck Init Error:", e);
+    if (label) label.textContent = "Hardware acceleration error. Please refresh.";
 });
 
 async function init() {
@@ -58,17 +56,15 @@ async function init() {
     camera = new THREE.PerspectiveCamera(42, canvas.clientWidth / canvas.clientHeight, 0.1, 100);
     camera.position.set(0, 0.1, 5.2);
 
-    // Apšvietimas
-    scene.add(new THREE.AmbientLight(0xffffff, 0.85));
-    const dir = new THREE.DirectionalLight(0xffffff, 0.8);
-    dir.position.set(2, 3, 3);
-    scene.add(dir);
+    // Lighting for professional look
+    scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.7);
+    dirLight.position.set(5, 5, 5);
+    scene.add(dirLight);
 
-    // Pagrindinė grupė karuselei
     group = new THREE.Group();
     scene.add(group);
 
-    // Užkrauname skaidres
     await loadSlides();
     layoutCards();
     updateLabel();
@@ -94,7 +90,7 @@ function bindUI() {
 
     const wrap = canvas.parentElement;
 
-    // Pelės/Lietimo valdymas
+    // Interaction management
     wrap.addEventListener("pointerdown", (e) => {
         drag.active = true;
         drag.x = e.clientX;
@@ -111,33 +107,34 @@ function bindUI() {
 
         orbit.yaw += dx * 0.003;
         orbit.pitch += dy * 0.002;
-        orbit.pitch = Math.max(-0.35, Math.min(0.35, orbit.pitch));
+        orbit.pitch = Math.max(-0.3, Math.min(0.3, orbit.pitch));
     });
 
     wrap.addEventListener("pointerup", () => (drag.active = false));
-
-    wrap.addEventListener("wheel", (e) => {
-        e.preventDefault();
-        camera.position.z = Math.max(3.2, Math.min(7.5, camera.position.z + e.deltaY * 0.002));
-    }, { passive: false });
 }
 
 async function loadSlides() {
     const loader = new THREE.TextureLoader();
-    const textures = await Promise.all(
-        SLIDES.map((s) =>
-            new Promise((resolve) => {
-                loader.load(s.src, (t) => {
-                    t.colorSpace = THREE.SRGBColorSpace;
-                    t.anisotropy = 8;
-                    resolve(t);
-                }, undefined, () => {
-                    console.warn(`Failed to load: ${s.src}`);
-                    resolve(null); // Tęsiam net jei viena skaidrė nerasta
-                });
-            })
-        )
-    );
+    
+    // Improved texture loading with error handling
+    const texturePromises = SLIDES.map(s => {
+        return new Promise((resolve) => {
+            loader.load(s.src, 
+                (tex) => {
+                    tex.colorSpace = THREE.SRGBColorSpace;
+                    tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+                    resolve(tex);
+                },
+                undefined,
+                () => {
+                    console.warn(`Asset missing: ${s.src}`);
+                    resolve(null);
+                }
+            );
+        });
+    });
+
+    const textures = await Promise.all(texturePromises);
 
     textures.forEach((tex, i) => {
         if (tex) {
@@ -151,15 +148,19 @@ async function loadSlides() {
 function makeCard(tex) {
     const w = 3.6;
     const h = 2.025;
-    const g = new THREE.Group();
+    const cardGroup = new THREE.Group();
 
-    // Pagrindinė skaidrė
+    // Main Slide Surface
     const geo = new THREE.PlaneGeometry(w, h);
-    const mat = new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide });
+    const mat = new THREE.MeshBasicMaterial({ 
+        map: tex, 
+        side: THREE.DoubleSide,
+        transparent: true 
+    });
     const mesh = new THREE.Mesh(geo, mat);
 
-    // Neoninis rėmelis / fonas
-    const frameGeo = new THREE.PlaneGeometry(w + 0.15, h + 0.15);
+    // Tech-glow Frame (Emopulse brand color)
+    const frameGeo = new THREE.PlaneGeometry(w + 0.1, h + 0.1);
     const frameMat = new THREE.MeshBasicMaterial({
         color: 0x3abff8,
         transparent: true,
@@ -169,31 +170,32 @@ function makeCard(tex) {
     const frame = new THREE.Mesh(frameGeo, frameMat);
     frame.position.z = -0.01;
 
-    g.add(mesh);
-    g.add(frame);
-    return g;
+    cardGroup.add(mesh);
+    cardGroup.add(frame);
+    return cardGroup;
 }
 
 function layoutCards() {
-    const radius = 5.0; // Karuselės spindulys
-    const step = 0.5;   // Atstumas tarp kortelių radianais
+    const radius = 4.5; 
+    const step = 0.45;
 
     cards.forEach((card, i) => {
         const rel = i - index;
         const a = rel * step;
 
-        const x = Math.sin(a) * 2.2;
+        const x = Math.sin(a) * 2.5;
         const z = Math.cos(a) * radius - radius;
-        const y = -Math.abs(rel) * 0.05;
+        const y = -Math.abs(rel) * 0.1;
 
         card.userData.target = {
             position: new THREE.Vector3(x, y, z),
-            rotation: new THREE.Euler(0, -a * 0.8, 0)
+            rotation: new THREE.Euler(0, -a * 0.7, 0)
         };
     });
 }
 
 function go(nextIdx) {
+    if (cards.length === 0) return;
     index = (nextIdx + cards.length) % cards.length;
     layoutCards();
     updateLabel();
@@ -201,12 +203,14 @@ function go(nextIdx) {
 }
 
 function updateLabel() {
-    if (label) label.textContent = `${index + 1}/${SLIDES.length} — ${SLIDES[index].name}`;
+    if (label) {
+        label.innerHTML = `<span class="idx">${index + 1}/${SLIDES.length}</span> — <span class="title">${SLIDES[index].name}</span>`;
+    }
 }
 
 function startAutoRotate() {
     stopAutoRotate();
-    timer = setInterval(() => go(index + 1), 4000);
+    timer = setInterval(() => go(index + 1), 5000);
 }
 
 function stopAutoRotate() {
@@ -227,16 +231,16 @@ function resize() {
 function animate() {
     requestAnimationFrame(animate);
 
-    // Sklandus grupės pasukimas pagal drag'ą
-    group.rotation.y += (orbit.yaw - group.rotation.y) * 0.08;
-    group.rotation.x += (orbit.pitch - group.rotation.x) * 0.08;
+    // Smooth rotation lag
+    group.rotation.y += (orbit.yaw - group.rotation.y) * 0.05;
+    group.rotation.x += (orbit.pitch - group.rotation.x) * 0.05;
 
-    // Sklandus kortelių judėjimas į jų vietas
+    // Card movement smoothing
     cards.forEach((c) => {
         const t = c.userData.target;
         if (t) {
-            c.position.lerp(t.position, 0.1);
-            c.rotation.y += (t.rotation.y - c.rotation.y) * 0.1;
+            c.position.lerp(t.position, 0.08);
+            c.rotation.y += (t.rotation.y - c.rotation.y) * 0.08;
         }
     });
 
