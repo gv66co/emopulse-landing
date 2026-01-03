@@ -2,122 +2,195 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>NEURO-AURA DRIFT v1.0</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <title>NEURO-EVOLUTION: AURA DRIFT PRO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
     <style>
-        :root { --neon: #00e5ff; --bg: #000510; }
-        body { margin: 0; background: var(--bg); color: var(--neon); font-family: 'Orbitron', sans-serif; overflow: hidden; }
-        #overlay { position: absolute; top: 20px; left: 20px; z-index: 100; background: rgba(0,20,40,0.8); padding: 20px; border-left: 4px solid var(--neon); border-radius: 0 10px 10px 0; pointer-events: none; }
-        #video { position: absolute; bottom: 20px; right: 20px; width: 220px; border: 1px solid var(--neon); border-radius: 10px; z-index: 100; transform: scaleX(-1); filter: saturate(0) brightness(1.2); }
-        #loader { position: fixed; inset: 0; background: #000; z-index: 1000; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; text-transform: uppercase; letter-spacing: 5px; }
-        .data-val { color: #fff; text-shadow: 0 0 10px var(--neon); }
+        :root { --deep: #00020a; --neon: #00f2ff; --gold: #ffcc00; }
+        body { margin: 0; background: var(--deep); color: var(--neon); font-family: 'Syncopate', sans-serif; overflow: hidden; }
+        
+        /* Sci-Fi HUD Interface */
+        #hud-left { position: absolute; top: 40px; left: 40px; z-index: 100; border-left: 2px solid var(--neon); padding-left: 20px; text-transform: uppercase; }
+        #hud-right { position: absolute; top: 40px; right: 40px; z-index: 100; text-align: right; border-right: 2px solid var(--neon); padding-right: 20px; }
+        
+        .metric { font-size: 0.7rem; color: rgba(0, 242, 255, 0.6); margin-bottom: 5px; }
+        .value { font-size: 1.4rem; font-weight: 700; letter-spacing: 2px; }
+
+        #video-feed { position: absolute; bottom: 30px; right: 30px; width: 180px; height: 180px; border-radius: 50%; border: 2px solid var(--neon); object-fit: cover; opacity: 0.4; filter: contrast(1.5) blue; z-index: 50; }
+        
+        canvas { display: block; filter: contrast(1.1) brightness(1.1); }
+
+        #init-btn { position: fixed; inset: 0; background: var(--deep); z-index: 9999; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--neon); font-size: 1.5rem; letter-spacing: 10px; transition: 0.5s; }
+        #init-btn:hover { background: #001a2e; text-shadow: 0 0 20px var(--neon); }
     </style>
 </head>
 <body>
 
-<div id="loader">Initializing Neural Links...</div>
-<div id="overlay">
-    <div>NEURAL STATUS: <span id="status" class="data-val">OFFLINE</span></div>
-    <div>EMOTION DRIFT: <span id="emotion" class="data-val">WAITING</span></div>
-    <div>PULSE (EST): <span id="pulse" class="data-val">0</span> BPM</div>
+<div id="init-btn">INITIALIZE NEURO-ORGANISM</div>
+
+<div id="hud-left">
+    <div class="metric">Neural Signature</div>
+    <div id="emotion" class="value">SYNCHRONIZING...</div>
+    <div class="metric" style="margin-top:20px;">Biological Rhythm</div>
+    <div id="pulse" class="value">000 BPM</div>
 </div>
-<video id="video" autoplay muted></video>
+
+<div id="hud-right">
+    <div class="metric">System Stability</div>
+    <div id="stability" class="value">99.9%</div>
+    <div class="metric" style="margin-top:20px;">Aura Drift Phase</div>
+    <div id="phase" class="value">STABLE</div>
+</div>
+
+<video id="video-feed" autoplay muted></video>
 
 <script>
-    let scene, camera, renderer, aura, particles;
-    let currentEmotion = "neutral";
-    let emotionIntensity = 0;
+    let scene, camera, renderer, aura, rings = [], audioCtx, oscillator, lfo;
+    let emotionData = { type: 'neutral', intensity: 0 };
 
-    // --- 1. INITIALIZE AI MODELS ---
-    async function startSystem() {
-        try {
-            const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
-            await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
-            await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
-            
-            const stream = await navigator.mediaDevices.getUserMedia({ video: {} });
-            document.getElementById('video').srcObject = stream;
-            
-            document.getElementById('loader').style.display = 'none';
-            init3D();
-            processEmotions();
-        } catch (err) {
-            document.getElementById('loader').innerText = "ERROR: ACCESS DENIED";
-            console.error(err);
-        }
+    // --- AUDIO SYNTHESIZER (Neural Soundscape) ---
+    function initNeuralAudio() {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        oscillator = audioCtx.createOscillator();
+        lfo = audioCtx.createOscillator();
+        const filter = audioCtx.createBiquadFilter();
+        const gainNode = audioCtx.createGain();
+
+        oscillator.type = 'sawtooth';
+        lfo.type = 'sine';
+        lfo.frequency.value = 0.5;
+        
+        filter.type = 'lowpass';
+        gainNode.gain.value = 0.1;
+
+        const lfoGain = audioCtx.createGain();
+        lfo.connect(lfoGain);
+        lfoGain.connect(filter.frequency);
+        
+        oscillator.connect(filter);
+        filter.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        
+        oscillator.start();
+        lfo.start();
     }
 
-    // --- 2. 3D AURA DRIFT ENGINE ---
+    function updateNeuralAudio(emotion, intensity) {
+        if(!audioCtx) return;
+        let freq = 110; // Base frequency (A2)
+        if(emotion === 'happy') freq = 220;
+        if(emotion === 'angry') freq = 55;
+        
+        oscillator.frequency.setTargetAtTime(freq, audioCtx.currentTime, 0.5);
+        lfo.frequency.setTargetAtTime(intensity * 10, audioCtx.currentTime, 0.5);
+    }
+
+    // --- 3D EVOLVED GEOMETRY ---
     function init3D() {
         scene = new THREE.Scene();
         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // Neural Body Geometry
-        const geo = new THREE.IcosahedronGeometry(2, 10);
-        const mat = new THREE.MeshPhongMaterial({
-            color: 0x00e5ff, wireframe: true, emissive: 0x00e5ff, emissiveIntensity: 0.5
+        // Core Aura (The Neuro-Body)
+        const auraGeo = new THREE.SphereGeometry(1.5, 64, 64);
+        const auraMat = new THREE.MeshStandardMaterial({
+            color: 0x00f2ff,
+            wireframe: true,
+            emissive: 0x00f2ff,
+            emissiveIntensity: 1,
+            transparent: true,
+            opacity: 0.8
         });
-        aura = new THREE.Mesh(geo, mat);
+        aura = new THREE.Mesh(auraGeo, auraMat);
         scene.add(aura);
 
-        // Space Particles
-        const partGeo = new THREE.BufferGeometry();
-        const pos = [];
-        for(let i=0; i<10000; i++) pos.push((Math.random()-0.5)*20, (Math.random()-0.5)*20, (Math.random()-0.5)*20);
-        partGeo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-        particles = new THREE.Points(partGeo, new THREE.PointsMaterial({color: 0xffffff, size: 0.02}));
-        scene.add(particles);
+        // Neural Rings (Emotion History)
+        for(let i=0; i<3; i++) {
+            const rGeo = new THREE.TorusGeometry(2.5 + i*0.5, 0.01, 16, 100);
+            const rMat = new THREE.MeshBasicMaterial({ color: 0x00f2ff, transparent: true, opacity: 0.3 });
+            const ring = new THREE.Mesh(rGeo, rMat);
+            ring.rotation.x = Math.PI / 2;
+            rings.push(ring);
+            scene.add(ring);
+        }
 
-        const light = new THREE.PointLight(0x00e5ff, 2, 100);
-        light.position.set(10, 10, 10);
-        scene.add(light);
-        camera.position.z = 5;
+        const pointLight = new THREE.PointLight(0x00f2ff, 2, 50);
+        pointLight.position.set(5, 5, 5);
+        scene.add(pointLight);
+        camera.position.z = 6;
 
         animate();
     }
 
     function animate() {
         requestAnimationFrame(animate);
-        let speed = 0.005 + (emotionIntensity * 0.05);
-        aura.rotation.y += speed;
-        aura.rotation.x += speed * 0.5;
-        
-        // Aura reaction logic
-        const scale = 1 + (emotionIntensity * 0.5);
-        aura.scale.lerp(new THREE.Vector3(scale, scale, scale), 0.1);
+        const time = Date.now() * 0.001;
 
-        particles.rotation.y -= 0.001;
+        // Aura Drift Logic
+        aura.rotation.y += 0.005 + (emotionData.intensity * 0.05);
+        aura.rotation.z += 0.002;
+        
+        // Morph aura based on pulse
+        const pulseScale = 1 + Math.sin(time * (1 + emotionData.intensity * 5)) * 0.05;
+        aura.scale.set(pulseScale, pulseScale, pulseScale);
+
+        // Rings rotation
+        rings.forEach((ring, i) => {
+            ring.rotation.z += 0.01 * (i + 1);
+            ring.rotation.x += 0.005 * (emotionData.intensity);
+        });
+
         renderer.render(scene, camera);
     }
 
-    // --- 3. NEURAL DATA SYNC ---
-    async function processEmotions() {
-        const video = document.getElementById('video');
+    // --- AI ENGINE ---
+    async function initAI() {
+        const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
+        await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+        await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
+        
+        const video = document.getElementById('video-feed');
+        const stream = await navigator.mediaDevices.getUserMedia({ video: {} });
+        video.srcObject = stream;
+
         setInterval(async () => {
             const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceExpressions();
             if (detections.length > 0) {
                 const expressions = detections[0].expressions;
-                currentEmotion = Object.keys(expressions).reduce((a, b) => expressions[a] > expressions[b] ? a : b);
-                emotionIntensity = expressions[currentEmotion];
+                const dominant = Object.keys(expressions).reduce((a, b) => expressions[a] > expressions[b] ? a : b);
+                
+                emotionData.type = dominant;
+                emotionData.intensity = expressions[dominant];
 
-                document.getElementById('status').innerText = "CONNECTED";
-                document.getElementById('emotion').innerText = currentEmotion.toUpperCase();
-                document.getElementById('pulse').innerText = Math.floor(65 + (emotionIntensity * 30));
-
-                // Change Color based on drift
-                if(currentEmotion === 'happy') aura.material.color.setHex(0x00ff00);
-                else if(currentEmotion === 'angry') aura.material.color.setHex(0xff0000);
-                else aura.material.color.setHex(0x00e5ff);
+                updateUI();
+                updateNeuralAudio(dominant, expressions[dominant]);
+                
+                // Real-time Aura color morphing
+                if(dominant === 'happy') aura.material.color.setHex(0x00ffaa);
+                else if(dominant === 'angry') aura.material.color.setHex(0xff3300);
+                else if(dominant === 'sad') aura.material.color.setHex(0x0055ff);
+                else aura.material.color.setHex(0x00f2ff);
             }
-        }, 100);
+        }, 150);
     }
 
-    window.onload = startSystem;
+    function updateUI() {
+        document.getElementById('emotion').innerText = emotionData.type;
+        document.getElementById('pulse').innerText = Math.floor(68 + (emotionData.intensity * 40)) + " BPM";
+        document.getElementById('phase').innerText = emotionData.intensity > 0.7 ? "UNSTABLE DRIFT" : "STABLE";
+    }
+
+    document.getElementById('init-btn').addEventListener('click', () => {
+        document.getElementById('init-btn').style.opacity = '0';
+        setTimeout(() => document.getElementById('init-btn').remove(), 500);
+        initNeuralAudio();
+        init3D();
+        initAI();
+    });
 </script>
 </body>
 </html>
