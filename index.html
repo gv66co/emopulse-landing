@@ -1,22 +1,35 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+    <meta charset="UTF-8">
+    <title>EMOPULSE V5 // PRO DASHBOARD</title>
+    <link rel="stylesheet" href="emopulse.css?v=5.0">
+    
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+</head>
 <body class="emopulse-body">
     <div class="pro-container">
-        <header class="top-bar">
-            <div class="logo">EMOPULSE <span class="cyan">V5</span></div>
-            <div class="status-box">STATUS: <span class="online-text">SYNCHRONIZED</span></div>
+        <header style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+            <div style="font-size: 1.5rem; font-weight: bold; letter-spacing: 4px;">EMOPULSE <span style="color: #00f2ff">V5</span></div>
+            <div class="online-text">G-CLOUD BACKEND: ACTIVE</div>
         </header>
 
         <main class="pro-grid">
             <section class="panel camera-panel">
-                <div class="panel-label">BIOMETRIC FEED</div>
+                <div class="label">BIOMETRIC FEED</div>
                 <div class="cam-container">
                     <video id="cam" autoplay muted playsinline></video>
                     <canvas id="face-mesh-canvas"></canvas>
                 </div>
-                <div class="neural-drift-zone">
-                    <div class="label">NEURAL DRIFT</div>
-                    <div id="neural-drift-val" class="val-xl">+0.842</div>
-                    <div class="drift-bar"><div class="drift-fill"></div></div>
-                </div>
+                <div id="neural-drift-val" class="val-xl">+0.842</div>
+                <div class="label">NEURAL DRIFT</div>
             </section>
 
             <section class="core-visual">
@@ -24,32 +37,33 @@
             </section>
 
             <section class="panel analysis-panel">
-                <div class="panel-label">EMOTIONAL SUMMARY</div>
-                <div id="aiText" class="ai-status-text">Analyzing facial features...</div>
-                <div class="tag-row">
-                    <span class="tag">#monitoring</span>
-                    <span class="tag">#biometric</span>
+                <div class="label">INSIGHT ENGINE</div>
+                <div id="aiText" style="font-size: 1.2rem; margin: 20px 0;">Skenuojama biometrinė sritis...</div>
+                <div style="display: flex; gap: 10px;">
+                    <span style="background: rgba(0,242,255,0.1); color: #00f2ff; padding: 5px 10px; border-radius: 5px; font-size: 10px;">#NEURAL_LINK</span>
                 </div>
             </section>
         </main>
 
         <footer class="pro-footer">
             <div class="stat-card">
-                <div class="label">EMOPULSE SCORE</div>
-                <div class="val"><span id="scoreValue">76</span>/100</div>
+                <div class="label">COHERENCE</div>
+                <div id="scoreValue" class="val-xl">0</div>
             </div>
             <div class="stat-card">
                 <div class="label">ENERGY</div>
-                <div class="val" id="energy">0.66</div>
+                <div id="energy" class="val-xl">0.00</div>
             </div>
             <div class="stat-card">
-                <div class="label">STRESS RISK</div>
-                <div id="stress-lvl" class="val stress-low">Low</div>
+                <div class="label">STRESS</div>
+                <div id="stress-lvl" class="val-xl" style="color: #4ade80;">LOW</div>
             </div>
             <div class="stat-card">
                 <div class="label">STABILITY</div>
-                <div class="val" id="stability">112°</div>
+                <div id="stability" class="val-xl">112.4°</div>
             </div>
         </footer>
     </div>
+    <script type="module" src="app.js"></script>
 </body>
+</html>
