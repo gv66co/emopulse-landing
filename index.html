@@ -2,7 +2,7 @@
 <html lang="lt">
 <head>
     <meta charset="UTF-8">
-    <title>EMOPULSE V5 - NEURAL INTERFACE</title>
+    <title>EMOPULSE V5 - NEURAL CORE LIVE</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_landmarker@0.10.0"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@100;300;600&display=swap" rel="stylesheet">
@@ -14,196 +14,154 @@
 
         #ui-interface {
             position: relative; z-index: 10; height: 100vh;
-            display: grid; grid-template-columns: 400px 1fr 400px;
-            grid-template-rows: 100px 1fr 220px; padding: 40px; gap: 25px;
+            display: grid; grid-template-columns: 380px 1fr 380px;
+            grid-template-rows: 80px 1fr 200px; padding: 30px; gap: 20px;
             pointer-events: none;
         }
 
         .panel { 
-            background: var(--glass); backdrop-filter: blur(40px); 
-            border: 1px solid rgba(0, 242, 255, 0.15); border-radius: 30px; 
-            padding: 30px; pointer-events: auto;
+            background: var(--glass); backdrop-filter: blur(30px); 
+            border: 1px solid rgba(0, 242, 255, 0.15); border-radius: 25px; 
+            padding: 25px; pointer-events: auto;
         }
 
-        .header { grid-column: 1 / 4; display: flex; justify-content: space-between; align-items: baseline; }
-        .logo { font-family: 'Orbitron'; letter-spacing: 12px; font-size: 28px; color: var(--neon); }
+        .header { grid-column: 1 / 4; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-family: 'Orbitron'; letter-spacing: 8px; font-size: 24px; color: var(--neon); }
 
-        /* Veido sekimo zona */
-        .cam-frame { position: relative; width: 100%; height: 230px; border-radius: 20px; overflow: hidden; border: 1px solid var(--neon); box-shadow: 0 0 20px rgba(0,242,255,0.2); }
-        #webcam { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); filter: grayscale(0.5) contrast(1.2); }
-        #face-overlay { position: absolute; inset: 0; width: 100%; height: 100%; transform: scaleX(-1); }
+        .cam-container { position: relative; width: 100%; height: 200px; border-radius: 15px; overflow: hidden; border: 1px solid var(--neon); margin-bottom: 20px; }
+        #webcam { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); opacity: 0.5; }
+        #face-canvas { position: absolute; inset: 0; width: 100%; height: 100%; transform: scaleX(-1); }
 
-        .stat-label { font-size: 11px; letter-spacing: 3px; opacity: 0.5; text-transform: uppercase; margin-bottom: 5px; }
-        .stat-value { font-family: 'Orbitron'; font-size: 34px; color: #fff; }
+        .stat-label { font-size: 10px; letter-spacing: 2px; opacity: 0.5; text-transform: uppercase; }
+        .stat-value { font-family: 'Orbitron'; font-size: 28px; color: var(--neon); }
 
-        /* Apatinės kortelės lygiai kaip pavyzdyje */
-        .bottom-shelf { grid-column: 1 / 4; grid-row: 3; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-        .card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 25px; padding: 25px; transition: 0.3s; }
-        .card:hover { border-color: var(--neon); background: rgba(0,242,255,0.02); }
-
-        .tag { display: inline-block; padding: 5px 12px; background: rgba(0, 242, 255, 0.1); border-radius: 10px; font-size: 11px; margin: 4px; color: var(--neon); border: 1px solid rgba(0,242,255,0.2); }
+        .bottom-shelf { grid-column: 1 / 4; grid-row: 3; display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+        .mini-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 15px; padding: 20px; }
+        
+        #loading-overlay { position: absolute; inset: 0; background: #000; z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .spinner { width: 50px; height: 50px; border: 3px solid rgba(0,242,255,0.1); border-top-color: var(--neon); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
+
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+        <p style="margin-top: 20px; font-family: 'Orbitron'; font-size: 12px; letter-spacing: 3px;">INITIALIZING NEURAL CORE...</p>
+    </div>
 
     <canvas id="bg-canvas"></canvas>
 
     <div id="ui-interface">
         <div class="header">
-            <div class="logo">EMOPULSE</div>
-            <div style="font-size: 12px; opacity: 0.6; letter-spacing: 2px;">LIVE MODEL: <span style="color:var(--neon)">V5.0 ACTIVE</span></div>
+            <div class="logo">EMOPULSE V5</div>
+            <div id="sys-status" style="font-size: 11px;">SYSTEM: <span style="color:var(--neon)">WAITING</span></div>
         </div>
 
         <div class="panel">
-            <div class="cam-frame">
+            <div class="cam-container">
                 <video id="webcam" autoplay playsinline muted></video>
-                <canvas id="face-overlay"></canvas>
+                <canvas id="face-canvas"></canvas>
             </div>
-            <div style="margin-top: 30px;">
-                <div class="stat-label">Neural Drift</div>
-                <div class="stat-value" id="drift-num">+0.842</div>
-                <div style="width: 100%; height: 4px; background: rgba(255,255,255,0.1); margin-top: 15px; border-radius: 2px;">
-                    <div id="drift-bar" style="width: 76%; height: 100%; background: var(--neon); box-shadow: 0 0 15px var(--neon);"></div>
-                </div>
-            </div>
+            <div class="stat-label">Neural Drift</div>
+            <div class="stat-value" id="drift-display">+0.000</div>
         </div>
 
-        <div></div> <div class="panel" style="border-right: 4px solid var(--neon);">
+        <div></div>
+
+        <div class="panel" style="border-left: 4px solid var(--neon);">
             <div class="stat-label">Emotional Summary</div>
-            <div id="status-text" style="font-size: 24px; margin: 20px 0; font-weight: 300; line-height: 1.4;">Laukiama biometrinių duomenų...</div>
-            <div id="tags-box">
-                <span class="tag">#scanning</span>
-                <span class="tag">#neural_sync</span>
-            </div>
+            <div id="summary-text" style="font-size: 20px; margin: 15px 0; font-weight: 300;">Skenuojamas veidas...</div>
         </div>
 
         <div class="bottom-shelf">
-            <div class="card">
-                <div class="stat-label">Emopulse Score</div>
-                <div class="stat-value">76<small style="font-size: 14px; opacity:0.3"> / 100</small></div>
-            </div>
-            <div class="card">
-                <div class="stat-label">Energy Level</div>
-                <div class="stat-value" id="energy-val">0,66 <span style="font-size: 12px; color:var(--neon)">▲ rising</span></div>
-            </div>
-            <div class="card">
-                <div class="stat-label">Stress Risk</div>
-                <div class="stat-value" id="stress-lvl" style="color: #44ff44;">Low</div>
-            </div>
-            <div class="card">
-                <div class="stat-label">Stability</div>
-                <div class="stat-value">112° <small style="font-size: 12px; opacity:0.3">to Calm</small></div>
-            </div>
+            <div class="mini-card"><div class="stat-label">Emopulse Score</div><div class="stat-value">76</div></div>
+            <div class="mini-card"><div class="stat-label">Energy</div><div class="stat-value">0,66</div></div>
+            <div class="mini-card"><div class="stat-label">Stress Risk</div><div class="stat-value" id="stress-lvl">Low</div></div>
+            <div class="mini-card"><div class="stat-label">Stability</div><div class="stat-value">112°</div></div>
         </div>
     </div>
 
     <script type="module">
         import { FaceLandmarker, FilesetResolver, DrawingUtils } from "https://cdn.jsdelivr.net/npm/@mediapipe/face_landmarker@0.10.0";
 
-        // --- 1. THREE.JS: QUANTUM CORE (Dabartinio "šarato" keitimas) ---
+        // 1. THREE.JS - Judantis fonas
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('bg-canvas'), antialias: true, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        camera.position.z = 20;
+        camera.position.z = 15;
 
-        // Sukuriame dalelių branduolį (vietoj sferos)
-        const particlesCount = 8000;
-        const posArray = new Float32Array(particlesCount * 3);
-        for(let i=0; i < particlesCount * 3; i++) {
-            posArray[i] = (Math.random() - 0.5) * 15;
-        }
-        const particlesGeo = new THREE.BufferGeometry();
-        particlesGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-        const particlesMat = new THREE.PointsMaterial({ size: 0.05, color: 0x00f2ff, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending });
-        const corePoints = new THREE.Points(particlesGeo, particlesMat);
-        scene.add(corePoints);
+        const core = new THREE.Mesh(new THREE.IcosahedronGeometry(4, 15), new THREE.MeshPhongMaterial({ color: 0x000000, emissive: 0x00f2ff, wireframe: true, transparent: true, opacity: 0.2 }));
+        scene.add(core);
+        scene.add(new THREE.PointLight(0x00f2ff, 2, 50));
 
-        // Žiedai aplink branduolį
-        const ringGeo = new THREE.TorusGeometry(6, 0.02, 16, 100);
-        const ringMat = new THREE.MeshBasicMaterial({ color: 0x00f2ff, transparent: true, opacity: 0.2 });
-        const ring = new THREE.Mesh(ringGeo, ringMat);
-        ring.rotation.x = Math.PI / 2.5;
-        scene.add(ring);
-
-        // --- 2. MEDIAPIPE: GYVAS VEIDO TINKLAS ---
+        // 2. AI VEIDO SEKIMAS
         let faceLandmarker;
         const video = document.getElementById("webcam");
-        const canvasFace = document.getElementById("face-overlay");
+        const canvasFace = document.getElementById("face-canvas");
         const ctxFace = canvasFace.getContext("2d");
 
         async function initAI() {
-            const files = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/face_landmarker@0.10.0/wasm");
-            faceLandmarker = await FaceLandmarker.createFromOptions(files, {
-                baseOptions: { modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task`, delegate: "GPU" },
-                outputFaceBlendshapes: true,
-                runningMode: "VIDEO"
-            });
-            startCamera();
+            try {
+                const files = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/face_landmarker@0.10.0/wasm");
+                faceLandmarker = await FaceLandmarker.createFromOptions(files, {
+                    baseOptions: { modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task`, delegate: "GPU" },
+                    outputFaceBlendshapes: true,
+                    runningMode: "VIDEO"
+                });
+                startCamera();
+            } catch (e) {
+                console.error("AI klaida:", e);
+                document.getElementById('loading-overlay').innerHTML = "<p>KLAIDA: Nepavyko įkrauti AI modulių.</p>";
+            }
         }
 
         function startCamera() {
-            navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
-                video.srcObject = stream;
-                video.addEventListener("loadeddata", predict);
+            navigator.mediaDevices.getUserMedia({ video: true }).then(s => {
+                video.srcObject = s;
+                video.addEventListener("loadeddata", () => {
+                    document.getElementById('loading-overlay').style.display = 'none';
+                    document.getElementById('sys-status').innerHTML = "SYSTEM: <span style='color:var(--neon)'>LIVE</span>";
+                    runDetection();
+                });
+            }).catch(err => {
+                document.getElementById('loading-overlay').innerHTML = "<p>KLAIDA: Suteikite leidimą naudoti kamerą.</p>";
             });
         }
 
-        async function predict() {
+        async function runDetection() {
             canvasFace.width = video.videoWidth;
             canvasFace.height = video.videoHeight;
-            const results = faceLandmarker.detectForVideo(video, performance.now());
-            ctxFace.clearRect(0, 0, canvasFace.width, canvasFace.height);
+            
+            function detect() {
+                const results = faceLandmarker.detectForVideo(video, performance.now());
+                ctxFace.clearRect(0, 0, canvasFace.width, canvasFace.height);
 
-            if (results.faceLandmarks && results.faceLandmarks[0]) {
-                const drawingUtils = new DrawingUtils(ctxFace);
-                // Piešiame neuroninį tinklą ant veido
-                drawingUtils.drawConnectors(results.faceLandmarks[0], FaceLandmarker.FACE_LANDMARKS_TESSELATION, { color: "#00f2ff22", lineWidth: 1 });
-                drawingUtils.drawConnectors(results.faceLandmarks[0], FaceLandmarker.FACE_LANDMARKS_RIGHT_EYE, { color: "#00f2ff" });
-                drawingUtils.drawConnectors(results.faceLandmarks[0], FaceLandmarker.FACE_LANDMARKS_LEFT_EYE, { color: "#00f2ff" });
-                
-                if (results.faceBlendshapes[0]) updateUI(results.faceBlendshapes[0].categories);
+                if (results.faceLandmarks && results.faceLandmarks[0]) {
+                    const drawingUtils = new DrawingUtils(ctxFace);
+                    drawingUtils.drawConnectors(results.faceLandmarks[0], FaceLandmarker.FACE_LANDMARKS_TESSELATION, { color: "#00f2ff33", lineWidth: 1 });
+                    
+                    if (results.faceBlendshapes[0]) {
+                        const stress = results.faceBlendshapes[0].categories.find(s => s.categoryName === "browDownLeft")?.score || 0;
+                        document.getElementById('drift-display').innerText = "+" + (0.8 + stress).toFixed(3);
+                        document.getElementById('stress-lvl').innerText = stress > 0.2 ? "Elevated" : "Low";
+                        document.getElementById('stress-lvl').style.color = stress > 0.2 ? "#ff3e3e" : "#00f2ff";
+                    }
+                }
+                requestAnimationFrame(detect);
             }
-            requestAnimationFrame(predict);
-        }
-
-        function updateUI(shapes) {
-            const browStress = shapes.find(s => s.categoryName === "browDownLeft")?.score || 0;
-            const statusText = document.getElementById('status-text');
-            const stressLvl = document.getElementById('stress-lvl');
-            const driftNum = document.getElementById('drift-num');
-
-            if (browStress > 0.25) {
-                statusText.innerText = "Elevated Stress Risk detected";
-                stressLvl.innerText = "High";
-                stressLvl.style.color = "#ff3e3e";
-                driftNum.innerText = "+" + (browStress * 8).toFixed(3);
-                corePoints.material.color.setHex(0xff3e3e); // Branduolys parausta
-            } else {
-                statusText.innerText = "Calm Focused Energy";
-                stressLvl.innerText = "Low";
-                stressLvl.style.color = "#44ff44";
-                driftNum.innerText = "+0.842";
-                corePoints.material.color.setHex(0x00f2ff); // Branduolys grįžta į žydrą
-            }
+            detect();
         }
 
         function animate() {
             requestAnimationFrame(animate);
-            corePoints.rotation.y += 0.002;
-            corePoints.rotation.x += 0.001;
-            ring.rotation.z += 0.005;
+            core.rotation.y += 0.005;
             renderer.render(scene, camera);
         }
 
         initAI();
         animate();
-
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
     </script>
 </body>
 </html>
