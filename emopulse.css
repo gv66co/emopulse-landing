@@ -1,4 +1,4 @@
-/* EMOPULSE PRO - CORE STYLING */
+/* --- PAGRINDINIAI KINTAMIEJI --- */
 :root {
     --bg-dark: #020617;
     --card-bg: rgba(15, 23, 42, 0.7);
@@ -7,38 +7,33 @@
     --text-main: #f8fafc;
     --text-muted: #94a3b8;
     --border: rgba(255, 255, 255, 0.1);
-    --neon-glow: 0 0 15px rgba(58, 191, 248, 0.4);
 }
 
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
     background-color: var(--bg-dark);
     color: var(--text-main);
     font-family: 'Inter', sans-serif;
     height: 100vh;
-    overflow: hidden; /* Užrakiname ekraną, kad nebūtų tuščios vietos apačioje */
+    overflow: hidden; /* Užrakina ekraną viename lange */
 }
 
-/* PAGRINDINIS TINKLELIS (GRID) */
+/* --- KONTEINERIO STRUKTŪRA (Pagal tavo HTML) --- */
 .app-container {
     display: grid;
     grid-template-areas: 
         "nav nav"
         "visual info"
         "footer footer";
-    grid-template-columns: 1.2fr 0.8fr; /* Kairė dalis platesnė 3D modeliui */
-    grid-template-rows: 60px 1fr 180px; /* Navigacija, Turinys, Metrikos */
+    grid-template-columns: 1.2fr 0.8fr;
+    grid-template-rows: 60px 1fr 180px;
     height: 100vh;
-    gap: 20px;
-    padding: 20px;
+    gap: 15px;
+    padding: 15px;
 }
 
-/* NAVIGACIJA */
+/* --- NAVIGACIJA --- */
 .top-nav {
     grid-area: nav;
     display: flex;
@@ -47,91 +42,98 @@ body {
     border-bottom: 1px solid var(--border);
 }
 
-.logo-group { font-weight: 800; letter-spacing: 1px; color: var(--text-main); }
-.nav-links { display: flex; gap: 25px; }
-.nav-links a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; transition: 0.3s; }
-.nav-links a.active, .nav-links a:hover { color: var(--accent-blue); }
+.logo-group { font-weight: 800; font-size: 1.2rem; }
+.pro-badge { background: var(--accent-purple); font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; vertical-align: middle; }
+.nav-links { display: flex; gap: 20px; align-items: center; }
+.nav-item { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; }
+.nav-item.active { color: var(--accent-blue); font-weight: 600; }
+.system-time { font-family: 'JetBrains Mono'; color: var(--accent-blue); }
 
-/* KAIRĖ SEKCIJA (3D CORE + MINI CAM) */
-.visual-section {
+/* --- KAIRĖ: VIZUALINIS VARIKLIS --- */
+.visual-engine {
     grid-area: visual;
     display: flex;
     flex-direction: column;
-    gap: 15px;
-    min-height: 0; /* Svarbu, kad neperpildytų aukščio */
+    gap: 10px;
+    min-height: 0; /* Neleidžia išsipūsti */
 }
 
 .stage-3d {
     flex: 1;
-    background: radial-gradient(circle, rgba(123, 92, 255, 0.1) 0%, transparent 70%);
-    border-radius: 24px;
+    background: radial-gradient(circle, rgba(58, 191, 248, 0.05) 0%, transparent 80%);
+    border-radius: 20px;
     border: 1px solid var(--border);
     position: relative;
     overflow: hidden;
 }
 
-canvas#compass3d {
-    width: 100% !important;
-    height: 100% !important;
-}
+#compass3d { width: 100% !important; height: 100% !important; }
 
-/* KAMEROS SKYDELIS (Kaip nuotraukoje) */
+.core-label { position: absolute; top: 20px; left: 20px; pointer-events: none; }
+.label-sub { font-size: 0.7rem; color: var(--accent-blue); letter-spacing: 2px; }
+
+/* KAMERA (Mažas skydelis apačioje kairėje) */
 .drift-panel {
-    height: 120px;
     background: var(--card-bg);
     border: 1px solid var(--border);
-    border-radius: 20px;
-    display: flex;
-    align-items: center;
-    padding: 15px;
-    gap: 20px;
+    border-radius: 15px;
+    padding: 10px;
     backdrop-filter: blur(10px);
 }
 
+.sensor-group { display: flex; align-items: center; gap: 15px; }
+
 .video-wrap {
-    width: 90px;
-    height: 90px;
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
     overflow: hidden;
     border: 2px solid var(--accent-blue);
-    box-shadow: var(--neon-glow);
+    position: relative;
 }
 
 #cam { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+#overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
 
-/* DEŠINĖ SEKCIJA (AI TEKSTAI) */
-.info-section {
+.sensor-stats { flex: 1; font-family: 'JetBrains Mono'; font-size: 0.75rem; }
+.stat-row { display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 2px 0; }
+.s-label { color: var(--text-muted); }
+.s-value { color: var(--accent-blue); font-weight: bold; }
+
+/* --- DEŠINĖ: DUOMENŲ VARIKLIS --- */
+.data-engine {
     grid-area: info;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 25px;
+    gap: 20px;
     padding-left: 20px;
 }
 
-.hero-title {
-    font-size: 2.2rem;
-    font-weight: 800;
-    line-height: 1.1;
-    color: #fff;
-}
+.hero-text h1 { font-size: 2rem; line-height: 1.1; margin-bottom: 10px; }
+.hero-text p { color: var(--text-muted); font-size: 0.9rem; }
 
-.status-card {
+.insight-card {
     background: var(--card-bg);
     border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 25px;
+    border-radius: 15px;
+    padding: 20px;
     position: relative;
 }
 
-#aiText {
-    font-size: 1.1rem;
-    color: var(--accent-blue);
-    margin-bottom: 10px;
-}
+.ai-header { display: flex; gap: 12px; margin-bottom: 10px; }
+.ai-avatar { background: var(--accent-purple); padding: 4px 8px; border-radius: 6px; font-weight: 800; font-size: 0.8rem; }
+.ai-name { display: block; font-size: 0.9rem; font-weight: bold; }
+.ai-status { font-size: 0.7rem; color: var(--accent-blue); }
 
-/* APAČIA (METRIKOS) */
-.bottom-metrics {
+.insight-text { font-size: 1.1rem; color: #fff; line-height: 1.4; }
+
+.score-display { text-align: right; }
+.score-label { font-size: 0.7rem; color: var(--text-muted); letter-spacing: 1px; }
+.big-score { font-size: 4rem; font-weight: 800; color: var(--accent-blue); }
+
+/* --- APAČIA: GRAFIKAI --- */
+.metrics-grid {
     grid-area: footer;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -141,30 +143,20 @@ canvas#compass3d {
 .m-card {
     background: var(--card-bg);
     border: 1px solid var(--border);
-    border-radius: 18px;
-    padding: 15px;
+    border-radius: 15px;
+    padding: 12px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
 }
 
-.m-header {
-    font-size: 0.7rem;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
+.m-header { font-size: 0.65rem; color: var(--text-muted); letter-spacing: 1px; margin-bottom: 8px; }
+canvas { width: 100% !important; height: 50px !important; }
 
-.mini-chart { width: 100%; height: 60px !important; }
+.m-footer { display: flex; justify-content: space-between; align-items: baseline; margin-top: 5px; }
+.m-sub { font-size: 0.7rem; color: var(--text-muted); }
+.m-val { font-size: 1.1rem; font-weight: bold; color: var(--accent-blue); }
 
-.metric-value {
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: var(--accent-blue);
-}
-
-/* INVESTORS PUSLAPIO STILIUS (Jei naudojama ta pati CSS rinkmena) */
-.investor-body .info-section {
-    grid-template-columns: 1fr;
-    text-align: center;
-}
+/* --- ANIMACIJOS --- */
+.pulse-status { font-size: 0.6rem; color: var(--accent-blue); margin-top: 5px; animation: blink 2s infinite; }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
