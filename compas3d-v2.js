@@ -1,8 +1,9 @@
-import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
-import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js";
-import { EffectComposer } from "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/postprocessing/EffectComposer.js";
-import { RenderPass } from "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/postprocessing/RenderPass.js";
-import { UnrealBloomPass } from "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/postprocessing/UnrealBloomPass.js";
+// Naudojame trumpus pavadinimus, kuriuos nustatėme Import Map (index.html)
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
 let scene, camera, renderer, composer, controls;
 let canvas, coreSphere, glowMesh, compassNeedleGroup;
@@ -25,7 +26,7 @@ export function initCompass3D() {
 
     // --- SCENE SETUP ---
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x02040a);
+    scene.background = null; // Leidžiame matytis CSS fonui, jei reikia (alpha: true)
 
     camera = new THREE.PerspectiveCamera(45, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
     camera.position.set(0, 3, 8);
@@ -33,7 +34,7 @@ export function initCompass3D() {
     renderer = new THREE.WebGLRenderer({ 
         canvas, 
         antialias: true, 
-        alpha: true,
+        alpha: true, // Kad matytųsi gražus fonas iš CSS
         powerPreference: "high-performance" 
     });
     renderer.setSize(canvas.clientWidth, canvas.clientHeight);
@@ -100,7 +101,7 @@ export function initCompass3D() {
 
     // --- COMPASS NEEDLE GROUP ---
     compassNeedleGroup = new THREE.Group();
-    const needleGeom = new THREE.ConeGeometry(0.15, 1.4, 4); // Piramidės formos adata
+    const needleGeom = new THREE.ConeGeometry(0.15, 1.4, 4); 
     const needleMat = new THREE.MeshStandardMaterial({ 
         color: 0xfbbf24, 
         emissive: 0x443300,
@@ -161,12 +162,16 @@ function animate() {
     const time = performance.now() * 0.001;
 
     // Branduolio animacija
-    coreSphere.rotation.y += 0.005;
-    coreSphere.position.y = Math.sin(time * 0.8) * 0.15; // Švelnus plūduriavimas
+    if(coreSphere) {
+        coreSphere.rotation.y += 0.005;
+        coreSphere.position.y = Math.sin(time * 0.8) * 0.15;
+    }
     
     // Švytėjimo pulsavimas
-    const pulse = 1 + Math.sin(time * 2) * 0.08;
-    glowMesh.scale.set(pulse, pulse, pulse);
+    if(glowMesh) {
+        const pulse = 1 + Math.sin(time * 2) * 0.08;
+        glowMesh.scale.set(pulse, pulse, pulse);
+    }
 
     // Žiedų sukimasis
     orbitRings.forEach((ring, i) => {
@@ -180,20 +185,24 @@ function animate() {
     });
 
     // Sklandus adatos judėjimas (Lerp)
-    // Svarbu: užtikriname, kad adata suktųsi trumpiausiu keliu
-    compassNeedleGroup.rotation.y += (needleTargetRotation - compassNeedleGroup.rotation.y) * 0.08;
+    if(compassNeedleGroup) {
+        compassNeedleGroup.rotation.y += (needleTargetRotation - compassNeedleGroup.rotation.y) * 0.08;
+    }
 
-    // Dinaminė branduolio spalva pagal įtampą/džiaugsmą
-    const colorIntensity = Math.min(1, Math.abs(needleTargetRotation) / Math.PI);
-    coreSphere.material.color.lerpColors(
-        new THREE.Color(0x3abff8), // Ramus (Melsva)
-        new THREE.Color(0xf87171), // Įtemptas (Raudona)
-        colorIntensity
-    );
-    
-    // Taip pat keičiame švytėjimo spalvą
-    glowMesh.material.color.copy(coreSphere.material.color);
+    // Dinaminė branduolio spalva
+    if(coreSphere && glowMesh) {
+        const colorIntensity = Math.min(1, Math.abs(needleTargetRotation) / Math.PI);
+        coreSphere.material.color.lerpColors(
+            new THREE.Color(0x3abff8), // Ramus
+            new THREE.Color(0xf87171), // Įtemptas
+            colorIntensity
+        );
+        glowMesh.material.color.copy(coreSphere.material.color);
+    }
 
     controls.update();
     composer.render();
 }
+
+// Svarbu: Automatiškai inicijuojame, kai modulis užsikrauna
+window.addEventListener('load', initCompass3D);
