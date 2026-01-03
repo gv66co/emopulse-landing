@@ -2,60 +2,45 @@
 <html lang="lt">
 <head>
     <meta charset="UTF-8">
-    <title>EMOPULSE V5 - NEURAL CORE LIVE</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMOPULSE V5 - FIX</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_landmarker@0.10.0"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@100;300;600&display=swap" rel="stylesheet">
     <style>
-        :root { --neon: #00f2ff; --glass: rgba(0, 10, 20, 0.85); }
+        :root { --neon: #00f2ff; --glass: rgba(0, 10, 20, 0.9); }
         body, html { margin: 0; padding: 0; background: #000; overflow: hidden; font-family: 'Inter', sans-serif; color: white; height: 100vh; }
         
         canvas#bg-canvas { position: absolute; inset: 0; z-index: 1; }
-
-        #ui-interface {
-            position: relative; z-index: 10; height: 100vh;
-            display: grid; grid-template-columns: 380px 1fr 380px;
-            grid-template-rows: 80px 1fr 200px; padding: 30px; gap: 20px;
-            pointer-events: none;
-        }
-
-        .panel { 
-            background: var(--glass); backdrop-filter: blur(30px); 
-            border: 1px solid rgba(0, 242, 255, 0.15); border-radius: 25px; 
-            padding: 25px; pointer-events: auto;
-        }
-
-        .header { grid-column: 1 / 4; display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-family: 'Orbitron'; letter-spacing: 8px; font-size: 24px; color: var(--neon); }
-
-        .cam-container { position: relative; width: 100%; height: 200px; border-radius: 15px; overflow: hidden; border: 1px solid var(--neon); margin-bottom: 20px; }
-        #webcam { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); opacity: 0.5; }
+        #ui-interface { position: relative; z-index: 10; height: 100vh; display: grid; grid-template-columns: 380px 1fr 380px; grid-template-rows: 80px 1fr 200px; padding: 30px; gap: 20px; pointer-events: none; }
+        .panel { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid rgba(0, 242, 255, 0.15); border-radius: 20px; padding: 25px; pointer-events: auto; }
+        .cam-container { position: relative; width: 100%; height: 200px; border-radius: 15px; overflow: hidden; border: 1px solid var(--neon); background: #000; }
+        #webcam { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
         #face-canvas { position: absolute; inset: 0; width: 100%; height: 100%; transform: scaleX(-1); }
-
-        .stat-label { font-size: 10px; letter-spacing: 2px; opacity: 0.5; text-transform: uppercase; }
         .stat-value { font-family: 'Orbitron'; font-size: 28px; color: var(--neon); }
-
         .bottom-shelf { grid-column: 1 / 4; grid-row: 3; display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
         .mini-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 15px; padding: 20px; }
-        
-        #loading-overlay { position: absolute; inset: 0; background: #000; z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .spinner { width: 50px; height: 50px; border: 3px solid rgba(0,242,255,0.1); border-top-color: var(--neon); border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Loading ekranas */
+        #loading-overlay { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s; }
+        .loader-ring { width: 60px; height: 60px; border: 3px solid rgba(0,242,255,0.1); border-top: 3px solid var(--neon); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
     <div id="loading-overlay">
-        <div class="spinner"></div>
-        <p style="margin-top: 20px; font-family: 'Orbitron'; font-size: 12px; letter-spacing: 3px;">INITIALIZING NEURAL CORE...</p>
+        <div class="loader-ring"></div>
+        <p id="loading-text" style="margin-top: 25px; font-family: 'Orbitron'; font-size: 11px; letter-spacing: 3px;">INITIALIZING NEURAL CORE...</p>
+        <button id="skip-btn" style="margin-top: 20px; background: none; border: 1px solid var(--neon); color: var(--neon); padding: 5px 15px; cursor: pointer; display: none;" onclick="hideLoading()">SKIP AI LOADING</button>
     </div>
 
     <canvas id="bg-canvas"></canvas>
 
     <div id="ui-interface">
-        <div class="header">
-            <div class="logo">EMOPULSE V5</div>
-            <div id="sys-status" style="font-size: 11px;">SYSTEM: <span style="color:var(--neon)">WAITING</span></div>
+        <div style="grid-column: 1/4; display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-family: 'Orbitron'; font-size: 24px; color: var(--neon);">EMOPULSE V5</div>
+            <div id="sys-status" style="font-size: 11px;">SYSTEM: <span style="color: #ff3e3e;">OFFLINE</span></div>
         </div>
 
         <div class="panel">
@@ -63,40 +48,46 @@
                 <video id="webcam" autoplay playsinline muted></video>
                 <canvas id="face-canvas"></canvas>
             </div>
-            <div class="stat-label">Neural Drift</div>
-            <div class="stat-value" id="drift-display">+0.000</div>
+            <div style="margin-top: 15px;">
+                <div style="font-size: 10px; opacity: 0.5;">NEURAL DRIFT</div>
+                <div class="stat-value" id="drift-display">+0.842</div>
+            </div>
         </div>
 
-        <div></div>
-
-        <div class="panel" style="border-left: 4px solid var(--neon);">
-            <div class="stat-label">Emotional Summary</div>
-            <div id="summary-text" style="font-size: 20px; margin: 15px 0; font-weight: 300;">Skenuojamas veidas...</div>
+        <div></div> <div class="panel" style="border-left: 4px solid var(--neon);">
+            <div style="font-size: 10px; opacity: 0.5;">EMOTIONAL SUMMARY</div>
+            <div id="summary-text" style="font-size: 18px; margin-top: 10px;">Ready for analysis...</div>
         </div>
 
         <div class="bottom-shelf">
-            <div class="mini-card"><div class="stat-label">Emopulse Score</div><div class="stat-value">76</div></div>
-            <div class="mini-card"><div class="stat-label">Energy</div><div class="stat-value">0,66</div></div>
-            <div class="mini-card"><div class="stat-label">Stress Risk</div><div class="stat-value" id="stress-lvl">Low</div></div>
-            <div class="mini-card"><div class="stat-label">Stability</div><div class="stat-value">112°</div></div>
+            <div class="mini-card"><div>SCORE</div><div class="stat-value">76</div></div>
+            <div class="mini-card"><div>ENERGY</div><div class="stat-value">0,66</div></div>
+            <div class="mini-card"><div>STRESS</div><div class="stat-value" id="stress-lvl">LOW</div></div>
+            <div class="mini-card"><div>STABILITY</div><div class="stat-value">112°</div></div>
         </div>
     </div>
 
     <script type="module">
         import { FaceLandmarker, FilesetResolver, DrawingUtils } from "https://cdn.jsdelivr.net/npm/@mediapipe/face_landmarker@0.10.0";
 
-        // 1. THREE.JS - Judantis fonas
+        // Parodome SKIP mygtuką po 10 sekundžių, jei AI vis dar kraunasi
+        setTimeout(() => { document.getElementById('skip-btn').style.display = 'block'; }, 10000);
+
+        function hideLoading() { document.getElementById('loading-overlay').style.opacity = '0'; setTimeout(() => { document.getElementById('loading-overlay').style.display = 'none'; }, 500); }
+
+        // --- THREE.JS PRADŽIA ---
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('bg-canvas'), antialias: true, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         camera.position.z = 15;
 
+        // Branduolio objektas
         const core = new THREE.Mesh(new THREE.IcosahedronGeometry(4, 15), new THREE.MeshPhongMaterial({ color: 0x000000, emissive: 0x00f2ff, wireframe: true, transparent: true, opacity: 0.2 }));
         scene.add(core);
         scene.add(new THREE.PointLight(0x00f2ff, 2, 50));
 
-        // 2. AI VEIDO SEKIMAS
+        // --- AI PRADŽIA ---
         let faceLandmarker;
         const video = document.getElementById("webcam");
         const canvasFace = document.getElementById("face-canvas");
@@ -104,30 +95,36 @@
 
         async function initAI() {
             try {
+                document.getElementById('loading-text').innerText = "RESOLVING FILES...";
                 const files = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/face_landmarker@0.10.0/wasm");
+                
+                document.getElementById('loading-text').innerText = "DOWNLOADING MODEL (25MB)...";
                 faceLandmarker = await FaceLandmarker.createFromOptions(files, {
                     baseOptions: { modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task`, delegate: "GPU" },
                     outputFaceBlendshapes: true,
                     runningMode: "VIDEO"
                 });
+                
                 startCamera();
             } catch (e) {
                 console.error("AI klaida:", e);
-                document.getElementById('loading-overlay').innerHTML = "<p>KLAIDA: Nepavyko įkrauti AI modulių.</p>";
+                document.getElementById('loading-text').innerText = "AI ERROR. TRY REFRESHING.";
             }
         }
 
-        function startCamera() {
-            navigator.mediaDevices.getUserMedia({ video: true }).then(s => {
-                video.srcObject = s;
+        async function startCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
                 video.addEventListener("loadeddata", () => {
-                    document.getElementById('loading-overlay').style.display = 'none';
+                    hideLoading();
                     document.getElementById('sys-status').innerHTML = "SYSTEM: <span style='color:var(--neon)'>LIVE</span>";
                     runDetection();
                 });
-            }).catch(err => {
-                document.getElementById('loading-overlay').innerHTML = "<p>KLAIDA: Suteikite leidimą naudoti kamerą.</p>";
-            });
+            } catch (err) {
+                alert("Prašau suteikti leidimą kamerai!");
+                hideLoading();
+            }
         }
 
         async function runDetection() {
@@ -135,6 +132,7 @@
             canvasFace.height = video.videoHeight;
             
             function detect() {
+                if (!faceLandmarker) return;
                 const results = faceLandmarker.detectForVideo(video, performance.now());
                 ctxFace.clearRect(0, 0, canvasFace.width, canvasFace.height);
 
@@ -142,10 +140,10 @@
                     const drawingUtils = new DrawingUtils(ctxFace);
                     drawingUtils.drawConnectors(results.faceLandmarks[0], FaceLandmarker.FACE_LANDMARKS_TESSELATION, { color: "#00f2ff33", lineWidth: 1 });
                     
-                    if (results.faceBlendshapes[0]) {
+                    if (results.faceBlendshapes && results.faceBlendshapes[0]) {
                         const stress = results.faceBlendshapes[0].categories.find(s => s.categoryName === "browDownLeft")?.score || 0;
                         document.getElementById('drift-display').innerText = "+" + (0.8 + stress).toFixed(3);
-                        document.getElementById('stress-lvl').innerText = stress > 0.2 ? "Elevated" : "Low";
+                        document.getElementById('stress-lvl').innerText = stress > 0.2 ? "ELEVATED" : "LOW";
                         document.getElementById('stress-lvl').style.color = stress > 0.2 ? "#ff3e3e" : "#00f2ff";
                     }
                 }
