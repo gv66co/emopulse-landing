@@ -2,143 +2,179 @@
 <html lang="lt">
 <head>
     <meta charset="UTF-8">
-    <title>EMOPULSE V3 - SOLID CORE (SAFE MODE)</title>
+    <title>Emopulse - Original V3 Core</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
-        :root {
-            --neon-blue: #3a8dff;
-            --deep-bg: #010308;
-            --glass-bg: rgba(8, 15, 30, 0.7);
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;300;600&display=swap');
 
-        body, html {
+        body, html { 
             margin: 0; padding: 0; width: 100%; height: 100%;
-            background: var(--deep-bg);
-            color: white; font-family: 'Segoe UI', Roboto, sans-serif;
-            overflow: hidden;
+            background: #000205; font-family: 'Inter', sans-serif;
+            overflow: hidden; color: white;
         }
 
-        /* Pagrindinis tinklelis */
-        #app {
-            display: grid;
-            grid-template-columns: 1fr 400px;
-            height: 100vh;
-            padding: 50px;
-            box-sizing: border-box;
-            background: radial-gradient(circle at 30% 50%, #051025 0%, #010308 100%);
-        }
+        #canvas-container { position: absolute; inset: 0; z-index: 1; }
 
-        /* CENTRINIS KOMPASAS (CSS DRIFT) */
-        .stage {
-            display: flex; justify-content: center; align-items: center;
-            position: relative;
-        }
-
-        .compass-core {
-            width: 300px; height: 300px;
-            border: 2px solid rgba(58, 141, 255, 0.2);
-            border-radius: 50%;
-            position: relative;
-            animation: emotionalDrift 10s infinite ease-in-out;
-            box-shadow: 0 0 100px rgba(58, 141, 255, 0.1);
-        }
-
-        .ring {
-            position: absolute; border: 1px solid var(--neon-blue);
-            border-radius: 50%; inset: -20px;
-            opacity: 0.4;
-            animation: rotate 15s infinite linear;
-        }
-
-        .ring-inner {
-            position: absolute; border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 50%; inset: 40px;
-            transform: rotateX(70deg);
-        }
-
-        /* DEŠINĖ PANELĖ */
-        .panel {
-            background: var(--glass-bg);
-            backdrop-filter: blur(30px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 40px;
-            padding: 40px;
+        /* Originalus Emopulse UI išdėstymas */
+        #ui-overlay {
+            position: relative; z-index: 10;
             display: flex; flex-direction: column;
-            box-shadow: -20px 0 60px rgba(0,0,0,0.5);
+            height: 100vh; padding: 60px;
+            box-sizing: border-box;
+            pointer-events: none;
         }
 
-        .video-aura {
-            width: 100%; aspect-ratio: 1;
-            border-radius: 30px;
-            background: #000;
-            overflow: hidden;
-            border: 1px solid rgba(58, 141, 255, 0.3);
-            position: relative;
+        .header { display: flex; align-items: center; gap: 15px; }
+        .logo-symbol { width: 24px; height: 24px; border: 2px solid white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; }
+        .logo-text { font-size: 22px; font-weight: 300; letter-spacing: 1px; }
+
+        .main-layout { display: flex; justify-content: space-between; margin-top: auto; align-items: flex-end; }
+
+        /* Dešinė panelė - identiška Copilot dizainui */
+        .data-panel {
+            width: 380px; background: rgba(2, 8, 18, 0.7);
+            backdrop-filter: blur(30px); border-radius: 30px;
+            padding: 40px; border: 1px solid rgba(255, 255, 255, 0.05);
+            pointer-events: auto;
         }
 
-        #webcam { width: 100%; height: 100%; object-fit: cover; filter: contrast(1.2); }
-
-        .ui-text { margin-top: 40px; }
-        .label { font-size: 10px; letter-spacing: 4px; color: #555; text-transform: uppercase; }
-        .value { font-size: 40px; font-weight: 200; margin: 10px 0; }
-        
-        .status-pill {
-            display: inline-block; padding: 6px 18px;
-            border: 1px solid var(--neon-blue); color: var(--neon-blue);
-            border-radius: 20px; font-size: 10px; letter-spacing: 2px;
+        .user-cam {
+            width: 220px; height: 220px; border-radius: 50%;
+            border: 2px solid #3a8dff; margin: 0 auto 40px;
+            overflow: hidden; position: relative;
+            box-shadow: 0 0 50px rgba(58, 141, 255, 0.2);
         }
+        #webcam { width: 100%; height: 100%; object-fit: cover; }
 
-        /* ANIMACIJOS */
-        @keyframes emotionalDrift {
-            0%, 100% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-30px) scale(1.05); }
-        }
+        .status-label { font-size: 11px; opacity: 0.5; letter-spacing: 2px; text-transform: uppercase; }
+        .status-value { font-size: 32px; font-weight: 300; margin: 10px 0; }
+        .tags { color: #ff9f1c; font-size: 14px; opacity: 0.8; }
 
-        @keyframes rotate {
-            from { transform: rotate(0deg) rotateX(60deg); }
-            to { transform: rotate(360deg) rotateX(60deg); }
-        }
+        .metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 40px; }
+        .metric-item div:first-child { font-size: 10px; opacity: 0.4; margin-bottom: 5px; }
+        .metric-item div:last-child { font-size: 24px; font-weight: 600; }
 
-        .system-id { position: absolute; top: 50px; left: 50px; font-size: 11px; letter-spacing: 8px; opacity: 0.4; }
     </style>
 </head>
 <body>
 
-    <div class="system-id">NEURAL_NAVIGATOR // V3.STABLE</div>
+    <div id="canvas-container"></div>
 
-    <div id="app">
-        <div class="stage">
-            <div class="compass-core">
-                <div class="ring"></div>
-                <div class="ring-inner"></div>
-                <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--neon-blue); font-size: 8px; letter-spacing: 5px;">
-                    CORE_RESONANCE
-                </div>
-            </div>
+    <div id="ui-overlay">
+        <div class="header">
+            <div class="logo-symbol">E</div>
+            <div class="logo-text">Emopulse</div>
         </div>
 
-        <div class="panel">
-            <div class="video-aura">
-                <video id="webcam" autoplay muted playsinline></video>
+        <div class="main-layout">
+            <div style="max-width: 400px; padding-bottom: 40px;">
+                <h1 style="font-size: 48px; font-weight: 100; line-height: 1.1;">Understand your emotional field</h1>
+                <p style="opacity: 0.6; font-weight: 300; margin-top: 20px;">Real-time neural analysis through advanced biometric resonance.</p>
             </div>
 
-            <div class="ui-text">
-                <div class="label">Resonance State</div>
-                <div class="value">Deep Calm</div>
-                <div class="status-pill">STABLE DRIFT ACTIVE</div>
-            </div>
+            <div class="data-panel">
+                <div class="user-cam">
+                    <video id="webcam" autoplay muted playsinline></video>
+                </div>
 
-            <div style="margin-top: auto; display: flex; justify-content: space-between; opacity: 0.3; font-size: 10px;">
-                <span>STRESS INDEX: 0.12</span>
-                <span>NEURAL: 98%</span>
+                <div class="status-label">Emotional Signature</div>
+                <div class="status-value">Calm focused energy</div>
+                <div class="tags">#calm #focused #energy</div>
+
+                <div class="metrics">
+                    <div class="metric-item">
+                        <div>STRESS RISK</div>
+                        <div style="color: #ff3b3b;">0.21 low</div>
+                    </div>
+                    <div class="metric-item">
+                        <div>EMOPULSE SCORE</div>
+                        <div style="color: #3a8dff;">76 /100</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Paprastas kameros įjungimas be papildomų bibliotekų
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then(s => document.getElementById('webcam').srcObject = s)
-            .catch(e => console.log("Kamera neaktyvi"));
+        let scene, camera, renderer, coreGroup;
+
+        function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 12;
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+            // PAGRINDINIS KOMPASAS (Emopulse Core)
+            coreGroup = new THREE.Group();
+            scene.add(coreGroup);
+
+            // 1. Vidinis šviečiantis rutulys (Aura)
+            const innerGeo = new THREE.SphereGeometry(2, 32, 32);
+            const innerMat = new THREE.MeshBasicMaterial({
+                color: 0x3a8dff,
+                transparent: true,
+                opacity: 0.05
+            });
+            const innerSphere = new THREE.Mesh(innerGeo, innerMat);
+            coreGroup.add(innerSphere);
+
+            // 2. Pagrindinis Wireframe (Tinklelis)
+            const wireGeo = new THREE.IcosahedronGeometry(2.1, 2);
+            const wireMat = new THREE.MeshBasicMaterial({
+                color: 0x3a8dff,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.2
+            });
+            const wireSphere = new THREE.Mesh(wireGeo, wireMat);
+            coreGroup.add(wireSphere);
+
+            // 3. Orbitos (Copilot stiliaus žiedai)
+            const ringColors = [0x3a8dff, 0xff9f1c, 0x7b5cff];
+            ringColors.forEach((color, i) => {
+                const ringGeo = new THREE.TorusGeometry(3.5 + (i * 0.4), 0.01, 16, 100);
+                const ringMat = new THREE.MeshBasicMaterial({ 
+                    color: color, 
+                    transparent: true, 
+                    opacity: 0.3 
+                });
+                const ring = new THREE.Mesh(ringGeo, ringMat);
+                ring.rotation.x = Math.random() * Math.PI;
+                ring.rotation.y = Math.random() * Math.PI;
+                coreGroup.add(ring);
+            });
+
+            animate();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const time = Date.now() * 0.0005;
+
+            // EMOTIONAL DRIFT: lėtas, stabilus plūduriavimas
+            coreGroup.position.y = Math.sin(time) * 0.3;
+            coreGroup.position.x = Math.cos(time * 0.8) * 0.2;
+            coreGroup.rotation.y += 0.001;
+
+            renderer.render(scene, camera);
+        }
+
+        // Kamera
+        navigator.mediaDevices.getUserMedia({ video: true }).then(s => {
+            document.getElementById('webcam').srcObject = s;
+        });
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        init();
     </script>
 </body>
 </html>
