@@ -1,8 +1,7 @@
 :root {
-    --bg-dark: #02040a; /* Dar tamsesnis fonas pagal foto */
-    --card-bg: rgba(13, 17, 23, 0.6);
+    --bg-dark: #02040a;
+    --card-bg: rgba(13, 17, 23, 0.4);
     --accent-blue: #3abff8;
-    --accent-purple: #7b5cff;
     --text-main: #ffffff;
     --text-muted: #7d8590;
     --border: rgba(255, 255, 255, 0.05);
@@ -14,141 +13,108 @@ body {
     background-color: var(--bg-dark);
     color: var(--text-main);
     font-family: 'Inter', sans-serif;
-    height: 100vh;
-    overflow: hidden;
+    min-height: 100vh;
     display: flex;
     justify-content: center;
-    align-items: center;
+    padding: 40px 20px;
 }
 
-/* PAGRINDINIS KONTEINERIS */
+/* Pagrindinis konteineris - 3 stulpeliai */
 .app-container {
     width: 100%;
-    max-width: 1200px; /* Apribojame plotį kaip pavyzdyje */
-    height: 100vh;
+    max-width: 1200px;
     display: grid;
+    grid-template-columns: 1fr 1fr 1fr; /* Trys lygūs stulpeliai */
     grid-template-areas: 
-        "nav nav"
-        "visual info"
-        "footer footer";
-    grid-template-columns: 1fr 400px; /* Dešinė pusė siauresnė teksto blokams */
-    grid-template-rows: 60px 1fr 320px; /* Didesnis footeris dviem eilėm kortelių */
-    gap: 20px;
-    padding: 30px;
+        "header header header"
+        "visual visual info"
+        "drift drift summary"
+        "footer footer footer";
+    gap: 30px;
 }
 
-/* TOP NAVIGACIJA */
+/* 1. Viršus (Logo ir Nav) */
 .top-nav {
-    grid-area: nav;
+    grid-area: header;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 20px;
 }
 
-.logo-group { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.5rem; }
-.logo-icon { width: 30px; height: 30px; border: 3px solid #fff; border-radius: 50%; position: relative; }
-.logo-icon::after { content: ''; position: absolute; top: 50%; left: 50%; width: 12px; height: 3px; background: #fff; transform: translate(-50%, -50%); }
-
-.nav-links { display: flex; gap: 30px; }
-.nav-link { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; }
-.nav-link.active { color: var(--accent-blue); }
-
-/* KAIRĖ: 3D CORE */
+/* 2. Kairė ir Centras (3D modelis ir Antraštė) */
 .visual-section {
     grid-area: visual;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    position: relative;
 }
 
 .stage-3d {
-    width: 450px; /* Fiksuotas dydis pagal foto */
-    height: 450px;
-    position: relative;
+    width: 100%;
+    height: 400px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: radial-gradient(circle, rgba(58, 191, 248, 0.08) 0%, transparent 70%);
 }
 
-/* DEŠINĖ: TEKSTAI IR INPUT */
+/* 3. Dešinė (Tekstai ir Input) */
 .info-section {
     grid-area: info;
     display: flex;
     flex-direction: column;
-    gap: 25px;
-    padding-top: 40px;
-}
-
-.hero-title { font-size: 2.8rem; font-weight: 700; line-height: 1.1; }
-.hero-subtitle { color: var(--accent-blue); font-size: 1.1rem; line-height: 1.4; }
-
-/* Input laukas iš foto */
-.input-box {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
-    color: var(--text-muted);
-    font-size: 0.9rem;
-    min-height: 100px;
-}
-
-.analyze-btn {
-    background: #0f172a;
-    border: 1px solid var(--border);
-    color: #fff;
-    padding: 12px;
-    border-radius: 8px;
-    text-align: center;
-    cursor: pointer;
-}
-
-/* APAČIA: KORTELIŲ TINKLELIS (Dvi eilės) */
-.bottom-metrics {
-    grid-area: footer;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: 140px 100px; /* Viršutinė eilė grafikams, apatinė skaičiams */
-    gap: 15px;
-}
-
-/* Bendras kortelių stilius */
-.metric-box, .drift-panel {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 15px;
-}
-
-/* EMOTIONAL DRIFT (Kairėje apačioje) */
-.visual-section .drift-panel {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 140px;
-    display: flex;
-    align-items: center;
     gap: 20px;
 }
 
+.hero-title { font-size: 2.8rem; font-weight: 700; line-height: 1.1; }
+.hero-subtitle { color: var(--accent-blue); font-size: 1rem; }
+
+/* 4. Vidurinė eilė (Emotional Drift ir Summary) */
+.drift-panel {
+    grid-area: drift;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 25px;
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
 .video-container {
-    width: 110px;
-    height: 110px;
+    width: 120px;
+    height: 120px;
     border-radius: 50%;
     border: 2px solid var(--accent-blue);
     overflow: hidden;
 }
 
-/* SKAIČIŲ STILIUS */
-.metric-value { font-size: 2.2rem; font-weight: 700; color: #fff; }
-.metric-sub { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; }
-
-/* AI SUMMARY KORTELĖ (Dešinėje virš footer) */
 .status-card {
+    grid-area: summary;
     background: var(--card-bg);
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-radius: 20px;
+    padding: 25px;
+}
+
+/* 5. Apačia (Metrikų tinklelis - 3 stulpeliai) */
+.bottom-metrics {
+    grid-area: footer;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+}
+
+.metric-box {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 15px;
     padding: 20px;
 }
-.signature-text { font-size: 1.4rem; font-weight: 600; margin: 10px 0; }
-.tags { display: flex; gap: 10px; flex-wrap: wrap; }
-.tag-item { color: var(--accent-blue); font-size: 0.8rem; }
+
+.metric-value { font-size: 2.2rem; font-weight: 700; color: #fff; margin: 10px 0; }
+.metric-sub { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; }
+
+canvas { width: 100% !important; height: 80px !important; }
