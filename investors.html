@@ -1,80 +1,79 @@
-<!doctype html>
-<html lang="lt">
-  <head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Emopulse — Investors</title>
 
-    <!-- Jei tavo CSS failas vadinasi emopulse.css, naudok šitą -->
-    <link rel="stylesheet" href="/emopulse.css" />
-  </head>
+    <link rel="stylesheet" href="emopulse.css" />
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📈</text></svg>">
+</head>
 
-  <body class="bg">
+<body class="bg">
     <header class="topbar">
-      <div class="brand">
-        <div class="mark">S</div>
-        <div class="brandText">
-          <div class="brandName">Emopulse</div>
+        <div class="brand">
+            <div class="mark">E</div>
+            <div class="brandText">
+                <div class="brandName">Emopulse</div>
+            </div>
         </div>
-      </div>
 
-      <div class="hero">
-        <div class="heroTitle">Pitch deck</div>
-        <div class="heroSub">3D carousel — slides only. Team slide: only Arvid Pak.</div>
-      </div>
+        <div class="hero">
+            <div class="heroTitle">Pitch Deck</div>
+            <div class="heroSub">Interactive 3D Experience</div>
+        </div>
 
-      <nav class="nav">
-        <a class="navLink" href="/index.html">Live model</a>
-        <a class="navLink navLinkActive" href="/investors.html">Investors</a>
-      </nav>
+        <nav class="nav">
+            <a class="navLink" href="index.html">Live Model</a>
+            <a class="navLink navLinkActive" href="investors.html">Investors</a>
+        </nav>
     </header>
 
     <main class="containerGrid">
-      <section class="panel panelWide">
-        <div class="panelTitle">Investors</div>
+        <section class="panel panelWide">
+            <div class="panelTitle">Pitch Presentation</div>
 
-        <div class="carouselWrap">
-          <canvas id="deck3d" class="deck3d"></canvas>
+            <div class="carouselWrap">
+                <canvas id="deck3d" class="deck3d"></canvas>
 
-          <div class="carouselHud">
-            <button id="prev" class="btn btnGhost">Prev</button>
-            <button id="next" class="btn btnGhost">Next</button>
-            <button id="pause" class="btn btnGhost" aria-pressed="false">Pause</button>
-          </div>
+                <div class="carouselHud">
+                    <button id="prev" class="btn btnGhost">Prev</button>
+                    <button id="next" class="btn btnGhost">Next</button>
+                    <button id="pause" class="btn btnGhost">Pause</button>
+                </div>
 
-          <div class="carouselMeta">
-            <div id="slideLabel" class="carouselLabel">—</div>
-            <div class="carouselHint">Hover pauses. Drag rotates. Wheel zooms.</div>
-          </div>
-        </div>
+                <div class="carouselMeta">
+                    <div id="slideLabel" class="carouselLabel">Loading slides...</div>
+                    <div class="carouselHint">Hover to pause • Drag to rotate • Wheel to zoom</div>
+                </div>
+            </div>
 
-        <div class="row mt12">
-          <a class="btn btnPrimary" href="/index.html">Try it live</a>
-          <a class="btn btnGhost" href="/EMOPULSE.APP%20(1).pdf" download>Download Pitchdeck</a>
-        </div>
-      </section>
+            <div class="row mt12">
+                <a class="btn btnPrimary" href="index.html">Try Live Demo</a>
+                <a class="btn btnGhost" href="EMOPULSE.APP.pdf" download>Download PDF</a>
+            </div>
+        </section>
 
-      <aside class="panel">
-        <div class="panelTitle">Deck rules</div>
-        <div class="bullets">
-          <div class="bullet">Uses your slide images from <code>/slides/</code></div>
-          <div class="bullet">Team slide must be the single image where it already says “Arvid Pak”</div>
-          <div class="bullet">No overlays added, no extra people</div>
-        </div>
-      </aside>
+        <aside class="panel">
+            <div class="panelTitle">Project Rules</div>
+            <div class="bullets">
+                <div class="bullet">Source: <code>/slides/</code> directory</div>
+                <div class="bullet">Founder: Arvid Pak (Single Image)</div>
+                <div class="bullet">Technology: Three.js WebGL Engine</div>
+            </div>
+        </aside>
     </main>
 
     <footer class="footer footerCompact">
-      <div>© 2026 emo1 (Emopulse). All rights reserved.</div>
+        <div>© 2026 Emopulse. All rights reserved.</div>
     </footer>
 
-    <!-- Three.js CDN -->
     <script type="module">
-      import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
-      window.THREE = THREE;
+        import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
+        // Priskiriame globaliam kintamajam, kad investors.js jį matytų, jei nėra modulis
+        window.THREE = THREE; 
     </script>
-
-    <!-- Tavo 3D carousel logika -->
-    <script type="module" src="/investors.js?v=1"></script>
-  </body>
+    <script type="module" src="investors.js"></script>
+</body>
 </html>
