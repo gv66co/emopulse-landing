@@ -3,46 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEURO-CORE ELITE</title>
+    <title>NEURO-CORE FINAL</title>
     <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Space+Mono&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
     <style>
-        :root { --neon: #00f2ff; --bg: #000205; }
+        :root { --neon: #00f2ff; --bg: #00050a; }
         body, html { margin: 0; padding: 0; background: var(--bg); color: var(--neon); font-family: 'Syncopate', sans-serif; overflow: hidden; height: 100%; }
         
         #hud { position: absolute; inset: 0; z-index: 10; padding: 30px; pointer-events: none; }
-        .panel { position: absolute; background: rgba(0, 5, 10, 0.9); backdrop-filter: blur(20px); border: 1px solid rgba(0, 242, 255, 0.3); padding: 25px; pointer-events: auto; box-shadow: 0 0 50px rgba(0, 242, 255, 0.1); }
-        #panel-l { top: 30px; left: 30px; border-left: 5px solid var(--neon); width: 280px; }
-        #panel-r { top: 30px; right: 30px; border-right: 5px solid var(--neon); text-align: right; }
+        .panel { position: absolute; background: rgba(0, 8, 15, 0.9); backdrop-filter: blur(15px); border: 1px solid rgba(0, 242, 255, 0.2); padding: 20px; pointer-events: auto; }
+        #panel-l { top: 30px; left: 30px; border-left: 4px solid var(--neon); width: 250px; }
+        #panel-r { top: 30px; right: 30px; border-right: 4px solid var(--neon); text-align: right; }
         
-        #scan-trigger { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); background: none; border: 2px solid var(--neon); color: var(--neon); padding: 20px 50px; font-family: 'Syncopate'; cursor: pointer; letter-spacing: 8px; z-index: 20; pointer-events: auto; transition: 0.5s; font-size: 1.2rem; }
-        #scan-trigger:hover { background: var(--neon); color: #000; box-shadow: 0 0 40px var(--neon); transform: translateX(-50%) scale(1.05); }
+        #scan-trigger { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); background: none; border: 2px solid var(--neon); color: var(--neon); padding: 15px 40px; font-family: 'Syncopate'; cursor: pointer; letter-spacing: 5px; z-index: 20; pointer-events: auto; transition: 0.3s; }
+        #scan-trigger:hover { background: var(--neon); color: #000; box-shadow: 0 0 30px var(--neon); }
 
-        #video-container { position: absolute; bottom: 30px; right: 30px; width: 300px; height: 225px; border: 1px solid var(--neon); overflow: hidden; background: #000; }
-        #video-feed { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); filter: grayscale(1) brightness(0.8); }
-        #face-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: scaleX(-1); }
+        #video-container { position: absolute; bottom: 30px; right: 30px; width: 260px; height: 195px; border: 1px solid var(--neon); overflow: hidden; }
+        #video-feed { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); filter: grayscale(1) brightness(0.6); }
+        #face-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: scaleX(-1); z-index: 5; }
 
-        #ai-comms { position: absolute; bottom: 150px; left: 50%; transform: translateX(-50%); width: 70%; text-align: center; font-family: 'Space Mono'; font-size: 1.2rem; text-shadow: 0 0 15px var(--neon); color: #fff; line-height: 1.5; }
-        .value { font-size: 1.5rem; font-family: 'Space Mono'; margin-top: 10px; font-weight: 700; color: #fff; text-shadow: 0 0 10px var(--neon); }
+        #ai-comms { position: absolute; bottom: 120px; left: 50%; transform: translateX(-50%); width: 80%; text-align: center; font-family: 'Space Mono'; font-size: 1rem; text-shadow: 0 0 10px var(--neon); color: #fff; }
+        .label { font-size: 0.5rem; opacity: 0.5; margin-bottom: 5px; }
+        .value { font-size: 1.2rem; font-family: 'Space Mono'; margin-bottom: 15px; }
     </style>
 </head>
 <body>
 
 <div id="hud">
     <div id="panel-l" class="panel">
-        <div style="font-size:0.6rem; opacity:0.5;">MICRO-EXPRESSION ANALYZER</div>
+        <div class="label">NEURAL LOAD</div>
         <div id="emo-val" class="value">IDLE</div>
-        <div id="confidence" style="font-size:0.7rem; margin-top:10px;">TIKSLUMAS: 0%</div>
+        <div id="confidence" style="font-size:0.6rem;">READY</div>
     </div>
     <div id="panel-r" class="panel">
-        <div style="font-size:0.6rem; opacity:0.5;">ANALIZĖS EIGA</div>
+        <div class="label">SCAN PROGRESS</div>
         <div id="prog-val" class="value">0%</div>
     </div>
 </div>
 
-<div id="ai-comms">SISTEMA PARUOŠTA. SSD-MOBILENET ANALIZATORIUS AKTYVUOTAS.</div>
-<button id="scan-trigger" onclick="startDeepScan()">PRADĖTI ANALIZĘ</button>
+<div id="ai-comms">SISTEMA PARUOŠTA. LAUKIU AKTYVAVIMO.</div>
+<button id="scan-trigger" onclick="startSystem()">PRADĖTI SKENAVIMĄ</button>
 
 <div id="video-container">
     <video id="video-feed" autoplay muted playsinline></video>
@@ -53,138 +54,36 @@
     let scene, camera, renderer, core;
     let isScanning = false;
     let analysisData = [];
-    const SCAN_SAMPLES = 100; // Tankesnis skenavimas
+    const GOAL = 150;
 
-    // 1. MOTERIŠKO BALSO FORSAVIMAS
+    // 1. ŠVELNUS BALSAS
     function speak(text) {
         window.speechSynthesis.cancel();
         const utter = new SpeechSynthesisUtterance(text);
         const voices = window.speechSynthesis.getVoices();
         
-        // Ieškome TIK moteriškų balsų
-        const femaleVoice = voices.find(v => 
-            (v.name.includes('Female') || v.name.includes('Samantha') || v.name.includes('Google UK English Female') || v.name.includes('Microsoft Zira'))
-        );
+        // Ieškome geriausio varianto
+        const female = voices.find(v => v.name.includes('Female') || v.name.includes('Samantha') || v.name.includes('Google UK English Female'));
+        if(female) utter.voice = female;
         
-        if (femaleVoice) {
-            utter.voice = femaleVoice;
-        }
-        
-        // Net jei balsas vyriškas iš sistemos, mes dirbtinai keliam toną (pitch)
-        utter.pitch = 1.3; // Keliam aukščiau, kad skambėtų moteriškai
-        utter.rate = 0.8; 
-        utter.volume = 1;
+        utter.lang = 'lt-LT';
+        utter.pitch = 1.2; // Aukštesnis tonas = moteriškesnis
+        utter.rate = 0.8;
         window.speechSynthesis.speak(utter);
     }
 
-    // 2. TANKUS NEUROLINK TINKLAS
-    function drawDetailedMesh(landmarks) {
-        const canvas = document.getElementById('face-canvas');
-        const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        const pts = landmarks.positions;
-        const wS = canvas.width / 640;
-        const hS = canvas.height / 480;
-
-        ctx.strokeStyle = 'rgba(0, 242, 255, 0.5)';
-        ctx.lineWidth = 0.5;
-        
-        // Trianguliacija - sujungia visus taškus į tinklą
-        for (let i = 0; i < pts.length; i++) {
-            for (let j = i + 1; j < pts.length; j++) {
-                let dist = Math.hypot(pts[i].x - pts[j].x, pts[i].y - pts[j].y);
-                if (dist < 35) {
-                    ctx.beginPath();
-                    ctx.moveTo(pts[i].x * wS, pts[i].y * hS);
-                    ctx.lineTo(pts[j].x * wS, pts[j].y * hS);
-                    ctx.stroke();
-                }
-            }
-        }
-    }
-
-    // 3. SSD MOBILENET V1 - AUKŠČIAUSIA KOKYBĖ
-    async function startDeepScan() {
-        if(isScanning) return;
-        const comms = document.getElementById('ai-comms');
-        const btn = document.getElementById('scan-trigger');
-        
-        isScanning = true;
-        btn.disabled = true;
-        analysisData = [];
-        comms.innerText = "KRAUNAMI DIDELIEJI NEURONINIAI MODELIAI... PRAŠOME PALAUKTI.";
-
-        const URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
-        // Krauname pilną SsdMobilenetV1 modelį (ne Tiny!)
-        await faceapi.nets.ssdMobilenetv1.loadFromUri(URL);
-        await faceapi.nets.faceExpressionNet.loadFromUri(URL);
-        await faceapi.nets.faceLandmark68Net.loadFromUri(URL);
-        
-        comms.innerText = "MODELIAI PARUOŠTI. ANALIZUOJU MICRO-IŠRAIŠKAS...";
-
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        document.getElementById('video-feed').srcObject = stream;
-
-        const scanLoop = async () => {
-            if(!isScanning) return;
-            const video = document.getElementById('video-feed');
-            
-            // Naudojame minConfidence: 0.5, kad pagautų net neryškius veidus
-            const res = await faceapi.detectSingleFace(video, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 }))
-                                     .withFaceLandmarks()
-                                     .withFaceExpressions();
-
-            if(res) {
-                drawDetailedMesh(res.landmarks);
-                const top = Object.keys(res.expressions).reduce((a, b) => res.expressions[a] > res.expressions[b] ? a : b);
-                const score = Math.round(res.expressions[top] * 100);
-                
-                analysisData.push(top);
-                document.getElementById('prog-val').innerText = Math.round((analysisData.length / SCAN_SAMPLES) * 100) + "%";
-                document.getElementById('emo-val').innerText = top.toUpperCase();
-                document.getElementById('confidence').innerText = `TIKSLUMAS: ${score}%`;
-
-                if(analysisData.length >= SCAN_SAMPLES) {
-                    isScanning = false;
-                    finishScan();
-                    return;
-                }
-            }
-            requestAnimationFrame(scanLoop);
-        };
-        scanLoop();
-    }
-
-    function finishScan() {
-        document.getElementById('scan-trigger').disabled = false;
-        const dominant = analysisData.sort((a,b) => analysisData.filter(v => v===a).length - analysisData.filter(v => v===b).length).pop();
-        
-        const reports = {
-            happy: "Jaučiu tavo vidinį džiaugsmą. Tavo energija šiandien yra nuostabi ir šviesi.",
-            neutral: "Tavo būsena stabili. Jauti ramybę ir pusiausvyrą savo viduje.",
-            sad: "Juntu tavo liūdesį. Nebijok pailsėti ir būti švelnus sau.",
-            angry: "Aptikau vidinį nerimą. Leisk jam išeiti su giliu įkvėpimu.",
-            surprised: "Tavo protas budrus ir pilnas naujų idėjų. Puikus laikas kūrybai."
-        };
-
-        const text = reports[dominant] || "Analizė baigta. Tavo siela yra unikali.";
-        document.getElementById('ai-comms').innerText = text;
-        speak(text); 
-    }
-
-    // 4. 3D RUTULYS
+    // 2. 3D RUTULYS
     function init3D() {
         scene = new THREE.Scene();
-        camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        const light = new THREE.PointLight(0x00f2ff, 15, 100);
+        const light = new THREE.PointLight(0x00f2ff, 10, 100);
         light.position.set(5, 5, 5);
         scene.add(light);
-        scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+        scene.add(new THREE.AmbientLight(0xffffff, 0.5));
 
         core = new THREE.Mesh(
             new THREE.IcosahedronGeometry(2.5, 12),
@@ -199,6 +98,94 @@
             renderer.render(scene, camera);
         }
         animate();
+    }
+
+    // 3. NEUROLINK TINKLAS
+    function drawNeuralNet(landmarks) {
+        const canvas = document.getElementById('face-canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        const pts = landmarks.positions;
+        const wS = canvas.width / 640;
+        const hS = canvas.height / 480;
+
+        ctx.strokeStyle = 'rgba(0, 242, 255, 0.5)';
+        ctx.lineWidth = 0.6;
+        ctx.beginPath();
+        
+        pts.forEach((p, i) => {
+            const x = p.x * wS;
+            const y = p.y * hS;
+            
+            // Sujungiame su kaimyniniu tašku, kad sukurtume tinklą
+            if(i > 0) ctx.lineTo(x, y);
+            else ctx.moveTo(x, y);
+            
+            ctx.fillStyle = '#00f2ff';
+            ctx.fillRect(x-1, y-1, 2, 2);
+        });
+        ctx.stroke();
+    }
+
+    async function startSystem() {
+        if(isScanning) return;
+        const comms = document.getElementById('ai-comms');
+        const btn = document.getElementById('scan-trigger');
+        
+        comms.innerText = "KRAUNAMI MODELIAI...";
+        btn.disabled = true;
+
+        const URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
+        await faceapi.nets.tinyFaceDetector.loadFromUri(URL);
+        await faceapi.nets.faceExpressionNet.loadFromUri(URL);
+        await faceapi.nets.faceLandmark68Net.loadFromUri(URL);
+
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        document.getElementById('video-feed').srcObject = stream;
+        
+        isScanning = true;
+        comms.innerText = "SKENUOJU BIOMETRINIUS DUOMENIS...";
+
+        const loop = setInterval(async () => {
+            const video = document.getElementById('video-feed');
+            const res = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 512, scoreThreshold: 0.5 }))
+                                     .withFaceLandmarks()
+                                     .withFaceExpressions();
+
+            if(res) {
+                drawNeuralNet(res.landmarks);
+                const top = Object.keys(res.expressions).reduce((a, b) => res.expressions[a] > res.expressions[b] ? a : b);
+                analysisData.push(top);
+                
+                const prog = Math.round((analysisData.length / GOAL) * 100);
+                document.getElementById('prog-val').innerText = prog + "%";
+                document.getElementById('emo-val').innerText = top.toUpperCase();
+
+                if(analysisData.length >= GOAL) {
+                    clearInterval(loop);
+                    isScanning = false;
+                    finish();
+                }
+            }
+        }, 100);
+    }
+
+    function finish() {
+        document.getElementById('scan-trigger').disabled = false;
+        const dominant = analysisData.sort((a,b) => analysisData.filter(v => v===a).length - analysisData.filter(v => v===b).length).pop();
+        
+        const reports = {
+            happy: "Jaučiu tavo šviesią energiją. Tavo siela dabar visiškoje harmonijoje.",
+            neutral: "Tavo būsena stabili ir rami. Tai puiki akimirka vidinei ramybei.",
+            sad: "Juntu lengvą liūdesį. Būk sau švelnus, šis jausmas praeis.",
+            angry: "Aptikau įtampą. Giliai įkvėpk ir leisk jai išeiti.",
+            surprised: "Tavo protas pilnas nuostabos. Matau labai ryškią kūrybinę energiją."
+        };
+
+        const msg = reports[dominant] || "Analizė baigta. Tavo energija unikali.";
+        document.getElementById('ai-comms').innerText = msg;
+        speak(msg);
     }
 
     window.onload = init3D;
