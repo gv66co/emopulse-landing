@@ -1,105 +1,91 @@
 let scene, camera, renderer, aura, stars;
 let systemActive = false;
-let analysisData = []; // Čia kaupsime emocijas galutinei analizei
-let isAnalyzing = false;
+let analysisData = []; 
 let lastSpeechTime = 0;
+const ANALYSIS_THRESHOLD = 150; // Kiek kadrų analizuoti prieš pasakant išvadą (~15 sek.)
 
-// 1. NEUROLINK: Veido taškų piešimas ant vaizdo
-const canvas = document.createElement('canvas');
-const ctx = canvas.getContext('2d');
-
-function setupNeurolinkCanvas() {
-    canvas.style.position = 'absolute';
-    canvas.style.top = '0';
-    canvas.style.left = '0';
-    canvas.width = 200; // Turi sutapti su video-box dydžiu
-    canvas.height = 150;
-    document.getElementById('video-box').appendChild(canvas);
-}
-
-function drawNeurolink(landmarks) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#00f2ff';
-    ctx.strokeStyle = 'rgba(0, 242, 255, 0.3)';
+// 1. ŠVELNUS MOTERIŠKAS BALSAS IR TIKSINGA KOMUNIKACIJA
+function speak(text) {
+    const synth = window.speechSynthesis;
+    const utter = new SpeechSynthesisUtterance(text);
     
-    const points = landmarks.positions;
-    points.forEach(p => {
-        // Adaptuojame taškus prie mažo video lango
-        const x = p.x * (canvas.width / 640); 
-        const y = p.y * (canvas.height / 480);
-        ctx.beginPath();
-        ctx.arc(x, y, 1.2, 0, 2 * Math.PI);
-        ctx.fill();
-    });
+    // Bandome rasti švelnesnį moterišką balsą (priklauso nuo naršyklės)
+    const voices = synth.getVoices();
+    // Ieškome balsų pavadinimuose "Google UK English Female", "Microsoft Zira" arba tiesiog "female"
+    const softVoice = voices.find(v => v.name.includes('Female') || v.name.includes('Google UK English Female') || v.name.includes('Zira'));
+    
+    if (softVoice) utter.voice = softVoice;
+    
+    utter.lang = 'en-US';
+    utter.pitch = 1.1; // Šiek tiek aukštesnis tonas suteikia švelnumo
+    utter.rate = 0.85; // Lėtesnis tempas skamba ramiau ir profesionaliau
+    
+    synth.speak(utter);
+    document.getElementById('ai-comms').innerText = "> IA ANALIZĖ: " + text;
 }
 
-// 2. IA BALSAS: Tik galutinis rezultatas
-function processFinalSpeech(currentEmotion) {
+// 2. GALUTINĖ ANALIZĖ (Tylėjimo logika)
+function performDeepAnalysis(currentEmotion) {
     const now = Date.now();
     analysisData.push(currentEmotion);
 
-    // Kaupiame duomenis (pvz., 100 kadrų ~ 10 sekundžių)
-    if (analysisData.length >= 100) {
-        // Surandame dažniausiai pasikartojusią emociją per tą laiką
-        const summary = analysisData.sort((a,b) =>
-            analysisData.filter(v => v===a).length - analysisData.filter(v => v===b).length
-        ).pop();
+    // Rodyti procesą HUD skydelyje (vizualiai)
+    const progress = Math.round((analysisData.length / ANALYSIS_THRESHOLD) * 100);
+    document.getElementById('drift-val').innerText = `ANALYZING ${progress}%`;
 
-        // IA prabyla tik jei praėjo bent 15 sek. nuo paskutinio sakinio
-        if (now - lastSpeechTime > 15000) {
-            const report = `Neural analysis complete. Your dominant cognitive state is ${summary}. Stability is nominal.`;
-            speak(report);
-            lastSpeechTime = now;
-            analysisData = []; // Išvalome kaupiklį naujai analizei
-        }
+    // Tik kai sukaupta pakankamai duomenų
+    if (analysisData.length >= ANALYSIS_THRESHOLD) {
+        // Surandame vyraujančią emociją per visą laikotarpį
+        const counts = {};
+        analysisData.forEach(e => counts[e] = (counts[e] || 0) + 1);
+        const dominant = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
+
+        // IA prabyla tik dabar
+        const reports = {
+            happy: "Your neural resonance is harmonized. I detect a sustained state of well-being.",
+            neutral: "Your bio-signature is perfectly stable. Mind-body connection is in equilibrium.",
+            sad: "I've detected some lower frequency shifts. Please focus on steady breathing for recalibration.",
+            angry: "Neural friction identified. Initiating orbital stabilization to calm your aura.",
+            surprised: "Heightened cognitive alertness detected. Your neural field is expanding."
+        };
+
+        speak(reports[dominant] || `Neural scan complete. Your primary state is ${dominant}.`);
+        
+        // Išvalome duomenis kitam ciklui
+        analysisData = [];
+        lastSpeechTime = now;
     }
 }
 
-// 3. SKALĖS: Emocijų stebėjimas realiu laiku (be balso)
-function updateScales(expressions) {
-    let html = "";
-    Object.keys(expressions).forEach(emo => {
-        const val = Math.round(expressions[emo] * 100);
-        if(val > 5) { // Rodome tik tas, kurios turi bent 5% reikšmę
-            html += `<div style="margin-bottom:8px">
-                <div class="label" style="font-size:0.5rem">${emo}</div>
-                <div style="width:100%; height:3px; background:rgba(0,242,255,0.1)">
-                    <div style="width:${val}%; height:100%; background:var(--neon); box-shadow:0 0 5px var(--neon)"></div>
-                </div>
-            </div>`;
-        }
-    });
-    document.getElementById('ai-comms').innerHTML = html;
-}
-
-// ATNAUJINTAS PALEIDIMAS
+// 3. VEIDO TINKLAS (NEUROLINK) IR ANALIZĖS CIKLAS
 async function runAI() {
-    setupNeurolinkCanvas();
+    setupNeurolinkCanvas(); // Naudojame iš ankstesnio kodo
     const video = document.getElementById('video-feed');
     
-    // Užkrauname papildomą modelį taškams (Landmarks)
     const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
     await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
 
     setInterval(async () => {
         if(!systemActive) return;
         
-        // Skaitome veidą + taškus + emocijas
         const result = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
                                     .withFaceLandmarks()
                                     .withFaceExpressions();
         
         if (result) {
-            drawNeurolink(result.landmarks);
+            // Piešiame 68 taškų tinklą (Neurolink)
+            drawNeurolink(result.landmarks); 
+            
+            // Atnaujiname skales (tik vizualiai, be garso)
             updateScales(result.expressions);
             
             const top = Object.keys(result.expressions).reduce((a, b) => result.expressions[a] > result.expressions[b] ? a : b);
             
-            // HUD atnaujinimas (be balso)
+            // Pagrindiniai HUD skaičiai
             document.getElementById('emo-val').innerText = top.toUpperCase();
             
-            // Siunčiame duomenis į kaupiklį galutinei analizei
-            processFinalSpeech(top);
+            // Vykdome kaupiamąją analizę
+            performDeepAnalysis(top);
         }
     }, 100);
 }
