@@ -1,257 +1,161 @@
 :root {
-  /* Pagrindinė paletė */
-  --bg-0: #03050a;
-  --bg-1: #071022;
-  --panel: rgba(6, 18, 30, 0.75);
-  --muted: #94a3b8;
-  --accent-cool: #3abff8;
-  --accent-warm: #fbbf24;
-  --danger: #f87171;
-  
-  /* Stiklo (Glass) efekto nustatymai */
-  --glass: rgba(255, 255, 255, 0.04);
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --card-radius: 16px;
-  --text: #eaf6ff;
-  
-  /* Emocijų spalvos */
-  --calm: #3abff8;
-  --focus: #7b5cff;
-  --joy: #fbbf24;
-  --stress: #f87171;
-  
-  --font-stack: 'Inter', system-ui, -apple-system, sans-serif;
-  
-  /* Dinaminiai JS kintamieji */
-  --p: 0%;
-  --angle: 0deg;
+  --bg-dark: #020408;
+  --bg-gradient: radial-gradient(circle at 20% 30%, #0a162f 0%, #020408 100%);
+  --accent-blue: #3abff8;
+  --accent-purple: #7b5cff;
+  --accent-gold: #fbbf24;
+  --text-main: #ffffff;
+  --text-muted: #64748b;
+  --panel-bg: rgba(6, 12, 24, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --font-main: 'Inter', sans-serif;
 }
 
-* {
+body {
   margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-html, body {
-  height: 100%;
-  font-family: var(--font-stack);
-  background: radial-gradient(circle at top right, var(--bg-1), var(--bg-0));
-  color: var(--text);
-  overflow-x: hidden;
-}
-
-.app {
-  display: grid;
-  grid-template-columns: 1.2fr 1fr;
-  gap: 32px;
+  background: var(--bg-gradient);
+  color: var(--text-main);
+  font-family: var(--font-main);
   min-height: 100vh;
-  padding: 40px;
-  align-items: start;
 }
 
-/* --- 3D STAGE (Kompaso vieta) --- */
-.stage {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  max-height: 80vh;
-  position: relative;
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.02);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 1px var(--glass-border);
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  backdrop-filter: blur(4px);
+.app-container {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 60px 40px;
 }
 
-canvas#compass3d {
-  width: 100% !important;
-  height: 100% !important;
-  display: block;
-}
-
-.vignette {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(circle, transparent 30%, rgba(0,0,0,0.7) 100%);
-  z-index: 2;
-}
-
-.brand {
-  position: absolute;
-  left: 24px;
-  top: 24px;
-  z-index: 10;
-}
-
-.brand .name {
-  font-weight: 800;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  font-size: 14px;
-  color: var(--accent-cool);
-  margin-bottom: 4px;
-  text-shadow: 0 0 10px rgba(58, 191, 248, 0.5);
-}
-
-/* --- VALDYMO SKYDELIS --- */
-.panel {
-  width: 100%;
-  background: var(--panel);
-  backdrop-filter: blur(16px) saturate(180%);
-  border-radius: var(--card-radius);
-  padding: 24px;
-  border: 1px solid var(--glass-border);
+/* --- KAIRĖ PUSĖ: 3D STAGE & AURA --- */
+.visual-section {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+  gap: 30px;
 }
 
-.header {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.logo-dot {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, var(--accent-cool), var(--focus));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 900;
-  color: var(--bg-0);
-  box-shadow: 0 0 20px rgba(123, 92, 255, 0.4);
-}
-
-/* --- VIDEO IR DROBĖS --- */
-.video-container {
+.stage-3d {
   position: relative;
   width: 100%;
-  border-radius: 14px;
-  overflow: hidden;
-  border: 1px solid var(--glass-border);
-  background: #000;
-  line-height: 0; /* Pašalina tarpą po video */
+  aspect-ratio: 1/1;
+  background: radial-gradient(circle, rgba(58, 191, 248, 0.1) 0%, transparent 70%);
+  border-radius: 50%; /* Padeda sukurti sferos pojūtį */
 }
 
-video#cam {
-  width: 100%;
-  height: auto;
-  display: block;
-  transform: scaleX(-1); /* Veidrodinis vaizdas natūralesniam pojūčiui */
-}
-
-canvas#overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 3;
-}
-
-/* --- METRIKOS --- */
-.metrics {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-.card {
-  background: var(--glass);
-  border-radius: 12px;
-  padding: 16px;
-  border: 1px solid var(--glass-border);
-  transition: transform 0.2s ease, background 0.2s ease;
-}
-
-.card:hover {
-  background: rgba(255, 255, 255, 0.07);
-  transform: translateY(-2px);
-}
-
-.card h4 {
-  font-size: 11px;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 6px;
-  letter-spacing: 0.5px;
-}
-
-/* --- STABILUMO MATUOKLIS (Gauge) --- */
-.stability-gauge {
-  width: 140px;
-  height: 140px;
-  margin: 10px auto;
-  position: relative;
+/* Mažasis "Emotional Drift" skydelis kairėje */
+.drift-panel {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 24px;
+  background: var(--panel-bg);
+  padding: 20px;
+  border-radius: 20px;
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(10px);
 }
 
-.stability-gauge::before {
-  content: "";
-  position: absolute;
-  inset: 0;
+.drift-circle {
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
-  background: conic-gradient(var(--accent-cool) var(--p), transparent 0);
-  mask: radial-gradient(circle, transparent 65%, black 66%);
-  -webkit-mask: radial-gradient(circle, transparent 65%, black 66%);
-  transition: --p 0.5s ease;
+  border: 2px solid var(--accent-blue);
+  box-shadow: 0 0 20px rgba(58, 191, 248, 0.3);
 }
 
-.stability-needle {
-  position: absolute;
-  width: 3px;
-  height: 45px;
-  background: #fff;
-  bottom: 50%;
-  left: 50%;
-  transform-origin: bottom center;
-  transform: translate(-50%, 0) rotate(var(--angle));
-  border-radius: 2px;
-  box-shadow: 0 0 12px rgba(255,255,255,0.6);
-  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+/* --- DEŠINĖ PUSĖ: TEKSTAI IR STATUSAS --- */
+.info-section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
-/* --- GRAFIKAI (Timeline & Pulse) --- */
-#timeline, #pulse {
+.hero-title {
+  font-size: 3.5rem;
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 24px;
+  letter-spacing: -1px;
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  color: var(--accent-blue);
+  line-height: 1.6;
+  margin-bottom: 40px;
+}
+
+.status-card {
+  background: var(--panel-bg);
+  border-radius: 16px;
+  padding: 30px;
+  border: 1px solid var(--glass-border);
+}
+
+.status-card h3 {
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  margin-bottom: 15px;
+}
+
+.signature-text {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.tags {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.tag {
+  color: var(--accent-blue);
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+/* --- APAČIA: TRIJŲ STULPELIŲ GRIDAS --- */
+.bottom-metrics {
+  grid-column: 1 / span 2; /* Išplečia per visą plotį */
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.metric-box {
+  background: var(--panel-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  padding: 20px;
+  height: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.metric-box h4 {
+  color: var(--text-main);
+  font-size: 1rem;
+  margin: 0;
+}
+
+.metric-value {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.metric-sub {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* --- MAŽI GRAFIKAI --- */
+canvas.mini-chart {
   width: 100%;
-  height: 60px;
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 8px;
-  margin-top: 8px;
-  display: block;
-}
-
-/* --- ADAPTYVUMAS --- */
-@media (max-width: 1024px) {
-  .app {
-    grid-template-columns: 1fr;
-    padding: 24px;
-    gap: 24px;
-  }
-  
-  .stage {
-    max-height: 60vh;
-  }
-}
-
-@media (max-width: 480px) {
-  .metrics {
-    grid-template-columns: 1fr;
-  }
-  .app {
-    padding: 16px;
-  }
+  height: 50px;
+  margin-top: 10px;
 }
