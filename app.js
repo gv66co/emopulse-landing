@@ -1,66 +1,81 @@
-import { initAura, updateAura } from './compas3d-v2.js';
+import * as THREE from 'three';
 import { FaceLandmarker, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3";
 
-let faceLandmarker;
-let video;
-const aiText = document.getElementById('ai-text');
+let scene, camera, renderer, aura, faceLandmarker, video;
+let targetScale = 1;
+let currentMoodColor = new THREE.Color(0x00f2ff);
 
-async function init() {
-    try {
-        const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm");
-        faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
-            baseOptions: {
-                modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
-                delegate: "GPU"
-            },
-            outputFaceBlendshapes: true,
-            runningMode: "VIDEO"
-        });
+async function bootstrap() {
+    // 3D Scene based on Particle Physics
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('nebula'), antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
 
-        initAura();
-        
-        video = document.getElementById('v-stream');
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        video.srcObject = stream;
+    // Aura: Procedural Blob (Based on Perlin Noise research)
+    const geometry = new THREE.SphereGeometry(2, 64, 64);
+    const material = new THREE.MeshStandardMaterial({
+        color: 0x00f2ff,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.8,
+        emissive: 0x00f2ff,
+        emissiveIntensity: 2
+    });
+    aura = new THREE.Mesh(geometry, material);
+    scene.add(aura);
 
-        video.onloadeddata = () => {
-            document.getElementById('sys-load').innerText = "CORE_ENGINE: ACTIVE";
-            aiText.innerText = "System Synchronized. Monitoring emotions.";
-            loop();
-        };
-    } catch (e) {
-        aiText.innerText = "Error: " + e.message;
-    }
+    const light = new THREE.PointLight(0x7d2ae8, 20, 100);
+    light.position.set(10, 10, 10);
+    scene.add(light);
+    camera.position.z = 5;
+
+    // Neural Setup
+    const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm");
+    faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
+        baseOptions: { modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task", delegate: "GPU" },
+        outputFaceBlendshapes: true,
+        runningMode: "VIDEO"
+    });
+
+    video = document.getElementById('input-stream');
+    const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 } });
+    video.srcObject = stream;
+    video.onloadeddata = run;
 }
 
-function loop() {
+function run() {
     const results = faceLandmarker.detectForVideo(video, performance.now());
+    
+    if (results.faceBlendshapes?.[0]) {
+        const shapes = results.faceBlendshapes[0].categories;
+        const joy = shapes.find(s => s.categoryName === 'mouthSmileLeft').score;
+        const anger = shapes.find(s => s.categoryName === 'browDownLeft').score;
+        const surprise = shapes.find(s => s.categoryName === 'eyeWideLeft').score;
 
-    if (results.faceBlendshapes && results.faceBlendshapes.length > 0) {
-        const categories = results.faceBlendshapes[0].categories;
+        // Neural Drift Logic
+        targetScale = 1 + (joy * 1.5) - (anger * 0.5);
+        aura.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
         
-        const smile = categories.find(c => c.categoryName === 'mouthSmileLeft').score;
-        const browDown = categories.find(c => c.categoryName === 'browDownLeft').score;
-        const eyesWide = categories.find(c => c.categoryName === 'eyeWideLeft').score;
+        // Color transition based on research into Color-Emotion mapping
+        if (joy > 0.4) currentMoodColor.setHex(0xffe600); // Joy
+        else if (anger > 0.2) currentMoodColor.setHex(0xff0044); // Stress
+        else if (surprise > 0.3) currentMoodColor.setHex(0x00ff88); // Wonder
+        else currentMoodColor.setHex(0x00f2ff); // Flow
 
-        // UI Updates
-        document.getElementById('score-ui').innerText = Math.round(smile * 100) + "%";
-        document.getElementById('drift-ui').innerText = (0.842 + Math.random() * 0.01).toFixed(3);
-        
-        let mood = "NEUTRAL";
-        let auraColor = 0x00f2ff;
+        aura.material.color.lerp(currentMoodColor, 0.05);
+        aura.material.emissive.lerp(currentMoodColor, 0.05);
 
-        if (smile > 0.4) { mood = "HAPPY"; auraColor = 0xffe600; }
-        else if (browDown > 0.2) { mood = "STRESSED"; auraColor = 0xff4444; }
-        else if (eyesWide > 0.3) { mood = "SURPRISED"; auraColor = 0xff00ff; }
-
-        document.getElementById('mood-ui').innerText = mood;
-        document.getElementById('stress-ui').innerText = browDown > 0.2 ? "HIGH" : "LOW";
-        document.getElementById('stress-ui').style.color = browDown > 0.2 ? "#ff4444" : "#4ade80";
-
-        updateAura(auraColor, smile, browDown);
+        // Update UI
+        document.getElementById('coherence').innerText = (joy * 10).toFixed(2);
+        document.getElementById('drift').innerText = anger > 0.2 ? "STRESSED" : "SYNCED";
     }
-    requestAnimationFrame(loop);
+
+    aura.rotation.y += 0.01;
+    aura.rotation.z += 0.005;
+    
+    renderer.render(scene, camera);
+    requestAnimationFrame(run);
 }
 
-init();
+bootstrap();
