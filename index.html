@@ -1,128 +1,90 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="lt">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Emopulse PRO – Advanced Biometric Resonance Interface" />
-    <title>Emopulse PRO – Live Interface</title>
-
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
-
-    <link rel="stylesheet" href="./emopulse.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
-
-    <script type="importmap">
-    {
-        "imports": {
-            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
-        }
-    }
-    </script>
-
-    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emopulse PRO - Live Terminal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="emopulse.css">
 </head>
-
 <body>
     <div class="app-container">
-        
-        <section class="visual-section">
-            <div class="stage-3d">
-                <canvas id="compass3d"></canvas>
-                
-                <div class="vignette"></div>
-                
-                <div class="brand">
-                    <div class="name">EMOPULSE <span style="font-weight: 300; opacity: 0.7;">PRO</span></div>
-                    <div class="version">CORE ENGINE V2.1</div>
-                </div>
+        <header class="top-nav">
+            <div class="logo-group">
+                <i class="fa-solid fa-circle-nodes logo-icon"></i>
+                <span class="logo-text">Emopulse <span class="pro">PRO</span></span>
             </div>
-
-            <div class="drift-panel">
-                <div class="video-container">
-                    <video id="cam" autoplay muted playsinline></video>
-                    <canvas id="overlay"></canvas>
-                </div>
-                <div class="drift-info">
-                    <h3 class="panel-label">Emotional Drift</h3>
-                    <div class="tag">Stability: <span id="stability" class="value-highlight">Calibrating...</span></div>
-                    <div class="tag">Intensity: <span id="intensity" class="value-highlight">Wait</span></div>
-                    <div class="tag">Score: <span id="score" class="value-highlight">0 / 100</span></div>
-                </div>
-            </div>
-            
-            <div id="camStatus" class="status-indicator">
-                System Status: Initializing AI Core...
-            </div>
-        </section>
-
-        <section class="info-section">
-            <nav class="top-nav">
-                <span class="nav-link active">Live model</span>
-                <a href="investors.html" class="nav-link">Investors</a>
-                <a href="#" class="nav-link">Neural Map</a>
+            <nav class="nav-links">
+                <a href="#" class="active">Live Terminal</a>
+                <a href="#">Investors</a>
+                <a href="#">Technology</a>
+                <span class="clock">17:45:12</span>
             </nav>
+        </header>
 
-            <div class="hero-content">
-                <h1 class="hero-title">Understand your emotional field in real time</h1>
-                <p class="hero-subtitle">
-                    Our camera-linked neural engine maps micro-expressions to decode your internal resonance and field coherence.
-                </p>
-            </div>
-
-            <div class="status-card">
-                <div class="card-header">
-                    <span class="icon">🔍</span>
-                    <h3>AI Summary</h3>
+        <main class="main-content">
+            <section class="left-col">
+                <div class="visual-engine">
+                    <div id="compass3d"></div> <div class="engine-label">NEURAL RESONANCE CORE</div>
                 </div>
-                <div id="aiText" class="signature-text">Syncing with biological field sensors...</div>
-                <div id="aiTags" class="tags">
+                
+                <div class="drift-panel">
+                    <div class="video-container">
+                        <video id="cam" autoplay muted playsinline></video>
                     </div>
-            </div>
-        </section>
+                    <div class="drift-stats">
+                        <h3>Emotional Drift</h3>
+                        <p>Stability: <span class="accent">112° toward Calm</span></p>
+                        <p>Intensity: <span class="accent">Low</span></p>
+                        <p>Score: <span class="accent">76/100</span></p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mid-col">
+                <div class="hero-text">
+                    <h1>Understand your emotional field in real time</h1>
+                    <p>Our neural engine maps micro-expressions to decode your internal resonance.</p>
+                </div>
+                <div class="input-area">
+                    <textarea placeholder="Type anything you're feeling..."></textarea>
+                    <button class="analyze-btn">Analyze my emotional field</button>
+                </div>
+            </section>
+
+            <section class="right-col">
+                <div class="info-card ai-summary">
+                    <div class="card-header"><i class="fa-solid fa-microchip"></i> AI Summary</div>
+                    <p>Biometric tension detected. System recommends immediate re-centering. #STRESS_ALERT</p>
+                </div>
+                <div class="info-card stress-risk">
+                    <div class="card-header"><i class="fa-solid fa-bolt"></i> Stress Risk</div>
+                    <div class="chart-placeholder">
+                        <canvas id="stressChart"></canvas>
+                    </div>
+                    <div class="risk-footer">Factor: <span class="accent">0.56</span></div>
+                </div>
+            </section>
+        </main>
 
         <footer class="bottom-metrics">
             <div class="metric-box">
-                <div class="metric-header">
-                    <h4>Mood Map</h4>
-                    <span class="trend">Live</span>
-                </div>
-                <canvas id="auraCanvas" class="mini-chart"></canvas>
-                <div class="metric-footer">
-                    <div class="metric-sub">Coherence Score</div>
-                    <div class="metric-value" id="scoreValue">0</div>
-                </div>
+                <span class="m-label">Mood Map</span>
+                <div class="mini-plot"></div>
             </div>
-
             <div class="metric-box">
-                <div class="metric-header">
-                    <h4>Resonance Timeline</h4>
-                    <span class="trend">Stable</span>
-                </div>
-                <canvas id="timelineCanvas" class="mini-chart"></canvas>
-                <div class="metric-footer">
-                    <div class="metric-sub">Energy Level</div>
-                    <div id="energy" class="metric-value">0.00</div>
-                </div>
+                <span class="m-label">Emotional Timeline</span>
+                <div class="mini-plot"></div>
             </div>
-
             <div class="metric-box">
-                <div class="metric-header">
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <h4>Stress Risk</h4>
-                        <span id="stressIcon">☀️</span>
-                    </div>
-                </div>
-                <canvas id="pulseCanvas" class="mini-chart"></canvas>
-                <div class="metric-footer">
-                    <div class="metric-sub">Stress Factor</div>
-                    <div id="stress" class="metric-value">0.00</div>
-                </div>
+                <span class="m-label">Emopulse Score</span>
+                <span class="m-value">76<small>/100</small></span>
+            </div>
+            <div class="metric-box">
+                <span class="m-label">Energy Level</span>
+                <span class="m-value">0.66 <small>rising</small></span>
             </div>
         </footer>
-
     </div>
-
-    <script type="module" src="./app.js"></script>
 </body>
 </html>
