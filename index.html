@@ -2,92 +2,100 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EMOPULSE V5 // NEURAL TERMINAL</title>
+    <title>EMOPULSE V5 // DEEP SPACE TERMINAL</title>
     <style>
         :root {
-            --space-bg: #010409;
-            --aura-glow: #00f2ff;
-            --panel-bg: rgba(5, 12, 24, 0.95);
-            --accent: #7d2ae8;
+            --cyan: #00f2ff;
+            --purple: #7d2ae8;
+            --deep-space: #010409;
+            --glass: rgba(10, 20, 40, 0.8);
+            --neon-border: rgba(0, 242, 255, 0.3);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
-            background: var(--space-bg);
-            color: #e6edf3;
-            font-family: 'Inter', 'JetBrains Mono', sans-serif;
+            background: var(--deep-space);
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
             height: 100vh;
-            width: 100vw;
             overflow: hidden;
-            background-image: radial-gradient(circle at 50% 50%, #0d1117 0%, #010409 100%);
+            /* Kosmoso gradientas */
+            background: radial-gradient(circle at center, #0a192f 0%, #010409 100%);
         }
 
-        .neuro-container {
+        /* Pagrindinis tinklelis su apsauga nuo "sulipimo" */
+        .app-wrapper {
             display: grid;
-            grid-template-columns: 380px 1fr 380px;
-            grid-template-rows: 70px 1fr 160px;
+            grid-template-columns: 400px 1fr 400px;
+            grid-template-rows: 80px 1fr 180px;
             height: 100vh;
-            padding: 20px;
-            gap: 20px;
+            padding: 30px;
+            gap: 25px;
+            position: relative;
+            z-index: 10;
         }
 
+        /* Neoninis Headeris */
         header {
             grid-column: 1 / -1;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid rgba(0, 242, 255, 0.15);
+            border-bottom: 2px solid var(--neon-border);
+            padding-bottom: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        .logo { font-size: 22px; font-weight: 900; letter-spacing: 6px; color: var(--aura-glow); text-shadow: 0 0 15px rgba(0,242,255,0.3); }
+        .logo-v5 {
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: 8px;
+            background: linear-gradient(90deg, var(--cyan), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 10px rgba(0,242,255,0.5));
+        }
 
-        /* Left Panel */
-        .left-side {
-            grid-row: 2;
-            background: var(--panel-bg);
-            border: 1px solid rgba(0, 242, 255, 0.1);
-            border-radius: 16px;
-            padding: 20px;
+        /* Šoniniai skydeliai (Glassmorphism) */
+        .panel {
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--neon-border);
+            border-radius: 20px;
+            padding: 25px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            box-shadow: 0 0 40px rgba(0,0,0,0.8);
         }
 
-        .cam-frame {
+        .cam-container {
             position: relative;
             width: 100%;
             aspect-ratio: 4/3;
-            border-radius: 12px;
+            border-radius: 15px;
             overflow: hidden;
-            border: 1px solid var(--aura-glow);
+            border: 1px solid var(--cyan);
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);
         }
 
-        video, canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+        video, canvas { position: absolute; width: 100%; height: 100%; object-fit: cover; }
 
-        /* Center Stage */
-        .center-aura {
+        /* Centrinė Aura */
+        .aura-viewport {
             grid-row: 2;
             display: flex;
             justify-content: center;
             align-items: center;
-            position: relative;
-        }
-        #aura-canvas { width: 100%; height: 100%; }
-
-        /* Right Panel */
-        .right-side {
-            grid-row: 2;
-            background: var(--panel-bg);
-            border: 1px solid rgba(125, 42, 232, 0.2);
-            border-radius: 16px;
-            padding: 25px;
-            display: flex;
-            flex-direction: column;
+            perspective: 1000px;
         }
 
-        /* Footer Metrics */
+        #aura-canvas { 
+            width: 100%; height: 100%; 
+            filter: drop-shadow(0 0 30px rgba(0,242,255,0.2));
+        }
+
+        /* Apatinės kortelės */
         footer {
             grid-column: 1 / -1;
             display: grid;
@@ -96,29 +104,77 @@
         }
 
         .stat-card {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-bottom: 4px solid var(--aura-glow);
+            background: var(--glass);
+            border: 1px solid var(--neon-border);
+            border-bottom: 4px solid var(--cyan);
             padding: 20px;
-            border-radius: 12px;
+            border-radius: 15px;
+            transition: 0.3s;
         }
 
-        .val-display { font-size: 36px; font-weight: 800; color: var(--aura-glow); }
-        .label-tag { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; opacity: 0.5; margin-bottom: 5px; }
+        .stat-card:hover { transform: translateY(-5px); border-color: var(--purple); }
 
-        .investor-btn {
+        .val { font-size: 38px; font-weight: 800; color: var(--cyan); text-shadow: 0 0 15px rgba(0,242,255,0.4); }
+        .label { font-size: 10px; text-transform: uppercase; letter-spacing: 3px; color: #888; }
+
+        /* Investuotojų mygtukas */
+        .invest-link {
             margin-top: auto;
+            display: block;
             text-decoration: none;
-            color: var(--accent);
-            border: 1px solid var(--accent);
-            padding: 12px;
+            color: #fff;
+            background: linear-gradient(45deg, var(--purple), transparent);
+            border: 1px solid var(--purple);
+            padding: 15px;
             text-align: center;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 12px;
-            transition: all 0.3s;
+            letter-spacing: 2px;
+            transition: 0.3s;
         }
-        .investor-btn:hover { background: var(--accent); color: white; box-shadow: 0 0 20px rgba(125, 42, 232, 0.4); }
+        .invest-link:hover { background: var(--purple); box-shadow: 0 0 30px rgba(125, 42, 232, 0.6); }
+
     </style>
+</head>
+<body>
+    <div class="app-wrapper">
+        <header>
+            <div class="logo-v5">EMOPULSE V5</div>
+            <div style="font-size: 10px; color: var(--cyan); opacity: 0.7;">QUANTUM_LINK: ESTABLISHED</div>
+        </header>
+
+        <aside class="panel">
+            <div class="label" style="margin-bottom: 15px;">Biometric Scan</div>
+            <div class="cam-container">
+                <video id="v-stream" autoplay muted playsinline></video>
+                <canvas id="m-overlay"></canvas>
+            </div>
+            <div style="margin-top: 25px;">
+                <div class="label">Neural Drift</div>
+                <div id="drift-ui" class="val">+0.842</div>
+            </div>
+        </aside>
+
+        <section class="aura-viewport">
+            <canvas id="aura-canvas"></canvas>
+        </section>
+
+        <aside class="panel">
+            <div class="label">AI Assistant Insights</div>
+            <div id="ai-text" style="margin: 20px 0; font-size: 1.1rem; line-height: 1.6; color: #ccc;">
+                Deep space synchronization active. Monitoring biometric fluctuations...
+            </div>
+            <a href="investors.html" class="invest-link">ACCESS INVESTOR PLATFORM</a>
+        </aside>
+
+        <footer>
+            <div class="stat-card"><div class="label">Coherence</div><div id="score-ui" class="val">0%</div></div>
+            <div class="stat-card"><div class="label">Mood</div><div id="mood-ui" class="val">--</div></div>
+            <div class="stat-card"><div class="label">Stress Risk</div><div id="stress-ui" class="val" style="color: #4ade80;">LOW</div></div>
+            <div class="stat-card"><div class="label">Stability</div><div id="stab-ui" class="val">100%</div></div>
+        </footer>
+    </div>
+
     <script type="importmap">
     {
         "imports": {
@@ -127,46 +183,6 @@
         }
     }
     </script>
-</head>
-<body>
-
-    <div class="neuro-container">
-        <header>
-            <div class="logo">EMOPULSE V5</div>
-            <div id="sys-load" style="font-size: 10px; color: #00ff88;">CORE_ENGINE: BOOTING</div>
-        </header>
-
-        <main class="left-side">
-            <div class="label-tag">Biometric Interface</div>
-            <div class="cam-frame">
-                <video id="v-stream" autoplay muted playsinline></video>
-                <canvas id="m-overlay"></canvas>
-            </div>
-            <div class="stat-card" style="margin-top: auto;">
-                <div class="label-tag">Neural Drift</div>
-                <div id="drift-ui" class="val-display">0.000</div>
-            </div>
-        </main>
-
-        <section class="center-aura">
-            <canvas id="aura-canvas"></canvas>
-        </section>
-
-        <aside class="right-side">
-            <div class="label-tag">AI Insights</div>
-            <div id="ai-text" style="margin-top: 20px; font-size: 18px; line-height: 1.5;">Initiating neural synchronization...</div>
-            
-            <a href="investors.html" class="investor-btn">GO TO INVESTORS PLATFORM</a>
-        </aside>
-
-        <footer>
-            <div class="stat-card"><div class="label-tag">Coherence</div><div id="score-ui" class="val-display">0%</div></div>
-            <div class="stat-card"><div class="label-tag">Mood State</div><div id="mood-ui" class="val-display">--</div></div>
-            <div class="stat-card"><div class="label-tag">Stress Index</div><div id="stress-ui" class="val-display" style="color: #4ade80;">LOW</div></div>
-            <div class="stat-card"><div class="label-tag">Stability</div><div id="stab-ui" class="val-display">100%</div></div>
-        </footer>
-    </div>
-
     <script type="module" src="app.js"></script>
 </body>
 </html>
