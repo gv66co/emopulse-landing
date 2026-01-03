@@ -2,14 +2,14 @@ import { initCompass3D, updateCompass3D } from './compas3d-v2.js';
 import { FaceLandmarker, FilesetResolver, DrawingUtils } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3";
 
 async function setupAI() {
-    initCompass3D(); // Paleidžiame 3D
+    initCompass3D(); // Paleidžiame 3D Branduolį
 
     const video = document.getElementById('cam');
     const canvasElement = document.getElementById('face-mesh-canvas');
     const canvasCtx = canvasElement.getContext('2d');
     const drawingUtils = new DrawingUtils(canvasCtx);
 
-    // SUTVARKYTA: Krauname WASM iš CDN, kad nebūtų 404 kairų
+    // 1. Krovimas iš CDN (ištaiso 404 klaidas)
     const filesetResolver = await FilesetResolver.forVisionTasks(
         "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm"
     );
@@ -23,49 +23,74 @@ async function setupAI() {
         runningMode: "VIDEO"
     });
 
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    // 2. Kameros paleidimas
+    const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { width: 1280, height: 720 } 
+    });
     video.srcObject = stream;
 
     video.addEventListener('loadeddata', () => {
-        canvasElement.width = video.videoWidth;
-        canvasElement.height = video.videoHeight;
+        // FUNKCIJA: Sutvarkome drobės dydį pagal tai, kaip video atrodo ekrane
+        const resizeCanvas = () => {
+            canvasElement.width = video.offsetWidth;
+            canvasElement.height = video.offsetHeight;
+        };
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
         
         function predict() {
             const results = faceLandmarker.detectForVideo(video, performance.now());
 
-            if (results.faceLandmarks) {
-                canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-                
+            // Išvalome drobę prieš kiekvieną nupiešimą
+            canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+
+            if (results.faceLandmarks && results.faceLandmarks.length > 0) {
                 for (const landmarks of results.faceLandmarks) {
-                    // Piešiame tą gražų tinklelį ant veido kaip tavo nuotraukose
-                    drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_TESSELATION, { color: "#00f2ff33", lineWidth: 1 });
+                    // Piešiame tinklelį (sumažintas ryškumas iki #00f2ff22, kad neatrodytų perkrauta)
+                    drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_TESSELATION, { 
+                        color: "#00f2ff22", 
+                        lineWidth: 1 
+                    });
                 }
 
                 if (results.faceBlendshapes && results.faceBlendshapes.length > 0) {
                     const shapes = results.faceBlendshapes[0].categories;
                     
-                    // Logika rodmenims
+                    // Emocijų skaičiavimas
                     const smile = shapes.find(s => s.categoryName === "mouthSmileLeft")?.score || 0;
                     const stress = shapes.find(s => s.categoryName === "browDownLeft")?.score || 0;
+                    const energy = shapes.find(s => s.categoryName === "eyeWideLeft")?.score || 0;
                     
-                    // Atnaujiname UI
-                    const drift = (0.842 + (Math.random() * 0.01)).toFixed(3);
-                    document.getElementById('neural-drift-val').innerText = "+" + drift;
-                    document.getElementById('scoreValue').innerText = Math.round(76 + (smile * 10));
+                    // --- UI ATNAUJINIMAS ---
                     
+                    // Neural Drift (simuliuojame nedidelį svyravimą dėl gyvumo)
+                    const drift = (0.842 + (Math.random() * 0.005)).toFixed(3);
+                    const driftElem = document.getElementById('neural-drift-val');
+                    if(driftElem) driftElem.innerText = "+" + drift;
+
+                    // Emopulse Score
+                    const scoreElem = document.getElementById('scoreValue');
+                    if(scoreElem) scoreElem.innerText = Math.round(70 + (smile * 20) - (stress * 10));
+
+                    // Energy
+                    const energyElem = document.getElementById('energy');
+                    if(energyElem) energyElem.innerText = (0.60 + (energy * 0.4)).toFixed(2);
+                    
+                    // Stress Risk vizualas
                     const stressText = document.getElementById('stress-lvl');
-                    if (stress > 0.2) {
-                        stressText.innerText = "Elevated";
-                        stressText.style.color = "#f87171";
-                        document.getElementById('aiText').innerText = "Elevated Stress Detected";
+                    const aiMsg = document.getElementById('aiText');
+
+                    if (stress > 0.25) {
+                        if(stressText) { stressText.innerText = "Elevated"; stressText.style.color = "#f87171"; }
+                        if(aiMsg) aiMsg.innerText = "Elevated Stress Detected";
                     } else {
-                        stressText.innerText = "Low";
-                        stressText.style.color = "#4ade80";
-                        document.getElementById('aiText').innerText = "System Synchronized";
+                        if(stressText) { stressText.innerText = "Low"; stressText.style.color = "#4ade80"; }
+                        if(aiMsg) aiMsg.innerText = "System Synchronized";
                     }
 
-                    // Judiname 3D adatą
-                    updateCompass3D((smile - stress) * 2);
+                    // 3. Judiname 3D adatą (šypsena suka į dešinę, stresas į kairę)
+                    updateCompass3D((smile - stress) * 1.5);
                 }
             }
             requestAnimationFrame(predict);
