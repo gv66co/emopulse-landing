@@ -1,22 +1,28 @@
 :root {
+  /* Pagrindinė paletė */
   --bg-0: #03050a;
   --bg-1: #071022;
-  --panel: rgba(6, 18, 30, 0.7);
+  --panel: rgba(6, 18, 30, 0.75);
   --muted: #94a3b8;
   --accent-cool: #3abff8;
   --accent-warm: #fbbf24;
   --danger: #f87171;
+  
+  /* Stiklo (Glass) efekto nustatymai */
   --glass: rgba(255, 255, 255, 0.04);
-  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.1);
   --card-radius: 16px;
   --text: #eaf6ff;
+  
+  /* Emocijų spalvos */
   --calm: #3abff8;
   --focus: #7b5cff;
   --joy: #fbbf24;
   --stress: #f87171;
+  
   --font-stack: 'Inter', system-ui, -apple-system, sans-serif;
   
-  /* Dinaminiai kintamieji, kuriuos valdys JS */
+  /* Dinaminiai JS kintamieji */
   --p: 0%;
   --angle: 0deg;
 }
@@ -26,6 +32,7 @@
   padding: 0;
   box-sizing: border-box;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 html, body {
@@ -45,7 +52,7 @@ html, body {
   align-items: start;
 }
 
-/* --- 3D STAGE SECTION --- */
+/* --- 3D STAGE (Kompaso vieta) --- */
 .stage {
   width: 100%;
   aspect-ratio: 1 / 1;
@@ -58,18 +65,20 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
+  backdrop-filter: blur(4px);
 }
 
 canvas#compass3d {
   width: 100% !important;
   height: 100% !important;
+  display: block;
 }
 
 .vignette {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(circle, transparent 20%, rgba(0,0,0,0.6) 100%);
+  background: radial-gradient(circle, transparent 30%, rgba(0,0,0,0.7) 100%);
   z-index: 2;
 }
 
@@ -87,20 +96,21 @@ canvas#compass3d {
   font-size: 14px;
   color: var(--accent-cool);
   margin-bottom: 4px;
+  text-shadow: 0 0 10px rgba(58, 191, 248, 0.5);
 }
 
-/* --- CONTROL PANEL --- */
+/* --- VALDYMO SKYDELIS --- */
 .panel {
   width: 100%;
   background: var(--panel);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(16px) saturate(180%);
   border-radius: var(--card-radius);
   padding: 24px;
   border: 1px solid var(--glass-border);
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  gap: 20px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.4);
 }
 
 .header {
@@ -119,22 +129,25 @@ canvas#compass3d {
   justify-content: center;
   font-weight: 900;
   color: var(--bg-0);
-  box-shadow: 0 0 20px rgba(58, 191, 248, 0.3);
+  box-shadow: 0 0 20px rgba(123, 92, 255, 0.4);
 }
 
-/* --- MEDIA / CAMERA --- */
+/* --- VIDEO IR DROBĖS --- */
 .video-container {
   position: relative;
   width: 100%;
-  border-radius: 12px;
+  border-radius: 14px;
   overflow: hidden;
   border: 1px solid var(--glass-border);
   background: #000;
+  line-height: 0; /* Pašalina tarpą po video */
 }
 
 video#cam {
   width: 100%;
+  height: auto;
   display: block;
+  transform: scaleX(-1); /* Veidrodinis vaizdas natūralesniam pojūčiui */
 }
 
 canvas#overlay {
@@ -144,47 +157,10 @@ canvas#overlay {
   width: 100%;
   height: 100%;
   pointer-events: none;
+  z-index: 3;
 }
 
-/* --- INPUTS & BUTTONS --- */
-.input-row {
-  display: flex;
-  gap: 10px;
-}
-
-.text-input {
-  flex: 1;
-  padding: 12px 16px;
-  border-radius: 10px;
-  border: 1px solid var(--glass-border);
-  background: var(--glass);
-  color: var(--text);
-  outline: none;
-  transition: 0.3s;
-}
-
-.text-input:focus {
-  border-color: var(--accent-cool);
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.btn {
-  padding: 12px 20px;
-  border-radius: 10px;
-  background: var(--accent-cool);
-  color: var(--bg-0);
-  font-weight: 700;
-  border: none;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.btn:hover {
-  filter: brightness(1.1);
-  transform: translateY(-1px);
-}
-
-/* --- METRICS & CARDS --- */
+/* --- METRIKOS --- */
 .metrics {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -196,21 +172,86 @@ canvas#overlay {
   border-radius: 12px;
   padding: 16px;
   border: 1px solid var(--glass-border);
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.card:hover {
+  background: rgba(255, 255, 255, 0.07);
+  transform: translateY(-2px);
 }
 
 .card h4 {
   font-size: 11px;
   text-transform: uppercase;
   color: var(--muted);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   letter-spacing: 0.5px;
 }
 
-.card div, .card p {
-  font-size: 15px;
-  font-weight: 600;
+/* --- STABILUMO MATUOKLIS (Gauge) --- */
+.stability-gauge {
+  width: 140px;
+  height: 140px;
+  margin: 10px auto;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* --- VISUALIZATIONS --- */
-#auraCanvas, #timeline, #pulse {
-  width: 100
+.stability-gauge::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(var(--accent-cool) var(--p), transparent 0);
+  mask: radial-gradient(circle, transparent 65%, black 66%);
+  -webkit-mask: radial-gradient(circle, transparent 65%, black 66%);
+  transition: --p 0.5s ease;
+}
+
+.stability-needle {
+  position: absolute;
+  width: 3px;
+  height: 45px;
+  background: #fff;
+  bottom: 50%;
+  left: 50%;
+  transform-origin: bottom center;
+  transform: translate(-50%, 0) rotate(var(--angle));
+  border-radius: 2px;
+  box-shadow: 0 0 12px rgba(255,255,255,0.6);
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* --- GRAFIKAI (Timeline & Pulse) --- */
+#timeline, #pulse {
+  width: 100%;
+  height: 60px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  margin-top: 8px;
+  display: block;
+}
+
+/* --- ADAPTYVUMAS --- */
+@media (max-width: 1024px) {
+  .app {
+    grid-template-columns: 1fr;
+    padding: 24px;
+    gap: 24px;
+  }
+  
+  .stage {
+    max-height: 60vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .metrics {
+    grid-template-columns: 1fr;
+  }
+  .app {
+    padding: 16px;
+  }
+}
