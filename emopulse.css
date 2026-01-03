@@ -1,12 +1,13 @@
 :root {
-    --bg-dark: #010307;
-    --panel-bg: rgba(10, 15, 25, 0.98);
+    --bg: #010307;
+    --panel: rgba(10, 15, 25, 0.98);
     --cyan: #00f2ff;
+    --purple: #7b5cff;
 }
 
 body.emopulse-body {
-    background-color: var(--bg-dark) !important;
-    color: white;
+    background-color: var(--bg) !important;
+    color: white !important;
     margin: 0;
     font-family: 'JetBrains Mono', monospace;
     height: 100vh;
@@ -17,29 +18,29 @@ body.emopulse-body {
     display: flex;
     flex-direction: column;
     height: 100vh;
-    padding: 25px;
+    padding: 20px;
 }
 
+/* 3 stulpelių tinklo atkūrimas */
 .pro-grid {
     display: grid;
-    grid-template-columns: 380px 1fr 380px; /* Trys stulpeliai */
+    grid-template-columns: 380px 1fr 380px;
     gap: 20px;
     flex: 1;
     align-items: center;
 }
 
 .panel {
-    background: var(--panel-bg);
+    background: var(--panel);
     border: 1px solid rgba(0, 242, 255, 0.15);
     border-radius: 20px;
     padding: 20px;
-    height: fit-content;
 }
 
 .cam-container {
     position: relative;
     width: 100%;
-    aspect-ratio: 1.33; /* 4:3 formatas kamerai */
+    aspect-ratio: 1.33;
     border-radius: 15px;
     overflow: hidden;
     border: 1px solid rgba(0, 242, 255, 0.3);
@@ -61,16 +62,16 @@ body.emopulse-body {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 15px;
-    margin-top: 25px;
+    margin-top: 20px;
 }
 
 .stat-card {
-    background: var(--panel-bg);
+    background: var(--panel);
     padding: 20px;
     border-radius: 15px;
     border-bottom: 2px solid var(--cyan);
 }
 
-.val-xl { font-size: 2.4rem; color: var(--cyan); font-weight: bold; margin: 10px 0; }
+.val-xl { font-size: 2.2rem; color: var(--cyan); font-weight: bold; margin: 10px 0; }
 .online-text { color: #00ff88; text-shadow: 0 0 10px rgba(0,255,136,0.5); }
-.stress-low { color: #4ade80; }
+.label { font-size: 10px; opacity: 0.5; letter-spacing: 2px; }
