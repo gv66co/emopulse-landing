@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEURO-CORE V5.5 - BIOMETRIC ELITE</title>
+    <title>NEURO-CORE v6.0 MAXIMA</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;600&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
@@ -12,60 +12,71 @@
             --deep-space: #000510;
             --neon-blue: #00e5ff;
             --neon-pink: #ff00ff;
-            --stress-color: #ff3b3b;
-            --ui-bg: rgba(0, 15, 30, 0.85);
+            --stress-red: #ff3b3b;
+            --ui-bg: rgba(0, 10, 25, 0.9);
         }
 
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
             background-color: var(--deep-space); color: #81d4fa;
             font-family: 'Orbitron', sans-serif; overflow: hidden;
-            touch-action: none;
         }
 
-        /* --- LOADER --- */
+        /* --- LOADING OVERLAY --- */
         #loader {
             position: fixed; inset: 0; background: var(--deep-space);
             z-index: 2000; display: none; flex-direction: column;
             align-items: center; justify-content: center;
         }
-        #load-bar-bg { width: 220px; height: 2px; background: rgba(0, 229, 255, 0.1); margin: 20px 0; }
-        #load-bar-fill { width: 0%; height: 100%; background: var(--neon-blue); box-shadow: 0 0 15px var(--neon-blue); transition: 0.2s; }
+        #load-bar-bg { width: 250px; height: 2px; background: rgba(0, 229, 255, 0.1); margin: 20px 0; }
+        #load-bar-fill { width: 0%; height: 100%; background: var(--neon-blue); box-shadow: 0 0 15px var(--neon-blue); }
 
-        /* --- HUD LAYOUT --- */
+        /* --- MULTI-PANEL HUD --- */
         .panel {
             position: absolute; background: var(--ui-bg);
-            backdrop-filter: blur(12px); border: 1px solid rgba(0, 229, 255, 0.2);
-            padding: 12px; z-index: 10; width: 145px; border-radius: 4px;
+            backdrop-filter: blur(15px); border: 1px solid rgba(0, 229, 255, 0.2);
+            padding: 15px; z-index: 10; border-radius: 4px;
         }
-        #panel-l { top: 15px; left: 15px; border-left: 3px solid var(--neon-blue); }
-        #panel-r { top: 15px; right: 15px; border-right: 3px solid var(--neon-pink); text-align: right; }
+        #panel-left { top: 20px; left: 20px; width: 180px; border-left: 4px solid var(--neon-blue); }
+        #panel-right { top: 20px; right: 20px; width: 180px; border-right: 4px solid var(--neon-pink); text-align: right; }
+        #panel-bottom { bottom: 20px; right: 20px; width: 200px; border-bottom: 2px solid var(--neon-blue); }
 
-        .stat-val { color: #fff; font-size: 0.85rem; text-shadow: 0 0 5px var(--neon-blue); margin-top: 2px; }
-        .label { font-size: 0.5rem; opacity: 0.6; letter-spacing: 1px; }
-
-        /* --- CAMERA CIRCLE --- */
+        .stat-group { margin-bottom: 15px; }
+        .label { font-size: 0.55rem; opacity: 0.6; letter-spacing: 2px; text-transform: uppercase; }
+        .val { font-size: 1rem; color: #fff; text-shadow: 0 0 8px var(--neon-blue); margin-top: 4px; }
+        
+        /* --- VISUALIZER --- */
         #video-container {
-            position: absolute; bottom: 100px; left: 50%;
-            transform: translateX(-50%); width: 150px; height: 150px;
-            border: 1px solid var(--neon-blue); background: #000;
-            overflow: hidden; border-radius: 50%; box-shadow: 0 0 30px rgba(0, 229, 255, 0.2);
+            position: absolute; bottom: 30px; left: 30px;
+            width: 200px; height: 150px; border: 1px solid var(--neon-blue);
+            background: #000; overflow: hidden; border-radius: 8px;
         }
-        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); opacity: 0.4; }
+        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); opacity: 0.5; }
         #face-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: scaleX(-1); }
 
-        #controls { position: absolute; bottom: 35px; left: 0; width: 100%; text-align: center; z-index: 100; }
+        /* --- CONTROLLERS --- */
+        #controls { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 100; }
         .btn {
-            background: rgba(0, 229, 255, 0.05); border: 1px solid var(--neon-blue); color: var(--neon-blue);
-            padding: 15px 40px; cursor: pointer; font-family: 'Orbitron'; letter-spacing: 3px;
-            font-size: 0.8rem; border-radius: 50px; text-transform: uppercase;
+            background: transparent; border: 1px solid var(--neon-blue); color: var(--neon-blue);
+            padding: 20px 50px; cursor: pointer; font-family: 'Orbitron'; letter-spacing: 5px;
+            font-size: 1rem; transition: 0.4s;
+        }
+        .btn:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 30px var(--neon-blue); }
+
+        /* --- REPORT --- */
+        #final-report {
+            position: fixed; inset: 0; background: rgba(0, 5, 15, 0.95);
+            z-index: 1500; display: none; align-items: center; justify-content: center;
+        }
+        .report-box {
+            width: 90%; max-width: 500px; padding: 40px; border: 1px solid var(--neon-blue);
+            background: var(--ui-bg); box-shadow: 0 0 50px rgba(0, 229, 255, 0.2);
         }
 
-        #final-report {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 85%; max-width: 320px; background: rgba(0, 5, 20, 0.98);
-            border: 1px solid var(--neon-blue); padding: 25px; z-index: 1500;
-            display: none; box-shadow: 0 0 50px rgba(0, 229, 255, 0.4); border-radius: 10px;
+        @media (max-width: 600px) {
+            .panel { width: 140px; padding: 10px; }
+            #video-container { width: 140px; height: 105px; bottom: 100px; left: 50%; transform: translateX(-50%); border-radius: 50%; }
+            #panel-bottom { display: none; }
         }
     </style>
 </head>
@@ -73,32 +84,59 @@
 
 <div id="loader">
     <div id="load-bar-bg"><div id="load-bar-fill"></div></div>
-    <p id="load-text" style="letter-spacing:4px; font-size:0.6rem;">LINKING BIOMETRICS: 0%</p>
+    <p id="load-text" style="letter-spacing:5px; font-size:0.7rem;">SYSTEM INITIALIZING</p>
 </div>
 
 <div id="hud">
-    <div id="panel-l" class="panel">
-        <div class="label">NEURAL LOAD</div>
-        <div id="emo-val" class="stat-val">STANDBY</div>
-        <div class="label" style="margin-top:10px;">BLINK COUNT</div>
-        <div id="blink-val" class="stat-val">0</div>
+    <div id="panel-left" class="panel">
+        <div class="stat-group">
+            <div class="label">Primary Emotion</div>
+            <div id="emo-val" class="val">AWAITING</div>
+        </div>
+        <div class="stat-group">
+            <div class="label">Stress Index</div>
+            <div id="stress-val" class="val">0.00</div>
+        </div>
+        <div class="stat-group">
+            <div class="label">Neural Stability</div>
+            <div id="stability-val" class="val">100%</div>
+        </div>
     </div>
-    <div id="panel-r" class="panel">
-        <div class="label">GAZE FOCUS</div>
-        <div id="gaze-val" class="stat-val">CENTER</div>
-        <div class="label" style="margin-top:10px;">STRESS INDEX</div>
-        <div id="stress-val" class="stat-val">0.00</div>
+
+    <div id="panel-right" class="panel">
+        <div class="stat-group">
+            <div class="label">Pulse (Est)</div>
+            <div class="val"><span id="bpm-val">--</span> BPM</div>
+        </div>
+        <div class="stat-group">
+            <div class="label">Blink Rate</div>
+            <div id="blink-val" class="val">0</div>
+        </div>
+        <div class="stat-group">
+            <div class="label">Gaze Focus</div>
+            <div id="gaze-val" class="val">CENTER</div>
+        </div>
+    </div>
+
+    <div id="panel-bottom" class="panel">
+        <div class="label">Neural Map Progress</div>
+        <div id="prog-text" class="val" style="font-size: 1.5rem;">0%</div>
+        <div style="width:100%; height:4px; background:rgba(255,255,255,0.1); margin-top:10px;">
+            <div id="sync-fill" style="width:0%; height:100%; background:var(--neon-blue);"></div>
+        </div>
     </div>
 </div>
 
 <div id="final-report">
-    <h3 style="color:var(--neon-blue); margin:0 0 15px 0; font-size:1rem; text-align:center;">BIOMETRIC SUMMARY</h3>
-    <div id="report-content" style="font-family:'Inter'; font-size:0.85rem; line-height:1.6;"></div>
-    <button class="btn" style="width:100%; margin-top:20px; padding:12px;" onclick="location.reload()">RE-LINK</button>
+    <div class="report-box">
+        <h2 style="color:var(--neon-blue); margin-top:0; letter-spacing:3px;">NEURAL DEBRIEF</h2>
+        <div id="report-content" style="font-family:'Inter'; line-height:1.8; color: #b2ebf2; margin: 25px 0;"></div>
+        <button class="btn" style="width:100%;" onclick="location.reload()">RE-SYNC SYSTEM</button>
+    </div>
 </div>
 
 <div id="controls">
-    <button id="start-btn" class="btn" onclick="masterInitialize()">Initialize Scan</button>
+    <button id="start-btn" class="btn" onclick="masterInit()">INITIALIZE LINK</button>
 </div>
 
 <div id="video-container">
@@ -110,81 +148,106 @@
 let scene, camera, renderer, core;
 let systemActive = false, analysisData = [];
 let stream = null, blinkCount = 0, isBlinking = false;
-const ANALYSIS_GOAL = 100;
+let voices = [];
+const ANALYSIS_GOAL = 120; // Daugiau duomenų tikslesnei analizei
 const MODEL_URL = 'https://raw.githubusercontent.com/vladmandic/face-api/master/model/';
 
-// 1. AUDIO & HAPTIC
-let voices = [];
-function loadVoices() { voices = window.speechSynthesis.getVoices(); }
+// --- AUDIO FIX ---
+function loadVoices() {
+    voices = window.speechSynthesis.getVoices();
+}
 window.speechSynthesis.onvoiceschanged = loadVoices;
 
 function speak(text) {
     const synth = window.speechSynthesis;
-    synth.cancel();
-    const utter = new SpeechSynthesisUtterance(text);
-    const pref = voices.find(v => v.lang.includes('en') && (v.name.includes('Female') || v.name.includes('Zira')));
-    if (pref) utter.voice = pref;
-    utter.pitch = 1.25; utter.rate = 0.9;
-    synth.speak(utter);
+    synth.cancel(); // NUTRAUKIA visus ankstesnius užstrigusius garsus
+    
+    setTimeout(() => {
+        const utter = new SpeechSynthesisUtterance(text);
+        const female = voices.find(v => v.lang.includes('en') && (v.name.includes('Female') || v.name.includes('Zira') || v.name.includes('Google US English')));
+        if (female) utter.voice = female;
+        utter.pitch = 1.2; utter.rate = 0.95;
+        synth.speak(utter);
+    }, 100);
 }
 
-// 2. 3D BACKGROUND
+// --- 3D ENVIRONMENT ---
 function init3D() {
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
     renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
-    core = new THREE.Mesh(new THREE.IcosahedronGeometry(2, 2), new THREE.MeshPhongMaterial({ color: 0x00e5ff, wireframe: true }));
+
+    const geo = new THREE.IcosahedronGeometry(3, 1);
+    const mat = new THREE.MeshPhongMaterial({ color: 0x00e5ff, wireframe: true, transparent: true, opacity: 0.3 });
+    core = new THREE.Mesh(geo, mat);
     scene.add(core);
-    scene.add(new THREE.PointLight(0xffffff, 1.5, 100), new THREE.AmbientLight(0x404040));
-    camera.position.z = 8;
-    function anim() {
-        requestAnimationFrame(anim);
-        if(core) { core.rotation.y += 0.005; core.rotation.x += 0.002; }
+
+    const light = new THREE.PointLight(0xffffff, 2, 100);
+    light.position.set(10, 10, 10);
+    scene.add(light, new THREE.AmbientLight(0x202020));
+    camera.position.z = 12;
+
+    function animate() {
+        requestAnimationFrame(animate);
+        if(core) { core.rotation.y += 0.003; core.rotation.z += 0.002; }
         renderer.render(scene, camera);
     }
-    anim();
+    animate();
 }
 
-// 3. BIOMETRIC LOGIC (BLINK & GAZE)
-function checkBlink(landmarks) {
-    const leftEye = landmarks.getLeftEye();
-    const rightEye = landmarks.getRightEye();
-
-    function getEAR(eye) { // Eye Aspect Ratio
-        const v1 = Math.hypot(eye[1].x - eye[5].x, eye[1].y - eye[5].y);
-        const v2 = Math.hypot(eye[2].x - eye[4].x, eye[2].y - eye[4].y);
-        const h = Math.hypot(eye[0].x - eye[3].x, eye[0].y - eye[3].y);
-        return (v1 + v2) / (2.0 * h);
-    }
-
-    const ear = (getEAR(leftEye) + getEAR(rightEye)) / 2;
-    if (ear < 0.22 && !isBlinking) {
-        isBlinking = true;
-        blinkCount++;
-        document.getElementById('blink-val').textContent = blinkCount;
-    } else if (ear > 0.25) {
-        isBlinking = false;
-    }
+// --- BIOMETRIC ENGINES ---
+function processBlinks(landmarks) {
+    const left = landmarks.getLeftEye();
+    const right = landmarks.getRightEye();
+    const getEAR = (eye) => (Math.hypot(eye[1].x-eye[5].x, eye[1].y-eye[5].y) + Math.hypot(eye[2].x-eye[4].x, eye[2].y-eye[4].y)) / (2 * Math.hypot(eye[0].x-eye[3].x, eye[0].y-eye[3].y));
+    const ear = (getEAR(left) + getEAR(right)) / 2;
+    if (ear < 0.22 && !isBlinking) { isBlinking = true; blinkCount++; document.getElementById('blink-val').textContent = blinkCount; }
+    else if (ear > 0.25) isBlinking = false;
 }
 
-function checkGaze(landmarks) {
+function processGaze(landmarks) {
     const nose = landmarks.getNose()[0];
-    const leftEye = landmarks.getLeftEye()[0];
-    const rightEye = landmarks.getRightEye()[3];
-    const midPoint = (leftEye.x + rightEye.x) / 2;
-    
-    const diff = nose.x - midPoint;
+    const left = landmarks.getLeftEye()[0];
+    const right = landmarks.getRightEye()[3];
+    const diff = nose.x - (left.x + right.x) / 2;
     const gaze = document.getElementById('gaze-val');
-    if (diff > 12) gaze.textContent = "LEFT";
-    else if (diff < -12) gaze.textContent = "RIGHT";
-    else gaze.textContent = "CENTERED";
+    if (diff > 15) gaze.textContent = "LEFT";
+    else if (diff < -15) gaze.textContent = "RIGHT";
+    else gaze.textContent = "CENTER";
 }
 
-// 4. MAIN INITIALIZATION
-async function masterInitialize() {
-    window.speechSynthesis.speak(new SpeechSynthesisUtterance("")); // Mobile audio unlock
+// --- FULL NEURO-MESH DRAWING ---
+function drawNeuroMesh(ctx, landmarks, stress) {
+    const pts = landmarks.positions;
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.lineWidth = 0.8;
+    ctx.strokeStyle = stress > 0.6 ? 'rgba(255, 59, 59, 0.6)' : 'rgba(0, 229, 255, 0.5)';
+    
+    // Piešiame pilną tinklą (trianguliaciją tarp taškų)
+    ctx.beginPath();
+    for (let i = 0; i < pts.length; i++) {
+        for (let j = i + 1; j < pts.length; j++) {
+            const dist = Math.hypot(pts[i].x - pts[j].x, pts[i].y - pts[j].y);
+            if (dist < 35) {
+                ctx.moveTo(pts[i].x, pts[i].y);
+                ctx.lineTo(pts[j].x, pts[j].y);
+            }
+        }
+    }
+    ctx.stroke();
+
+    // Akcentuojame akis ir lūpas
+    ctx.fillStyle = ctx.strokeStyle;
+    [...landmarks.getLeftEye(), ...landmarks.getRightEye(), ...landmarks.getMouth()].forEach(p => {
+        ctx.fillRect(p.x-1, p.y-1, 2, 2);
+    });
+}
+
+// --- MAIN LOOP ---
+async function masterInit() {
+    window.speechSynthesis.speak(new SpeechSynthesisUtterance("")); // Audio unlock
     document.getElementById('start-btn').style.display = 'none';
     const loader = document.getElementById('loader');
     loader.style.display = 'flex';
@@ -192,13 +255,14 @@ async function masterInitialize() {
     try {
         const loadBar = document.getElementById('load-bar-fill');
         const loadTxt = document.getElementById('load-text');
-        
-        loadBar.style.width = "30%"; loadTxt.textContent = "LOADING DETECTOR: 30%";
+
+        loadTxt.textContent = "CORE MODULES: 25%"; loadBar.style.width = "25%";
         await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
-        loadBar.style.width = "60%"; loadTxt.textContent = "LOADING BIOMETRICS: 60%";
+        loadTxt.textContent = "NEURO MESH: 50%"; loadBar.style.width = "50%";
         await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+        loadTxt.textContent = "EMOTION ENGINE: 75%"; loadBar.style.width = "75%";
         await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
-        loadBar.style.width = "100%"; loadTxt.textContent = "SYNCING: 100%";
+        loadBar.style.width = "100%";
 
         stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
         document.getElementById('video-feed').srcObject = stream;
@@ -206,65 +270,71 @@ async function masterInitialize() {
         setTimeout(() => {
             loader.style.display = 'none';
             systemActive = true;
-            speak("Neural link initialized. Keep your eyes on the core.");
-            processLoop();
-        }, 800);
-    } catch (e) { alert("Access Denied."); location.reload(); }
+            speak("Neural link established. Full biometric scan in progress.");
+            runAnalysis();
+        }, 1000);
+    } catch (e) { alert("Camera access denied."); location.reload(); }
 }
 
-async function processLoop() {
-    if(!systemActive) return;
+async function runAnalysis() {
+    if (!systemActive) return;
     const video = document.getElementById('video-feed');
     const canvas = document.getElementById('face-canvas');
     const ctx = canvas.getContext('2d');
 
-    const res = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 160 }))
+    const result = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 224 }))
         .withFaceLandmarks().withFaceExpressions();
 
-    if(res) {
-        checkBlink(res.landmarks);
-        checkGaze(res.landmarks);
+    if (result) {
+        processBlinks(result.landmarks);
+        processGaze(result.landmarks);
         
-        const emo = Object.keys(res.expressions).reduce((a, b) => res.expressions[a] > res.expressions[b] ? a : b);
-        const stress = (res.expressions.angry + res.expressions.fearful) * 1.5;
-
-        document.getElementById('emo-val').textContent = emo.toUpperCase();
+        const expressions = result.expressions;
+        const topEmo = Object.keys(expressions).reduce((a, b) => expressions[a] > expressions[b] ? a : b);
+        const stress = (expressions.angry + expressions.fearful + expressions.sad) * 1.2;
+        
+        // HUD Updates
+        document.getElementById('emo-val').textContent = topEmo.toUpperCase();
         document.getElementById('stress-val').textContent = stress.toFixed(2);
+        document.getElementById('bpm-val').textContent = Math.round(70 + (stress * 15));
         
-        // Draw Neural Mesh
-        ctx.clearRect(0,0,canvas.width, canvas.height);
-        ctx.strokeStyle = isBlinking ? "#ff00ff" : "#00e5ff";
-        ctx.lineWidth = 1;
-        const pts = res.landmarks.positions;
-        ctx.beginPath();
-        for(let i=0; i<pts.length; i+=6) {
-            ctx.moveTo(pts[i].x, pts[i].y);
-            ctx.lineTo(pts[(i+12)%pts.length].x, pts[(i+12)%pts.length].y);
-        }
-        ctx.stroke();
+        const prog = (analysisData.length / ANALYSIS_GOAL) * 100;
+        document.getElementById('prog-text').textContent = Math.round(prog) + "%";
+        document.getElementById('sync-fill').style.width = prog + "%";
 
-        analysisData.push({emo, stress});
-        if(analysisData.length >= ANALYSIS_GOAL) finishScan();
+        drawNeuroMesh(ctx, result.landmarks, stress);
+        
+        analysisData.push({ emo: topEmo, stress: stress });
+        if (analysisData.length >= ANALYSIS_GOAL) finalize();
     }
-    if(systemActive) setTimeout(processLoop, 120);
+    if (systemActive) setTimeout(runAnalysis, 100);
 }
 
-function finishScan() {
+function finalize() {
     systemActive = false;
-    if(stream) stream.getTracks().forEach(t => t.stop());
-    if(navigator.vibrate) navigator.vibrate([100, 50, 100]);
+    if (stream) stream.getTracks().forEach(t => t.stop());
+    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
 
-    const report = document.getElementById('report-content');
-    const fatigue = blinkCount > 10 ? "HIGH" : "NORMAL";
-    
-    report.innerHTML = `
-        <b>CORE STATE:</b> ${analysisData[0].emo.toUpperCase()}<br>
-        <b>BLINK RATE:</b> ${blinkCount} (Fatigue: ${fatigue})<br>
-        <b>STRESS LVL:</b> MINIMAL<br><br>
-        <i>AI Observation: Your blink rate suggests ${fatigue === "HIGH" ? "you need ocular rest." : "optimal focus levels."}</i>
+    const counts = {};
+    let avgStress = 0;
+    analysisData.forEach(d => { counts[d.emo] = (counts[d.emo] || 0) + 1; avgStress += d.stress; });
+    const dominant = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
+    avgStress /= analysisData.length;
+
+    document.getElementById('report-content').innerHTML = `
+        <b>DOMINANT EMOTION:</b> ${dominant.toUpperCase()}<br>
+        <b>AVERAGE STRESS INDEX:</b> ${avgStress.toFixed(2)}<br>
+        <b>TOTAL BLINKS:</b> ${blinkCount}<br>
+        <b>NEURAL SYNC:</b> COMPLETE<br><br>
+        <i>AI INSIGHT: ${avgStress > 0.4 ? "High cognitive load detected. System recommends immediate neural recalibration (rest)." : "Neural resonance is stable. Cognitive efficiency is at peak levels."}</i>
     `;
-    document.getElementById('final-report').style.display = 'block';
-    speak("Scan complete. Review your debrief.");
+    
+    document.getElementById('final-report').style.display = 'flex';
+    
+    // Balsas dabar turėtų būti aiškus
+    setTimeout(() => {
+        speak("Biometric analysis complete. Your neural profile has been generated.");
+    }, 500);
 }
 
 init3D();
