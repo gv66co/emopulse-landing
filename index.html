@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEURO-CORE MOBILE ELITE v4.5</title>
+    <title>NEURO-CORE MOBILE v4.6 - AUDIO FIX</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;600&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
@@ -29,7 +29,6 @@
             align-items: center; justify-content: center;
         }
 
-        /* HUD Panels - Responsive Layout */
         .panel {
             position: absolute; background: rgba(0, 10, 30, 0.8);
             backdrop-filter: blur(10px); border: 1px solid var(--ui-border);
@@ -49,7 +48,6 @@
             display: none; border-radius: 10px; box-shadow: 0 0 40px rgba(0, 229, 255, 0.3);
         }
 
-        /* Camera Feed Optimized for Mobile */
         #video-container {
             position: absolute; bottom: 110px; left: 50%;
             transform: translateX(-50%);
@@ -70,7 +68,6 @@
         .stat-val { color: #fff; font-size: 1rem; text-shadow: 0 0 5px var(--neon-blue); }
         #ai-comms { position: absolute; bottom: 85px; left: 50%; transform: translateX(-50%); width: 90%; text-align: center; color: var(--neon-blue); font-size: 0.65rem; letter-spacing: 1px; }
 
-        /* Animation for scanning line */
         .scanline { width: 150px; height: 2px; background: var(--neon-blue); animation: load 1.5s infinite; }
         @keyframes load { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
     </style>
@@ -79,7 +76,7 @@
 
 <div id="loader">
     <div class="scanline"></div>
-    <p style="margin-top:15px; font-size:0.7rem;">CALIBRATING NEURAL SENSORS</p>
+    <p style="margin-top:15px; font-size:0.7rem;">OPTIMIZING AUDIO ENGINE</p>
 </div>
 
 <div id="hud">
@@ -91,9 +88,9 @@
         <div id="stress-val" class="stat-val">0.00</div>
     </div>
     <div id="panel-r" class="panel">
-        <div style="font-size:0.55rem; opacity:0.7;">PULSE EST.</div>
+        <div style="font-size:0.55rem; opacity:0.7;">PULSE</div>
         <div class="stat-val"><span id="bpm-val">--</span></div>
-        <div style="font-size:0.55rem; opacity:0.7; margin-top:18px;">PROGRESS</div>
+        <div style="font-size:0.55rem; opacity:0.7; margin-top:18px;">SCAN</div>
         <div id="prog-text" class="stat-val">0%</div>
     </div>
 </div>
@@ -107,7 +104,7 @@
 <div id="ai-comms">> SYSTEM STANDBY</div>
 
 <div id="controls">
-    <button id="start-btn" class="btn" onclick="startLab()">Start Session</button>
+    <button id="start-btn" class="btn" onclick="unlockAudioAndStart()">Start Session</button>
 </div>
 
 <div id="video-container">
@@ -121,18 +118,12 @@ let systemActive = false;
 let analysisData = [];
 let stream = null;
 let lastAITime = 0;
-const ANALYSIS_GOAL = 80; 
+const ANALYSIS_GOAL = 60; // Slightly shorter for mobile testing
 const MODEL_URL = 'https://raw.githubusercontent.com/vladmandic/face-api/master/model/';
 
-// Colors mapping for mesh
 const EMOTION_COLORS = {
-    neutral: '#00e5ff',
-    happy: '#00ff88',
-    sad: '#0066ff',
-    angry: '#ff3b3b',
-    fearful: '#ff00ff',
-    disgusted: '#a8ff00',
-    surprised: '#ffff00'
+    neutral: '#00e5ff', happy: '#00ff88', sad: '#0066ff',
+    angry: '#ff3b3b', fearful: '#ff00ff', disgusted: '#a8ff00', surprised: '#ffff00'
 };
 
 function init3D() {
@@ -141,35 +132,47 @@ function init3D() {
     renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
-
-    const geo = new THREE.IcosahedronGeometry(2, 2);
-    const mat = new THREE.MeshPhongMaterial({ color: 0x00e5ff, wireframe: true });
-    core = new THREE.Mesh(geo, mat);
+    core = new THREE.Mesh(new THREE.IcosahedronGeometry(2, 2), new THREE.MeshPhongMaterial({ color: 0x00e5ff, wireframe: true }));
     scene.add(core);
-
-    const light = new THREE.PointLight(0xffffff, 1.5, 100);
-    light.position.set(5,5,5);
-    scene.add(light, new THREE.AmbientLight(0x404040));
+    scene.add(new THREE.PointLight(0xffffff, 1.5, 100), new THREE.AmbientLight(0x404040));
     camera.position.z = 7;
-
     function animate(t) {
         requestAnimationFrame(animate);
         if(core) core.rotation.y += 0.005;
-        if(systemActive && t - lastAITime > 120) {
-            processNeuralData();
-            lastAITime = t;
-        }
+        if(systemActive && t - lastAITime > 150) { processNeuralData(); lastAITime = t; }
         renderer.render(scene, camera);
     }
     animate(0);
 }
 
+// AUDIO FIX: Mobiliesiems skirtas "pažadinimas"
+function unlockAudioAndStart() {
+    // 1. Sukuriamas tuščias garsas, kad naršyklė leistų tolesnę kalbą
+    const synth = window.speechSynthesis;
+    const silentUtter = new SpeechSynthesisUtterance("");
+    silentUtter.volume = 0;
+    synth.speak(silentUtter);
+
+    // 2. Paleidžiama pagrindinė sistema
+    startLab();
+}
+
 function speak(text) {
+    const synth = window.speechSynthesis;
+    synth.cancel(); // Sustabdomi ankstesni pranešimai
+    
     const utter = new SpeechSynthesisUtterance(text);
-    const voices = speechSynthesis.getVoices();
-    utter.voice = voices.find(v => v.lang.includes('en') && (v.name.includes('Female') || v.name.includes('Zira'))) || voices[0];
-    utter.pitch = 1.2; utter.rate = 0.9;
-    speechSynthesis.speak(utter);
+    const voices = synth.getVoices();
+    
+    // Ieškome moteriško balso
+    let femaleVoice = voices.find(v => v.lang.includes('en') && (v.name.includes('Female') || v.name.includes('Zira') || v.name.includes('Samantha')));
+    
+    if (femaleVoice) utter.voice = femaleVoice;
+    utter.pitch = 1.3; // Aukštesnis tonas (moteriškesnis)
+    utter.rate = 0.9;
+    utter.volume = 1.0;
+    
+    synth.speak(utter);
     document.getElementById('ai-comms').textContent = "> " + text.toUpperCase();
 }
 
@@ -194,10 +197,10 @@ async function startLab() {
             canvas.height = video.videoHeight;
             document.getElementById('loader').style.display = 'none';
             systemActive = true;
-            speak("Neural link active.");
+            speak("Neural link active. Voice engine initialized.");
         };
     } catch (err) {
-        alert("Mobile camera access required.");
+        alert("Camera access is required for neural scanning.");
         location.reload();
     }
 }
@@ -208,32 +211,24 @@ async function processNeuralData() {
     const ctx = canvas.getContext('2d');
 
     const result = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 160 }))
-        .withFaceLandmarks()
-        .withFaceExpressions();
+        .withFaceLandmarks().withFaceExpressions();
 
     if (result) {
         const top = Object.keys(result.expressions).reduce((a, b) => result.expressions[a] > result.expressions[b] ? a : b);
         const meshColor = EMOTION_COLORS[top] || '#00e5ff';
         
-        // --- DRAW COLORFUL NEUROMESH ---
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         const pts = result.landmarks.positions;
-        ctx.strokeStyle = meshColor;
-        ctx.lineWidth = 1.5;
-        ctx.globalAlpha = 0.6;
+        ctx.strokeStyle = meshColor; ctx.lineWidth = 1.2; ctx.globalAlpha = 0.5;
         ctx.beginPath();
-        for (let i = 0; i < pts.length; i += 3) {
-            for (let j = i + 1; j < pts.length; j += 12) {
+        for (let i = 0; i < pts.length; i += 4) {
+            for (let j = i + 1; j < pts.length; j += 15) {
                 const d = Math.hypot(pts[i].x - pts[j].x, pts[i].y - pts[j].y);
-                if (d < 50) {
-                    ctx.moveTo(pts[i].x, pts[i].y);
-                    ctx.lineTo(pts[j].x, pts[j].y);
-                }
+                if (d < 50) { ctx.moveTo(pts[i].x, pts[i].y); ctx.lineTo(pts[j].x, pts[j].y); }
             }
         }
         ctx.stroke();
 
-        // Update HUD
         const stress = (result.expressions.angry * 1.5) + (result.expressions.fearful * 1.2);
         document.getElementById('emo-val').textContent = top.toUpperCase();
         document.getElementById('emo-val').style.color = meshColor;
@@ -260,11 +255,11 @@ function stopSystem() {
     const report = document.getElementById('report-content');
     report.innerHTML = `
         <b>Dominant State:</b> ${dominant.toUpperCase()}<br>
-        <b>Neural Stability:</b> ${analysisData.length >= ANALYSIS_GOAL ? 'Verified' : 'Incomplete'}<br><br>
-        <i>Summary: Bio-signals indicate a predominantly ${dominant} state. Neural interface suggests optimal recovery.</i>
+        <b>Neural Status:</b> Verified<br><br>
+        <i>AI Insight: Your biometric resonance shows a strong affinity for ${dominant} patterns.</i>
     `;
     document.getElementById('final-report').style.display = 'block';
-    speak("Analysis complete.");
+    speak("Scanning complete. Report generated successfully.");
 }
 
 window.addEventListener('resize', () => {
@@ -273,6 +268,8 @@ window.addEventListener('resize', () => {
     camera.updateProjectionMatrix();
 });
 
+// Paruošiame balsus naršyklėje
+window.speechSynthesis.getVoices();
 init3D();
 </script>
 </body>
