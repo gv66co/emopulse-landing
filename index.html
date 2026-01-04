@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEURO-CORE ELITE v3.0</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <title>NEURO-CORE LAB ELITE v3.0</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;600&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
     <style>
@@ -13,23 +13,24 @@
             --neon-blue: #00e5ff;
             --aura-glow: rgba(0, 229, 255, 0.4);
             --ui-border: rgba(79, 195, 247, 0.3);
+            --joy-color: #ff9f1c;
+            --stress-color: #ff3b3b;
         }
 
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
             background-color: var(--deep-space); color: #81d4fa;
-            font-family: 'Orbitron', sans-serif; overflow: hidden;
+            font-family: 'Orbitron', sans-serif; overflow-x: hidden;
         }
 
-        /* Three.js drobė visame fone */
         #aura-canvas {
             display: block; position: fixed; top: 0; left: 0;
             z-index: 1; pointer-events: none;
         }
 
-        /* HUD Elementai */
-        #hud { position: absolute; inset: 0; z-index: 10; pointer-events: none; }
-
+        /* HUD & Panels */
+        #hud { position: relative; z-index: 10; padding: 20px; pointer-events: none; }
+        
         .panel {
             position: absolute; background: rgba(0, 10, 30, 0.85);
             backdrop-filter: blur(15px); border: 1px solid var(--ui-border);
@@ -45,50 +46,53 @@
         .stat-label { font-size: 0.6rem; opacity: 0.6; letter-spacing: 2px; margin-bottom: 5px; }
         .stat-value { font-size: 1.1rem; color: #fff; text-shadow: 0 0 10px var(--neon-blue); margin-bottom: 15px; }
 
-        /* Kameros langas */
+        /* Report Card CSS */
+        .story-card {
+            max-width: 600px; margin: 100px auto; background: rgba(255,255,255,0.05);
+            border-radius: 20px; padding: 32px; border: 1px solid var(--ui-border);
+            position: relative; z-index: 100; backdrop-filter: blur(20px);
+            display: none; animation: storyFade 0.5s ease-out;
+        }
+        .story-card::before {
+            content: ""; position: absolute; top: 0; left: 0; height: 6px; width: 100%;
+            background: linear-gradient(90deg, #3a8dff, #7b5cff, #ff9f1c, #ff3b3b);
+        }
+        .story-title { font-size: 22px; font-weight: 800; margin-bottom: 16px; color: #fff; }
+        .story-text { font-family: 'Inter'; font-size: 16px; line-height: 1.6; color: #81d4fa; }
+        .story-tag { 
+            display: inline-block; padding: 6px 14px; border-radius: 8px; 
+            font-size: 12px; font-weight: 600; margin: 5px; color: #fff; background: var(--neon-blue);
+        }
+
+        /* Controls */
+        #controls {
+            position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%);
+            z-index: 200; text-align: center;
+        }
+        .btn {
+            background: transparent; border: 1px solid var(--neon-blue);
+            color: var(--neon-blue); padding: 15px 40px; font-family: 'Orbitron';
+            cursor: pointer; transition: 0.3s; letter-spacing: 3px; margin: 0 10px;
+        }
+        .btn:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 20px var(--neon-blue); }
+        .btn-stop { border-color: var(--stress-color); color: var(--stress-color); }
+        .btn-stop:hover { background: var(--stress-color); color: #fff; box-shadow: 0 0 20px var(--stress-color); }
+
+        /* Camera Box */
         #video-container {
             position: absolute; bottom: 30px; right: 30px;
-            width: 280px; height: 210px; border: 1px solid var(--neon-blue);
+            width: 240px; height: 180px; border: 1px solid var(--neon-blue);
             z-index: 15; overflow: hidden; background: #000;
         }
-
-        video {
-            width: 100%; height: 100%; object-fit: cover;
-            transform: scaleX(-1); filter: grayscale(1) brightness(0.8) contrast(1.2);
-            opacity: 0.7;
-        }
-
-        #face-canvas {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 20; transform: scaleX(-1); pointer-events: none;
-        }
-
-        #video-container::after {
-            content: ""; position: absolute; top: 0; left: 0;
-            width: 100%; height: 3px; background: var(--neon-blue);
-            box-shadow: 0 0 15px var(--neon-blue); z-index: 25;
-            animation: scan 3s linear infinite;
-        }
-
-        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
+        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); opacity: 0.5; }
+        #face-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: scaleX(-1); }
 
         #ai-comms {
             position: absolute; bottom: 120px; left: 50%; transform: translateX(-50%);
-            width: 60%; text-align: center;
-            background: linear-gradient(90deg, transparent, rgba(0, 229, 255, 0.1), transparent);
-            padding: 15px; border-bottom: 1px solid var(--neon-blue);
-            font-size: 0.9rem; z-index: 30; text-transform: uppercase;
+            width: 60%; text-align: center; color: var(--neon-blue); font-size: 0.8rem;
         }
 
-        #scan-trigger {
-            position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%);
-            z-index: 100; background: transparent; border: 1px solid var(--neon-blue);
-            color: var(--neon-blue); padding: 12px 40px; font-family: 'Orbitron';
-            cursor: pointer; transition: 0.3s; letter-spacing: 3px;
-        }
-
-        #scan-trigger:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 20px var(--neon-blue); }
-        #scan-trigger:disabled { opacity: 0.3; cursor: wait; }
+        @keyframes storyFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -98,194 +102,197 @@
 <div id="hud">
     <div id="panel-l" class="panel">
         <div class="stat-label">NEURAL LOAD</div>
-        <div id="emo-val" class="stat-value">AWAITING</div>
+        <div id="emo-val" class="stat-value">OFFLINE</div>
         <div class="stat-label">HEART RATE</div>
         <div class="stat-value"><span id="bpm-val">--</span> BPM</div>
     </div>
     <div id="panel-r" class="panel">
-        <div class="stat-label">SYSTEM STATUS</div>
-        <div id="drift-val" class="stat-value">READY</div>
-        <div class="stat-label">SYNC PROGRESS</div>
+        <div class="stat-label">STABILITY INDEX</div>
+        <div id="drift-val" class="stat-value">AWAITING</div>
+        <div class="stat-label">SESSION SYNC</div>
         <div id="prog-val" class="stat-value">0%</div>
     </div>
 </div>
 
-<div id="ai-comms">> INITIALIZE NEURAL LINK TO START BIOMETRIC ANALYSIS</div>
-<button id="scan-trigger" onclick="initSystem()">START SCAN</button>
+<div id="final-report" class="story-card">
+    <div class="story-title">NEURAL SESSION SUMMARY</div>
+    <div id="report-text" class="story-text">Analysis data processed. No anomalies detected.</div>
+    <div id="report-tags" style="margin-top:20px;"></div>
+</div>
+
+<div id="ai-comms">> READY FOR NEURAL SYNCHRONIZATION</div>
+
+<div id="controls">
+    <button id="btn-start" class="btn" onclick="startLab()">START SCAN</button>
+    <button id="btn-stop" class="btn btn-stop" style="display:none;" onclick="stopLab()">TERMINATE</button>
+</div>
 
 <div id="video-container">
     <video id="video-feed" autoplay muted playsinline></video>
     <canvas id="face-canvas"></canvas>
 </div>
 
+
+
 <script>
-    let scene, camera, renderer, auraSphere, rings = [];
+    let scene, camera, renderer, auraSphere, stream = null, aiInterval = null;
     let systemActive = false;
-    let analysisData = [];
-    const ANALYSIS_GOAL = 150; 
+    let sessionLog = [];
+    const ANALYSIS_LIMIT = 200;
     const MODEL_URL = 'https://raw.githubusercontent.com/vladmandic/face-api/master/model/';
 
     const EMOTION_MAP = {
-        neutral:  { color: 0x00e5ff, speed: 0.005 },
-        happy:    { color: 0x00ff88, speed: 0.015 },
-        sad:      { color: 0x0066ff, speed: 0.002 },
-        angry:    { color: 0xff3300, speed: 0.040 },
-        surprised:{ color: 0xffdd00, speed: 0.020 }
+        neutral:  { color: 0x00e5ff, msg: "Balanced state." },
+        happy:    { color: 0x00ff88, msg: "Neural harmony." },
+        sad:      { color: 0x0066ff, msg: "Frequency drop." },
+        angry:    { color: 0xff3300, msg: "Neural friction." },
+        surprised:{ color: 0xffdd00, msg: "Synaptic spike." }
     };
 
-    function speak(text) {
-        window.speechSynthesis.cancel();
-        const utter = new SpeechSynthesisUtterance(text);
-        const voices = window.speechSynthesis.getVoices();
-        const softVoice = voices.find(v => v.name.includes('Female') || v.name.includes('Zira'));
-        if (softVoice) utter.voice = softVoice;
-        utter.pitch = 1.1; utter.rate = 0.85;
-        window.speechSynthesis.speak(utter);
-        document.getElementById('ai-comms').innerText = "> IA: " + text;
-    }
-
     function init3D() {
-        const canvas = document.getElementById('aura-canvas');
         scene = new THREE.Scene();
         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+        renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('aura-canvas'), antialias: true, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
 
-        const geometry = new THREE.IcosahedronGeometry(2.2, 15);
-        const material = new THREE.MeshPhongMaterial({ color: 0x00e5ff, wireframe: true, transparent: true, opacity: 0.4 });
-        auraSphere = new THREE.Mesh(geometry, material);
+        const geo = new THREE.IcosahedronGeometry(2, 10);
+        const mat = new THREE.MeshPhongMaterial({ color: 0x00e5ff, wireframe: true, transparent: true, opacity: 0.3 });
+        auraSphere = new THREE.Mesh(geo, mat);
         scene.add(auraSphere);
 
-        for (let i = 0; i < 3; i++) {
-            const rGeo = new THREE.TorusGeometry(3 + i * 0.6, 0.01, 16, 100);
-            const rMat = new THREE.MeshBasicMaterial({ color: 0x7d2ae8, transparent: true, opacity: 0.2 });
-            const ring = new THREE.Mesh(rGeo, rMat);
-            rings.push(ring);
-            scene.add(ring);
-        }
-
-        const light = new THREE.PointLight(0xffffff, 2);
+        const light = new THREE.PointLight(0xffffff, 1.5);
         light.position.set(5, 5, 5);
-        scene.add(light);
-        scene.add(new THREE.AmbientLight(0x404040, 2));
-        camera.position.z = 8;
+        scene.add(light, new THREE.AmbientLight(0x404040, 2));
+        camera.position.z = 6;
 
         function animate() {
             requestAnimationFrame(animate);
             if(auraSphere) {
-                auraSphere.rotation.y += 0.003;
-                rings.forEach((r, i) => { r.rotation.z += 0.001 * (i + 1); });
+                auraSphere.rotation.y += 0.002;
+                auraSphere.rotation.x += 0.001;
             }
             renderer.render(scene, camera);
         }
         animate();
     }
 
-    function updateAura(emotion, intensity) {
-        if (!auraSphere) return;
-        const theme = EMOTION_MAP[emotion] || EMOTION_MAP.neutral;
-        auraSphere.material.color.lerp(new THREE.Color(theme.color), 0.05);
-        const scale = 1 + (intensity * 0.5);
-        auraSphere.scale.lerp(new THREE.Vector3(scale, scale, scale), 0.1);
-        
-        if (emotion === 'angry') {
-            auraSphere.position.x = (Math.random() - 0.5) * 0.15;
-        } else {
-            auraSphere.position.x *= 0.9;
-        }
-    }
-
-    function drawNeurolink(landmarks) {
-        const ctx = document.getElementById('face-canvas').getContext('2d');
-        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-        const pts = landmarks.positions;
-        ctx.strokeStyle = 'rgba(0, 229, 255, 0.3)';
-        ctx.lineWidth = 0.5;
-        ctx.beginPath();
-        for (let i = 0; i < pts.length; i++) {
-            for (let j = i + 1; j < pts.length; j++) {
-                const d = Math.hypot(pts[i].x - pts[j].x, pts[i].y - pts[j].y);
-                if (d < 25) {
-                    ctx.moveTo(pts[i].x, pts[i].y);
-                    ctx.lineTo(pts[j].x, pts[j].y);
-                }
-            }
-        }
-        ctx.stroke();
-    }
-
-    async function initSystem() {
-        const btn = document.getElementById('scan-trigger');
-        btn.disabled = true;
-        document.getElementById('ai-comms').innerText = "> CONNECTING TO NEURAL INTERFACE...";
+    async function startLab() {
+        document.getElementById('btn-start').style.display = 'none';
+        document.getElementById('btn-stop').style.display = 'inline-block';
+        document.getElementById('final-report').style.display = 'none';
+        document.getElementById('ai-comms').innerText = "> INITIALIZING MODELS...";
+        sessionLog = [];
 
         try {
             await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
             await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
             await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
 
-            const stream = await navigator.mediaDevices.getUserMedia({ video: {} });
-            document.getElementById('video-feed').srcObject = stream;
-
+            stream = await navigator.mediaDevices.getUserMedia({ video: {} });
             const video = document.getElementById('video-feed');
+            video.srcObject = stream;
+
             video.onloadedmetadata = () => {
                 const canvas = document.getElementById('face-canvas');
                 canvas.width = video.videoWidth;
                 canvas.height = video.videoHeight;
                 systemActive = true;
-                runLoop();
-                speak("Connection established. Analyzing bio-signature.");
+                document.getElementById('ai-comms').innerText = "> LINK ACTIVE. COLLECTING BIOMETRICS.";
+                speak("Neural link active. Monitoring bio-signatures.");
+                runAI();
             };
         } catch (e) {
-            document.getElementById('ai-comms').innerText = "> ERROR: INITIALIZATION FAILED.";
-            btn.disabled = false;
+            document.getElementById('ai-comms').innerText = "> ERROR: SENSOR ACCESS DENIED.";
+            document.getElementById('btn-start').style.display = 'inline-block';
         }
     }
 
-    function runLoop() {
+    function runAI() {
         const video = document.getElementById('video-feed');
-        setInterval(async () => {
+        aiInterval = setInterval(async () => {
             if (!systemActive) return;
-            const res = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 416 }))
+            const res = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 320 }))
                 .withFaceLandmarks().withFaceExpressions();
 
             if (res) {
-                drawNeurolink(res.landmarks);
                 const top = Object.keys(res.expressions).reduce((a, b) => res.expressions[a] > res.expressions[b] ? a : b);
                 const intensity = res.expressions[top];
+                sessionLog.push(top);
 
+                // Update UI
                 document.getElementById('emo-val').innerText = top.toUpperCase();
-                document.getElementById('bpm-val').innerText = Math.round(68 + (res.expressions.angry + res.expressions.happy) * 32);
+                document.getElementById('bpm-val').innerText = Math.round(65 + (res.expressions.angry * 25) + (res.expressions.happy * 15));
+                document.getElementById('prog-val').innerText = Math.min(100, Math.round((sessionLog.length / ANALYSIS_LIMIT) * 100)) + "%";
+                document.getElementById('drift-val').innerText = intensity > 0.7 ? "CORE ALIGNED" : "STABILIZING";
+
+                // Update 3D
+                const theme = EMOTION_MAP[top] || EMOTION_MAP.neutral;
+                auraSphere.material.color.lerp(new THREE.Color(theme.color), 0.1);
                 
-                analysisData.push(top);
-                document.getElementById('prog-val').innerText = Math.round((analysisData.length / ANALYSIS_GOAL) * 100) + "%";
-                document.getElementById('drift-val').innerText = intensity > 0.8 ? "HIGH INTENSITY" : "STABLE";
-
-                updateAura(top, intensity);
-
-                if (analysisData.length >= ANALYSIS_GOAL) {
-                    performReport();
-                    analysisData = [];
-                }
+                drawNeurolink(res.landmarks);
             }
-        }, 100);
+        }, 150);
     }
 
-    function performReport() {
-        const counts = {};
-        analysisData.forEach(e => counts[e] = (counts[e] || 0) + 1);
+    function stopLab() {
+        systemActive = false;
+        clearInterval(aiInterval);
+        if (stream) stream.getTracks().forEach(t => t.stop());
+        
+        document.getElementById('btn-start').style.display = 'inline-block';
+        document.getElementById('btn-start').innerText = "NEW SESSION";
+        document.getElementById('btn-stop').style.display = 'none';
+        
+        generateReport();
+    }
+
+    function generateReport() {
+        if (sessionLog.length < 5) return;
+        const counts = sessionLog.reduce((a, e) => { a[e] = (a[e] || 0) + 1; return a; }, {});
         const dominant = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
-        const reports = {
-            happy: "Neural resonance is high. Sustained dopamine levels confirmed.",
-            neutral: "Core stability maintained. Bio-rhythm is in perfect sync.",
-            sad: "Minor frequency drop. Recalibrating emotional core.",
-            angry: "Neural friction identified. Suggesting immediate stabilization.",
-            surprised: "Heightened alertness. Neural field is expanding rapidly."
+
+        const insights = {
+            happy: "Jūsų neuralinis profilis rodo aukštą kūrybinį potencialą ir dopamino balansą. Rekomenduojama tęsti pradėtas užduotis.",
+            neutral: "Fiksuojama kognityvinė ramybė. Jūsų smegenų bangos veikia stabiliausiu režimu, idealiai tinka giliam susikaupimui.",
+            sad: "Aptikti žemi biometriniai dažniai. Laboratorija siūlo 5 minučių pertrauką neuraliniam persikrovimui.",
+            angry: "Užfiksuota neuralinė įtampa. Rekomenduojamas kontroliuojamas kvėpavimo ciklas stabilumui atstatyti.",
+            surprised: "Aptiktas aukštas budrumo lygis. Tai rodo aktyvų informacijos apdorojimo procesą."
         };
-        speak(reports[dominant] || "Analysis complete. Neural state confirmed.");
+
+        document.getElementById('report-text').innerText = insights[dominant] || "Sesija baigta sėkmingai.";
+        document.getElementById('report-tags').innerHTML = `
+            <div class="story-tag">${dominant.toUpperCase()} DOMINANT</div>
+            <div class="story-tag">SAMPLES: ${sessionLog.length}</div>
+            <div class="story-tag">STABILITY: EXCELLENT</div>
+        `;
+        document.getElementById('final-report').style.display = 'block';
+        speak("Session complete. Neural report generated.");
     }
 
-    window.onload = () => { init3D(); window.speechSynthesis.getVoices(); };
+    function drawNeurolink(landmarks) {
+        const ctx = document.getElementById('face-canvas').getContext('2d');
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        const pts = landmarks.positions;
+        ctx.strokeStyle = 'rgba(0, 229, 255, 0.4)';
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        for (let i = 0; i < pts.length; i += 2) {
+            for (let j = i + 1; j < pts.length; j += 4) {
+                const d = Math.hypot(pts[i].x - pts[j].x, pts[i].y - pts[j].y);
+                if (d < 35) { ctx.moveTo(pts[i].x, pts[i].y); ctx.lineTo(pts[j].x, pts[j].y); }
+            }
+        }
+        ctx.stroke();
+    }
+
+    function speak(t) {
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(t);
+        u.rate = 0.9; u.pitch = 1.1;
+        window.speechSynthesis.speak(u);
+    }
+
+    window.onload = init3D;
 </script>
 </body>
 </html>
