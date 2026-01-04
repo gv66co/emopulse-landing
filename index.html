@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEURO-CORE ELITE v4.1 - MESH RESTORED</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NEURO-CORE MOBILE ELITE v4.5</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;600&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
@@ -28,86 +28,86 @@
             z-index: 2000; display: none; flex-direction: column;
             align-items: center; justify-content: center;
         }
-        .scanline {
-            width: 250px; height: 2px; background: var(--neon-blue);
-            box-shadow: 0 0 15px var(--neon-blue);
-            animation: loadingMove 1.5s infinite ease-in-out;
-        }
-        @keyframes loadingMove { 0%, 100% { transform: scaleX(0.1); opacity: 0.2; } 50% { transform: scaleX(1); opacity: 1; } }
 
+        /* HUD Panels - Responsive Layout */
         .panel {
-            position: absolute; background: rgba(0, 10, 30, 0.85);
-            backdrop-filter: blur(15px); border: 1px solid var(--ui-border);
-            padding: 20px; z-index: 10; width: 220px;
+            position: absolute; background: rgba(0, 10, 30, 0.8);
+            backdrop-filter: blur(10px); border: 1px solid var(--ui-border);
+            padding: 12px; z-index: 10; width: calc(50% - 25px);
+            max-width: 180px;
         }
-        #panel-l { top: 20px; left: 20px; border-left: 4px solid var(--neon-blue); }
-        #panel-r { top: 20px; right: 20px; border-right: 4px solid var(--neon-pink); text-align: right; }
+        #panel-l { top: 15px; left: 15px; border-left: 3px solid var(--neon-blue); }
+        #panel-r { top: 15px; right: 15px; border-right: 3px solid var(--neon-pink); text-align: right; }
 
-        .progress-container { width: 100%; height: 6px; background: rgba(255,255,255,0.05); margin: 15px 0; border-radius: 3px; overflow: hidden; }
-        #progress-fill { width: 0%; height: 100%; background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink)); box-shadow: 0 0 15px var(--neon-blue); transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .progress-container { width: 100%; height: 4px; background: rgba(255,255,255,0.1); margin: 8px 0; border-radius: 2px; overflow: hidden; }
+        #progress-fill { width: 0%; height: 100%; background: var(--neon-blue); transition: width 0.3s; }
 
         #final-report {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 90%; max-width: 450px; background: rgba(0, 15, 40, 0.98);
-            border: 1px solid var(--neon-blue); border-radius: 8px; padding: 35px; z-index: 1500;
-            display: none; box-shadow: 0 0 60px rgba(0, 229, 255, 0.4);
-            animation: modalIn 0.4s ease-out;
+            width: 85%; max-width: 350px; background: rgba(0, 15, 40, 0.95);
+            border: 1px solid var(--neon-blue); padding: 25px; z-index: 1500;
+            display: none; border-radius: 10px; box-shadow: 0 0 40px rgba(0, 229, 255, 0.3);
         }
-        @keyframes modalIn { from { opacity: 0; transform: translate(-50%, -45%); } to { opacity: 1; transform: translate(-50%, -50%); } }
 
+        /* Camera Feed Optimized for Mobile */
         #video-container {
-            position: absolute; bottom: 25px; left: 25px;
-            width: 220px; height: 165px; border: 1px solid var(--neon-blue);
-            background: #000; overflow: hidden; border-radius: 4px;
+            position: absolute; bottom: 110px; left: 50%;
+            transform: translateX(-50%);
+            width: 160px; height: 160px; border: 2px solid var(--ui-border);
+            background: #000; overflow: hidden; border-radius: 50%;
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.2);
         }
-        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); opacity: 0.4; filter: grayscale(0.3); }
+        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); opacity: 0.5; }
         #face-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: scaleX(-1); }
 
-        #controls { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); z-index: 100; display: flex; gap: 15px; }
+        #controls { position: absolute; bottom: 30px; left: 0; width: 100%; text-align: center; z-index: 100; }
         .btn {
-            background: rgba(0,0,0,0.6); border: 1px solid var(--neon-blue); color: var(--neon-blue);
-            padding: 14px 35px; cursor: pointer; font-family: 'Orbitron'; letter-spacing: 3px;
-            transition: 0.3s; font-size: 0.8rem;
+            background: rgba(0, 229, 255, 0.1); border: 1px solid var(--neon-blue); color: var(--neon-blue);
+            padding: 16px 40px; cursor: pointer; font-family: 'Orbitron'; letter-spacing: 2px;
+            font-size: 0.9rem; border-radius: 30px; text-transform: uppercase;
         }
-        .btn:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 20px var(--neon-blue); }
 
-        .stat-val { color: #fff; font-size: 1.2rem; text-shadow: 0 0 8px var(--neon-blue); margin-top: 5px; }
-        #ai-comms { position: absolute; bottom: 130px; left: 50%; transform: translateX(-50%); width: 80%; text-align: center; color: var(--neon-blue); font-size: 0.75rem; letter-spacing: 2px; }
+        .stat-val { color: #fff; font-size: 1rem; text-shadow: 0 0 5px var(--neon-blue); }
+        #ai-comms { position: absolute; bottom: 85px; left: 50%; transform: translateX(-50%); width: 90%; text-align: center; color: var(--neon-blue); font-size: 0.65rem; letter-spacing: 1px; }
+
+        /* Animation for scanning line */
+        .scanline { width: 150px; height: 2px; background: var(--neon-blue); animation: load 1.5s infinite; }
+        @keyframes load { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
     </style>
 </head>
 <body>
 
 <div id="loader">
     <div class="scanline"></div>
-    <p style="margin-top:25px; letter-spacing:6px; font-size: 0.8rem;">RE-LOADING NEURAL MESH...</p>
+    <p style="margin-top:15px; font-size:0.7rem;">CALIBRATING NEURAL SENSORS</p>
 </div>
 
 <div id="hud">
     <div id="panel-l" class="panel">
-        <div style="font-size:0.6rem; opacity:0.7; letter-spacing: 1px;">EMOTION CORE</div>
-        <div id="emo-val" class="stat-val">OFFLINE</div>
+        <div style="font-size:0.55rem; opacity:0.7;">NEURAL CORE</div>
+        <div id="emo-val" class="stat-val">READY</div>
         <div class="progress-container"><div id="progress-fill"></div></div>
-        <div style="font-size:0.6rem; opacity:0.7; margin-top:10px;">STRESS LEVEL</div>
+        <div style="font-size:0.55rem; opacity:0.7; margin-top:5px;">STRESS</div>
         <div id="stress-val" class="stat-val">0.00</div>
     </div>
     <div id="panel-r" class="panel">
-        <div style="font-size:0.6rem; opacity:0.7;">BIOMETRICS</div>
-        <div class="stat-val"><span id="bpm-val">--</span> BPM</div>
-        <div style="font-size:0.6rem; opacity:0.7; margin-top:28px;">SYNC STATUS</div>
+        <div style="font-size:0.55rem; opacity:0.7;">PULSE EST.</div>
+        <div class="stat-val"><span id="bpm-val">--</span></div>
+        <div style="font-size:0.55rem; opacity:0.7; margin-top:18px;">PROGRESS</div>
         <div id="prog-text" class="stat-val">0%</div>
     </div>
 </div>
 
 <div id="final-report">
-    <h3 style="color:var(--neon-blue); border-bottom:1px solid var(--ui-border); padding-bottom:15px; margin-top:0;">SCAN ANALYSIS</h3>
-    <div id="report-content" style="font-family:'Inter'; line-height:1.7; font-size:0.95rem; color: #b2ebf2;"></div>
-    <button class="btn" style="width:100%; margin-top:25px;" onclick="location.reload()">NEW SCAN</button>
+    <h4 style="color:var(--neon-blue); margin:0 0 15px 0; text-align:center;">SCAN COMPLETE</h4>
+    <div id="report-content" style="font-family:'Inter'; font-size:0.85rem; line-height:1.6; color:#b2ebf2;"></div>
+    <button class="btn" style="width:100%; margin-top:20px; padding:12px;" onclick="location.reload()">RE-SCAN</button>
 </div>
 
 <div id="ai-comms">> SYSTEM STANDBY</div>
 
 <div id="controls">
-    <button id="start-btn" class="btn" onclick="startLab()">INITIALIZE LINK</button>
+    <button id="start-btn" class="btn" onclick="startLab()">Start Session</button>
 </div>
 
 <div id="video-container">
@@ -121,8 +121,19 @@ let systemActive = false;
 let analysisData = [];
 let stream = null;
 let lastAITime = 0;
-const ANALYSIS_GOAL = 100; 
+const ANALYSIS_GOAL = 80; 
 const MODEL_URL = 'https://raw.githubusercontent.com/vladmandic/face-api/master/model/';
+
+// Colors mapping for mesh
+const EMOTION_COLORS = {
+    neutral: '#00e5ff',
+    happy: '#00ff88',
+    sad: '#0066ff',
+    angry: '#ff3b3b',
+    fearful: '#ff00ff',
+    disgusted: '#a8ff00',
+    surprised: '#ffff00'
+};
 
 function init3D() {
     scene = new THREE.Scene();
@@ -131,20 +142,20 @@ function init3D() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    const geo = new THREE.IcosahedronGeometry(2.5, 3);
-    const mat = new THREE.MeshPhongMaterial({ color: 0x00e5ff, wireframe: true, transparent: true, opacity: 0.2 });
+    const geo = new THREE.IcosahedronGeometry(2, 2);
+    const mat = new THREE.MeshPhongMaterial({ color: 0x00e5ff, wireframe: true });
     core = new THREE.Mesh(geo, mat);
     scene.add(core);
 
-    const light = new THREE.PointLight(0xffffff, 2, 100);
+    const light = new THREE.PointLight(0xffffff, 1.5, 100);
     light.position.set(5,5,5);
-    scene.add(light, new THREE.AmbientLight(0x404040, 2));
-    camera.position.z = 10;
+    scene.add(light, new THREE.AmbientLight(0x404040));
+    camera.position.z = 7;
 
     function animate(t) {
         requestAnimationFrame(animate);
         if(core) core.rotation.y += 0.005;
-        if(systemActive && t - lastAITime > 150) { // Frequency adjusted for mesh smoothness
+        if(systemActive && t - lastAITime > 120) {
             processNeuralData();
             lastAITime = t;
         }
@@ -154,30 +165,26 @@ function init3D() {
 }
 
 function speak(text) {
-    const synth = window.speechSynthesis;
-    synth.cancel();
     const utter = new SpeechSynthesisUtterance(text);
-    const voices = synth.getVoices();
-    const femaleVoice = voices.find(v => (v.name.includes('Female') || v.name.includes('Zira') || v.name.includes('Google US English')) && v.lang.includes('en'));
-    if (femaleVoice) utter.voice = femaleVoice;
-    utter.pitch = 1.15; utter.rate = 0.85;
-    synth.speak(utter);
+    const voices = speechSynthesis.getVoices();
+    utter.voice = voices.find(v => v.lang.includes('en') && (v.name.includes('Female') || v.name.includes('Zira'))) || voices[0];
+    utter.pitch = 1.2; utter.rate = 0.9;
+    speechSynthesis.speak(utter);
     document.getElementById('ai-comms').textContent = "> " + text.toUpperCase();
 }
 
 async function startLab() {
-    const loader = document.getElementById('loader');
-    loader.style.display = 'flex';
+    document.getElementById('loader').style.display = 'flex';
     document.getElementById('start-btn').style.display = 'none';
 
     try {
         await Promise.all([
             faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
             faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
-            faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL) // LANDMARKS RE-ENABLED
+            faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL)
         ]);
 
-        stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
         const video = document.getElementById('video-feed');
         video.srcObject = stream;
         
@@ -185,14 +192,13 @@ async function startLab() {
             const canvas = document.getElementById('face-canvas');
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
-            loader.style.display = 'none';
+            document.getElementById('loader').style.display = 'none';
             systemActive = true;
-            speak("Neural mesh online. Link established.");
+            speak("Neural link active.");
         };
     } catch (err) {
-        loader.style.display = 'none';
-        document.getElementById('start-btn').style.display = 'block';
-        alert("CRITICAL ERROR: Connection failure.");
+        alert("Mobile camera access required.");
+        location.reload();
     }
 }
 
@@ -201,41 +207,40 @@ async function processNeuralData() {
     const canvas = document.getElementById('face-canvas');
     const ctx = canvas.getContext('2d');
 
-    const result = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 224 }))
+    const result = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 160 }))
         .withFaceLandmarks()
         .withFaceExpressions();
 
     if (result) {
-        // --- DRAW NEUROMESH ---
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const landmarks = result.landmarks;
-        const positions = landmarks.positions;
+        const top = Object.keys(result.expressions).reduce((a, b) => result.expressions[a] > result.expressions[b] ? a : b);
+        const meshColor = EMOTION_COLORS[top] || '#00e5ff';
         
-        ctx.strokeStyle = 'rgba(0, 229, 255, 0.4)';
-        ctx.lineWidth = 1;
+        // --- DRAW COLORFUL NEUROMESH ---
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const pts = result.landmarks.positions;
+        ctx.strokeStyle = meshColor;
+        ctx.lineWidth = 1.5;
+        ctx.globalAlpha = 0.6;
         ctx.beginPath();
-        // Face outline and internal connections
-        for (let i = 0; i < positions.length; i += 2) {
-            for (let j = i + 1; j < positions.length; j += 8) {
-                const dist = Math.hypot(positions[i].x - positions[j].x, positions[i].y - positions[j].y);
-                if (dist < 45) {
-                    ctx.moveTo(positions[i].x, positions[i].y);
-                    ctx.lineTo(positions[j].x, positions[j].y);
+        for (let i = 0; i < pts.length; i += 3) {
+            for (let j = i + 1; j < pts.length; j += 12) {
+                const d = Math.hypot(pts[i].x - pts[j].x, pts[i].y - pts[j].y);
+                if (d < 50) {
+                    ctx.moveTo(pts[i].x, pts[i].y);
+                    ctx.lineTo(pts[j].x, pts[j].y);
                 }
             }
         }
         ctx.stroke();
 
-        // --- UPDATE HUD ---
-        const top = Object.keys(result.expressions).reduce((a, b) => result.expressions[a] > result.expressions[b] ? a : b);
-        const stress = (result.expressions.angry * 1.5) + (result.expressions.fearful * 1.1);
-        
+        // Update HUD
+        const stress = (result.expressions.angry * 1.5) + (result.expressions.fearful * 1.2);
         document.getElementById('emo-val').textContent = top.toUpperCase();
+        document.getElementById('emo-val').style.color = meshColor;
         document.getElementById('stress-val').textContent = stress.toFixed(2);
-        document.getElementById('bpm-val').textContent = Math.round(72 + (stress * 15));
+        document.getElementById('bpm-val').textContent = Math.round(70 + (stress * 20));
         
         analysisData.push({ emotion: top, stress: stress });
-        
         const prog = (analysisData.length / ANALYSIS_GOAL) * 100;
         document.getElementById('progress-fill').style.width = prog + "%";
         document.getElementById('prog-text').textContent = Math.round(prog) + "%";
@@ -249,36 +254,23 @@ function stopSystem() {
     if(stream) stream.getTracks().forEach(t => t.stop());
     
     const counts = {};
-    let totalStress = 0;
-    analysisData.forEach(d => {
-        counts[d.emotion] = (counts[d.emotion] || 0) + 1;
-        totalStress += d.stress;
-    });
-
+    analysisData.forEach(d => counts[d.emotion] = (counts[d.emotion] || 0) + 1);
     const dominant = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
-    const avgStress = totalStress / analysisData.length;
+    
     const report = document.getElementById('report-content');
-    report.textContent = "";
-
-    const createEl = (txt) => {
-        const div = document.createElement('div');
-        div.textContent = txt;
-        div.style.marginBottom = "8px";
-        return div;
-    };
-
-    report.appendChild(createEl(`DOMINANT PATTERN: ${dominant.toUpperCase()}`));
-    report.appendChild(createEl(`AVG STRESS INDEX: ${avgStress.toFixed(2)}`));
-    report.appendChild(createEl(`STATUS: ${avgStress > 0.4 ? 'ADAPTATION REQUIRED' : 'NEURAL HARMONY'}`));
-
+    report.innerHTML = `
+        <b>Dominant State:</b> ${dominant.toUpperCase()}<br>
+        <b>Neural Stability:</b> ${analysisData.length >= ANALYSIS_GOAL ? 'Verified' : 'Incomplete'}<br><br>
+        <i>Summary: Bio-signals indicate a predominantly ${dominant} state. Neural interface suggests optimal recovery.</i>
+    `;
     document.getElementById('final-report').style.display = 'block';
-    speak("Diagnostic complete.");
+    speak("Analysis complete.");
 }
 
 window.addEventListener('resize', () => {
+    renderer.setSize(window.innerWidth, window.innerHeight);
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
 init3D();
