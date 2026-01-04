@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="lt">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEURO-CORE LAB ELITE v3.0</title>
+    <title>NEURO-CORE ELITE v3.0 - LABORATORY</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;600&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
@@ -22,7 +22,6 @@
             font-family: 'Orbitron', sans-serif; overflow: hidden;
         }
 
-        /* HUD Elementai */
         #hud { position: absolute; inset: 0; z-index: 10; pointer-events: none; }
         
         .panel {
@@ -40,31 +39,26 @@
         .stat-label { font-size: 0.6rem; opacity: 0.6; letter-spacing: 2px; margin-bottom: 5px; }
         .stat-value { font-size: 1.1rem; color: #fff; text-shadow: 0 0 10px var(--neon-blue); margin-bottom: 15px; }
 
-        /* Ataskaitos kortelė */
-        .story-card {
-            max-width: 500px; margin: 100px auto; background: rgba(255,255,255,0.05);
-            border-radius: 20px; padding: 32px; border: 1px solid var(--ui-border);
-            position: relative; z-index: 100; backdrop-filter: blur(20px);
-            display: none; animation: storyFade 0.5s ease-out;
+        /* Report Card - High Priority Z-Index */
+        #final-report {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 450px; background: rgba(0, 15, 40, 0.95);
+            border-radius: 10px; padding: 30px; border: 1px solid var(--neon-blue);
+            z-index: 1000; backdrop-filter: blur(30px);
+            display: none; box-shadow: 0 0 50px rgba(0, 229, 255, 0.2);
             pointer-events: auto;
         }
-        .story-card::before {
-            content: ""; position: absolute; top: 0; left: 0; height: 6px; width: 100%;
-            background: linear-gradient(90deg, #3a8dff, #7b5cff, #ff9f1c, #ff3b3b);
-        }
-        .story-title { font-size: 20px; font-weight: 800; margin-bottom: 16px; color: #fff; }
-        .story-text { font-family: 'Inter'; font-size: 15px; line-height: 1.6; color: #81d4fa; }
+        .report-header { border-bottom: 1px solid var(--ui-border); padding-bottom: 10px; margin-bottom: 20px; font-weight: bold; color: var(--neon-blue); }
+        .report-item { font-family: 'Inter'; font-size: 14px; margin-bottom: 10px; line-height: 1.4; }
 
-        /* Kameros langas */
         #video-container {
             position: absolute; bottom: 30px; right: 30px;
             width: 240px; height: 180px; border: 1px solid var(--neon-blue);
             z-index: 15; overflow: hidden; background: #000;
         }
-        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); opacity: 0.4; filter: grayscale(1); }
+        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); opacity: 0.3; }
         #face-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: scaleX(-1); }
 
-        /* Valdymas */
         #controls {
             position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%);
             z-index: 100; text-align: center;
@@ -76,14 +70,11 @@
         }
         .btn:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 20px var(--neon-blue); }
         .btn-stop { border-color: var(--stress-color); color: var(--stress-color); }
-        .btn-stop:hover { background: var(--stress-color); color: #fff; box-shadow: 0 0 20px var(--stress-color); }
 
         #ai-comms {
             position: absolute; bottom: 120px; left: 50%; transform: translateX(-50%);
             width: 80%; text-align: center; color: var(--neon-blue); font-size: 0.8rem;
         }
-
-        @keyframes storyFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -92,28 +83,28 @@
     <div id="panel-l" class="panel">
         <div class="stat-label">NEURAL STATE</div>
         <div id="emo-val" class="stat-value">OFFLINE</div>
-        <div class="stat-label">BIOMETRIC BPM</div>
-        <div class="stat-value"><span id="bpm-val">--</span></div>
+        <div class="stat-label">HEART RATE</div>
+        <div class="stat-value"><span id="bpm-val">--</span> BPM</div>
     </div>
     <div id="panel-r" class="panel">
         <div class="stat-label">SYNC PROGRESS</div>
         <div id="prog-val" class="stat-value">0%</div>
-        <div class="stat-label">SYSTEM DRIFT</div>
-        <div id="drift-val" class="stat-value">AWAITING</div>
+        <div class="stat-label">SYSTEM STATUS</div>
+        <div id="drift-val" class="stat-value">IDLE</div>
     </div>
 </div>
 
-<div id="final-report" class="story-card">
-    <div class="story-title">SESSION ANALYSIS REPORT</div>
-    <div id="report-text" class="story-text">Procesas baigtas. Duomenys apdoroti.</div>
-    <button class="btn" style="margin-top: 20px; font-size: 10px;" onclick="this.parentElement.style.display='none'">CLOSE</button>
+<div id="final-report">
+    <div class="report-header">LABORATORY ANALYSIS COMPLETE</div>
+    <div id="report-content" class="report-item"></div>
+    <button class="btn" style="margin-top: 20px; width: 100%; font-size: 10px;" onclick="closeReport()">DISMISS</button>
 </div>
 
-<div id="ai-comms">> INITIALIZE NEURAL LINK TO COMMENCE</div>
+<div id="ai-comms">> SYSTEM STANDBY</div>
 
 <div id="controls">
-    <button id="scan-trigger" class="btn" onclick="initSystem()">START SCAN</button>
-    <button id="stop-trigger" class="btn btn-stop" style="display:none;" onclick="stopSystem()">TERMINATE</button>
+    <button id="scan-trigger" class="btn" onclick="initSystem()">START SESSION</button>
+    <button id="stop-trigger" class="btn btn-stop" style="display:none;" onclick="stopSystem()">TERMINATE SESSION</button>
 </div>
 
 <div id="video-container">
@@ -121,10 +112,7 @@
     <canvas id="face-canvas"></canvas>
 </div>
 
-
-
 <script>
-/* --- GLOBALŪS KINTAMIEJI --- */
 let scene, camera, renderer, core, rings = [];
 let systemActive = false;
 let analysisData = [];
@@ -134,24 +122,23 @@ const ANALYSIS_THRESHOLD = 150;
 const MODEL_URL = 'https://raw.githubusercontent.com/vladmandic/face-api/master/model/';
 
 const EMOTION_THEMES = {
-    neutral:  { color: 0x00e5ff, speed: 0.005, scale: 1.0 },
-    happy:    { color: 0x00ff88, speed: 0.015, scale: 1.3 },
-    sad:      { color: 0x0066ff, speed: 0.002, scale: 0.9 },
-    angry:    { color: 0xff3300, speed: 0.040, scale: 1.2 },
-    surprised:{ color: 0xffdd00, speed: 0.020, scale: 1.4 }
+    neutral:  { color: 0x00e5ff, scale: 1.0 },
+    happy:    { color: 0x00ff88, scale: 1.3 },
+    sad:      { color: 0x0066ff, scale: 0.9 },
+    angry:    { color: 0xff3300, scale: 1.2 },
+    surprised:{ color: 0xffdd00, scale: 1.4 }
 };
 
-/* --- 1. BALSAS --- */
 function speak(text) {
     const synth = window.speechSynthesis;
     synth.cancel();
     const utter = new SpeechSynthesisUtterance(text);
-    utter.pitch = 1.1; utter.rate = 0.9;
+    utter.lang = 'en-US';
+    utter.pitch = 1.0; utter.rate = 0.9;
     synth.speak(utter);
-    document.getElementById('ai-comms').innerText = "> ANALYSIS: " + text;
+    document.getElementById('ai-comms').innerText = "> " + text.toUpperCase();
 }
 
-/* --- 2. 3D BRANDUOLYS --- */
 function init3D() {
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -163,15 +150,17 @@ function init3D() {
     light.position.set(5, 5, 5);
     scene.add(light, new THREE.AmbientLight(0x404040, 2));
 
-    const geometry = new THREE.IcosahedronGeometry(2.5, 15);
-    const material = new THREE.MeshPhongMaterial({ color: 0x00e5ff, wireframe: true, transparent: true, opacity: 0.4 });
-    core = new THREE.Mesh(geometry, material);
+    core = new THREE.Mesh(
+        new THREE.IcosahedronGeometry(2.5, 15),
+        new THREE.MeshPhongMaterial({ color: 0x00e5ff, wireframe: true, transparent: true, opacity: 0.4 })
+    );
     scene.add(core);
 
     for(let i=0; i<2; i++) {
-        const rGeo = new THREE.TorusGeometry(4 + i, 0.01, 16, 100);
-        const rMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.2 });
-        const ring = new THREE.Mesh(rGeo, rMat);
+        const ring = new THREE.Mesh(
+            new THREE.TorusGeometry(4 + i, 0.01, 16, 100),
+            new THREE.MeshBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.2 })
+        );
         rings.push(ring);
         scene.add(ring);
     }
@@ -188,18 +177,7 @@ function init3D() {
     animate();
 }
 
-function updateVisuals(emotion, intensity) {
-    if (!core) return;
-    const theme = EMOTION_THEMES[emotion] || EMOTION_THEMES.neutral;
-    core.material.color.lerp(new THREE.Color(theme.color), 0.05);
-    const pulse = 1 + (Math.sin(Date.now() * 0.005) * 0.05);
-    const targetScale = theme.scale * pulse;
-    core.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
-}
-
-/* --- 3. SKENAVIMO LOGIKA --- */
 async function initSystem() {
-    if (systemActive) return;
     document.getElementById('scan-trigger').style.display = 'none';
     document.getElementById('stop-trigger').style.display = 'inline-block';
     document.getElementById('final-report').style.display = 'none';
@@ -223,7 +201,7 @@ async function initSystem() {
             runAI();
         };
     } catch (err) {
-        document.getElementById('ai-comms').innerText = "> ERROR: CAMERA ACCESS DENIED.";
+        document.getElementById('ai-comms').innerText = "> ERROR: HARDWARE DISCONNECTED";
         document.getElementById('scan-trigger').style.display = 'inline-block';
     }
 }
@@ -240,18 +218,16 @@ async function runAI() {
             const top = Object.keys(result.expressions).reduce((a, b) => result.expressions[a] > result.expressions[b] ? a : b);
             
             document.getElementById('emo-val').innerText = top.toUpperCase();
-            document.getElementById('bpm-val').innerText = Math.round(68 + (result.expressions.angry * 30));
+            document.getElementById('bpm-val').innerText = Math.round(68 + (result.expressions.angry * 30) + (result.expressions.happy * 10));
             
-            updateVisuals(top, result.expressions[top]);
+            const theme = EMOTION_THEMES[top] || EMOTION_THEMES.neutral;
+            core.material.color.lerp(new THREE.Color(theme.color), 0.1);
+            core.scale.lerp(new THREE.Vector3(theme.scale, theme.scale, theme.scale), 0.1);
             
             analysisData.push(top);
-            const progress = Math.min(100, Math.round((analysisData.length / ANALYSIS_THRESHOLD) * 100));
-            document.getElementById('prog-val').innerText = progress + "%";
-            document.getElementById('drift-val').innerText = progress < 100 ? "ANALYZING" : "SYNCED";
-
-            if (analysisData.length === ANALYSIS_THRESHOLD) {
-                speak("Neural baseline established. Data synthesis complete.");
-            }
+            let prog = Math.min(100, Math.round((analysisData.length / ANALYSIS_THRESHOLD) * 100));
+            document.getElementById('prog-val').innerText = prog + "%";
+            document.getElementById('drift-val').innerText = "LINK ACTIVE";
         }
     }, 150);
 }
@@ -263,28 +239,38 @@ function stopSystem() {
     
     document.getElementById('scan-trigger').style.display = 'inline-block';
     document.getElementById('stop-trigger').style.display = 'none';
-    document.getElementById('emo-val').innerText = "OFFLINE";
     
-    generateFinalReport();
+    showLaboratoryReport();
 }
 
-function generateFinalReport() {
-    if (analysisData.length === 0) return;
+function showLaboratoryReport() {
+    if (analysisData.length < 5) {
+        speak("Session too short for valid data.");
+        return;
+    }
+
     const counts = {};
     analysisData.forEach(e => counts[e] = (counts[e] || 0) + 1);
     const dominant = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
+    const diversity = Object.keys(counts).length;
 
-    const insights = {
-        happy: "Jūsų būsena rodo optimalią neuralinę harmoniją. Dopamino lygis skatina kūrybinį mąstymą.",
-        neutral: "Sistemos stabilumas pasiektas. Jūsų kognityvinė apkrova yra minimali, o tai idealu giliam darbui.",
-        sad: "Užfiksuotas dažnio kritimas. Rekomenduojama atlikti aplinkos recalibraciją arba trumpą pertrauką.",
-        angry: "Neuralinė trintis aptikta. Jūsų bio-signalai rodo aukštą įtampą, rekomenduojama stabilizuoti kvėpavimą.",
-        surprised: "Aukštas kognityvinis sužadinimas. Jūsų neuralinis laukas reaguoja į naujus dirgiklius itin aktyviai."
-    };
+    const reportHTML = `
+        <div class="report-item"><b>Dominant State:</b> ${dominant.toUpperCase()}</div>
+        <div class="report-item"><b>Neural Diversity:</b> ${diversity} unique patterns identified.</div>
+        <div class="report-item"><b>Data Samples:</b> ${analysisData.length} biometric points collected.</div>
+        <div class="report-item" style="color: #81d4fa; margin-top: 15px;">
+            <i>AI Summary: Your neural core shows ${dominant === 'neutral' ? 'high stability' : 'dynamic activation'}. 
+            Biosignals suggest session completed with ${diversity > 2 ? 'varied' : 'consistent'} cognitive load.</i>
+        </div>
+    `;
 
-    document.getElementById('report-text').innerText = insights[dominant] || "Analizė baigta.";
+    document.getElementById('report-content').innerHTML = reportHTML;
     document.getElementById('final-report').style.display = 'block';
-    speak("Session terminated. Neural report ready.");
+    speak("Laboratory analysis report generated.");
+}
+
+function closeReport() {
+    document.getElementById('final-report').style.display = 'none';
 }
 
 function drawNeurolink(landmarks) {
@@ -292,13 +278,13 @@ function drawNeurolink(landmarks) {
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     const pts = landmarks.positions;
-    ctx.strokeStyle = 'rgba(0, 229, 255, 0.3)';
-    ctx.lineWidth = 0.5;
+    ctx.strokeStyle = 'rgba(0, 229, 255, 0.4)';
+    ctx.lineWidth = 0.8;
     ctx.beginPath();
-    for (let i = 0; i < pts.length; i += 2) {
-        for (let j = i + 1; j < pts.length; j += 4) {
+    for (let i = 0; i < pts.length; i += 3) {
+        for (let j = i + 1; j < pts.length; j += 7) {
             const dist = Math.hypot(pts[i].x - pts[j].x, pts[i].y - pts[j].y);
-            if (dist < 30) { ctx.moveTo(pts[i].x, pts[i].y); ctx.lineTo(pts[j].x, pts[j].y); }
+            if (dist < 35) { ctx.moveTo(pts[i].x, pts[i].y); ctx.lineTo(pts[j].x, pts[j].y); }
         }
     }
     ctx.stroke();
