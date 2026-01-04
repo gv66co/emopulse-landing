@@ -1,91 +1,199 @@
-let scene, camera, renderer, aura, stars;
+/* --- GLOBALŪS KINTAMIEJI --- */
+let scene, camera, renderer, core;
 let systemActive = false;
-let analysisData = []; 
-let lastSpeechTime = 0;
-const ANALYSIS_THRESHOLD = 150; // Kiek kadrų analizuoti prieš pasakant išvadą (~15 sek.)
+let analysisData = [];
+const ANALYSIS_THRESHOLD = 150; // ~15 sek. analizės ciklas
+const MODEL_URL = 'https://raw.githubusercontent.com/vladmandic/face-api/master/model/';
 
-// 1. ŠVELNUS MOTERIŠKAS BALSAS IR TIKSINGA KOMUNIKACIJA
+/* --- 1. ŠVELNUS BALSAS IR KOMUNIKACIJA --- */
 function speak(text) {
     const synth = window.speechSynthesis;
-    const utter = new SpeechSynthesisUtterance(text);
+    synth.cancel(); // Nutildome ankstesnį tekstą, kad nesidubliuotų
     
-    // Bandome rasti švelnesnį moterišką balsą (priklauso nuo naršyklės)
+    const utter = new SpeechSynthesisUtterance(text);
     const voices = synth.getVoices();
-    // Ieškome balsų pavadinimuose "Google UK English Female", "Microsoft Zira" arba tiesiog "female"
-    const softVoice = voices.find(v => v.name.includes('Female') || v.name.includes('Google UK English Female') || v.name.includes('Zira'));
+    
+    // Ieškome geriausio prieinamo balso
+    const softVoice = voices.find(v => 
+        v.name.includes('Google UK English Female') || 
+        v.name.includes('Zira') || 
+        v.name.includes('Samantha')
+    );
     
     if (softVoice) utter.voice = softVoice;
-    
     utter.lang = 'en-US';
-    utter.pitch = 1.1; // Šiek tiek aukštesnis tonas suteikia švelnumo
-    utter.rate = 0.85; // Lėtesnis tempas skamba ramiau ir profesionaliau
+    utter.pitch = 1.1; 
+    utter.rate = 0.85; 
     
     synth.speak(utter);
-    document.getElementById('ai-comms').innerText = "> IA ANALIZĖ: " + text;
+    
+    // Tekstas AI skydelyje pagal tavo CSS (.ai-assistant / #ai-comms)
+    const comms = document.getElementById('ai-comms');
+    if(comms) comms.innerText = "> ANALYSIS: " + text;
 }
 
-// 2. GALUTINĖ ANALIZĖ (Tylėjimo logika)
+/* --- 2. 3D BRANDUOLIO INICIALIZACIJA (Three.js) --- */
+function init3D() {
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Šviesos
+    const light = new THREE.PointLight(0x00e5ff, 15, 100);
+    light.position.set(5, 5, 5);
+    scene.add(light);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+
+    // Geometrinis branduolys
+    const geometry = new THREE.IcosahedronGeometry(2.5, 15);
+    const material = new THREE.MeshStandardMaterial({ 
+        color: 0x00e5ff, 
+        wireframe: true, 
+        transparent: true, 
+        opacity: 0.4 
+    });
+    core = new THREE.Mesh(geometry, material);
+    scene.add(core);
+
+    camera.position.z = 8;
+
+    function animate() {
+        requestAnimationFrame(animate);
+        core.rotation.y += 0.005;
+        core.rotation.x += 0.002;
+        renderer.render(scene, camera);
+    }
+    animate();
+}
+
+/* --- 3. GEOMETRINIS VEIDO TINKLAS (NEUROLINK) --- */
+function drawNeurolink(landmarks) {
+    const canvas = document.getElementById('face-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    const pts = landmarks.positions;
+    ctx.strokeStyle = 'rgba(0, 229, 255, 0.3)';
+    ctx.lineWidth = 0.5;
+
+    // Jungiame taškus linijomis, kad sukurtume tinklą
+    ctx.beginPath();
+    for (let i = 0; i < pts.length; i++) {
+        for (let j = i + 1; j < pts.length; j++) {
+            const dist = Math.hypot(pts[i].x - pts[j].x, pts[i].y - pts[j].y);
+            // Jungiame tik artimus taškus (pvz. < 30px atstumu)
+            if (dist < 30) {
+                ctx.moveTo(pts[i].x, pts[i].y);
+                ctx.lineTo(pts[j].x, pts[j].y);
+            }
+        }
+    }
+    ctx.stroke();
+
+    // Piešiame pačius mazgus (taškus)
+    ctx.fillStyle = '#00e5ff';
+    pts.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 1, 0, Math.PI * 2);
+        ctx.fill();
+    });
+}
+
+/* --- 4. GILIOJI ANALIZĖ --- */
 function performDeepAnalysis(currentEmotion) {
-    const now = Date.now();
     analysisData.push(currentEmotion);
 
-    // Rodyti procesą HUD skydelyje (vizualiai)
+    // Progresas dešinėje panelėje (pagal tavo CSS #drift-val)
     const progress = Math.round((analysisData.length / ANALYSIS_THRESHOLD) * 100);
-    document.getElementById('drift-val').innerText = `ANALYZING ${progress}%`;
+    const driftEl = document.getElementById('drift-val');
+    if (driftEl) driftEl.innerText = `SCANNING ${progress}%`;
 
-    // Tik kai sukaupta pakankamai duomenų
     if (analysisData.length >= ANALYSIS_THRESHOLD) {
-        // Surandame vyraujančią emociją per visą laikotarpį
         const counts = {};
         analysisData.forEach(e => counts[e] = (counts[e] || 0) + 1);
         const dominant = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
 
-        // IA prabyla tik dabar
         const reports = {
-            happy: "Your neural resonance is harmonized. I detect a sustained state of well-being.",
+            happy: "Neural resonance is harmonized. I detect a sustained state of well-being.",
             neutral: "Your bio-signature is perfectly stable. Mind-body connection is in equilibrium.",
-            sad: "I've detected some lower frequency shifts. Please focus on steady breathing for recalibration.",
+            sad: "I've detected some lower frequency shifts. Please focus on steady breathing.",
             angry: "Neural friction identified. Initiating orbital stabilization to calm your aura.",
             surprised: "Heightened cognitive alertness detected. Your neural field is expanding."
         };
 
         speak(reports[dominant] || `Neural scan complete. Your primary state is ${dominant}.`);
-        
-        // Išvalome duomenis kitam ciklui
-        analysisData = [];
-        lastSpeechTime = now;
+        analysisData = []; // Resetiname kitam ciklui
     }
 }
 
-// 3. VEIDO TINKLAS (NEUROLINK) IR ANALIZĖS CIKLAS
-async function runAI() {
-    setupNeurolinkCanvas(); // Naudojame iš ankstesnio kodo
-    const video = document.getElementById('video-feed');
+/* --- 5. PAGRINDINIS PALEIDIMAS --- */
+async function initSystem() {
+    if (systemActive) return;
     
-    const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
-    await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+    const comms = document.getElementById('ai-comms');
+    const btn = document.getElementById('scan-trigger');
+    if (btn) btn.disabled = true;
+    if (comms) comms.innerText = "> INITIALIZING NEURAL LINK...";
+
+    try {
+        // Krauname visus reikiamus modelius
+        await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+        await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+        await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
+
+        const video = document.getElementById('video-feed');
+        const stream = await navigator.mediaDevices.getUserMedia({ video: {} });
+        video.srcObject = stream;
+
+        video.onloadedmetadata = () => {
+            const canvas = document.getElementById('face-canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            systemActive = true;
+            if (comms) comms.innerText = "> SYSTEM ACTIVE. COMMENCING SCAN.";
+            runAI();
+        };
+    } catch (err) {
+        console.error(err);
+        if (comms) comms.innerText = "> ERROR: SENSOR ACCESS DENIED.";
+        if (btn) btn.disabled = false;
+    }
+}
+
+async function runAI() {
+    const video = document.getElementById('video-feed');
 
     setInterval(async () => {
-        if(!systemActive) return;
-        
-        const result = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
-                                    .withFaceLandmarks()
-                                    .withFaceExpressions();
-        
+        if (!systemActive) return;
+
+        const result = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 224 }))
+            .withFaceLandmarks()
+            .withFaceExpressions();
+
         if (result) {
-            // Piešiame 68 taškų tinklą (Neurolink)
-            drawNeurolink(result.landmarks); 
+            // Vizualizacija
+            drawNeurolink(result.landmarks);
             
-            // Atnaujiname skales (tik vizualiai, be garso)
-            updateScales(result.expressions);
-            
-            const top = Object.keys(result.expressions).reduce((a, b) => result.expressions[a] > result.expressions[b] ? a : b);
-            
-            // Pagrindiniai HUD skaičiai
-            document.getElementById('emo-val').innerText = top.toUpperCase();
-            
-            // Vykdome kaupiamąją analizę
+            // Emocijų nustatymas
+            const top = Object.keys(result.expressions).reduce((a, b) => 
+                result.expressions[a] > result.expressions[b] ? a : b
+            );
+
+            // Atnaujiname kairę panelę (#emo-val)
+            const emoEl = document.getElementById('emo-val');
+            if (emoEl) emoEl.innerText = top.toUpperCase();
+
+            // Vykdome ilgalaikę analizę
             performDeepAnalysis(top);
         }
     }, 100);
 }
+
+// Pradedame 3D fone iškart užsikrovus puslapiui
+window.onload = () => {
+    init3D();
+    window.speechSynthesis.getVoices(); // Išankstinis balsų paruošimas
+};
