@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEURO-CORE ELITE v3.0 - LABORATORY</title>
+    <title>NEURO-CORE ELITE v3.0 - AUTO LAB</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;600&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
@@ -39,21 +39,23 @@
         .stat-label { font-size: 0.6rem; opacity: 0.6; letter-spacing: 2px; margin-bottom: 5px; }
         .stat-value { font-size: 1.1rem; color: #fff; text-shadow: 0 0 10px var(--neon-blue); margin-bottom: 15px; }
 
-        /* Report Card - High Priority Z-Index */
         #final-report {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             width: 450px; background: rgba(0, 15, 40, 0.95);
             border-radius: 10px; padding: 30px; border: 1px solid var(--neon-blue);
             z-index: 1000; backdrop-filter: blur(30px);
-            display: none; box-shadow: 0 0 50px rgba(0, 229, 255, 0.2);
-            pointer-events: auto;
+            display: none; box-shadow: 0 0 50px rgba(0, 229, 255, 0.4);
+            pointer-events: auto; animation: scanFade 0.5s ease-out;
         }
-        .report-header { border-bottom: 1px solid var(--ui-border); padding-bottom: 10px; margin-bottom: 20px; font-weight: bold; color: var(--neon-blue); }
+
+        @keyframes scanFade { from { opacity: 0; transform: translate(-50%, -45%); } to { opacity: 1; transform: translate(-50%, -50%); } }
+
+        .report-header { border-bottom: 1px solid var(--ui-border); padding-bottom: 10px; margin-bottom: 20px; font-weight: bold; color: var(--neon-blue); text-align: center; }
         .report-item { font-family: 'Inter'; font-size: 14px; margin-bottom: 10px; line-height: 1.4; }
 
         #video-container {
             position: absolute; bottom: 30px; right: 30px;
-            width: 240px; height: 180px; border: 1px solid var(--neon-blue);
+            width: 240px; height: 180px; border: 1px solid var(--ui-border);
             z-index: 15; overflow: hidden; background: #000;
         }
         video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); opacity: 0.3; }
@@ -81,30 +83,29 @@
 
 <div id="hud">
     <div id="panel-l" class="panel">
-        <div class="stat-label">NEURAL STATE</div>
-        <div id="emo-val" class="stat-value">OFFLINE</div>
+        <div class="stat-label">NEURAL SCANNER</div>
+        <div id="emo-val" class="stat-value">AWAITING...</div>
         <div class="stat-label">HEART RATE</div>
         <div class="stat-value"><span id="bpm-val">--</span> BPM</div>
     </div>
     <div id="panel-r" class="panel">
-        <div class="stat-label">SYNC PROGRESS</div>
+        <div class="stat-label">DATA PROGRESS</div>
         <div id="prog-val" class="stat-value">0%</div>
-        <div class="stat-label">SYSTEM STATUS</div>
-        <div id="drift-val" class="stat-value">IDLE</div>
+        <div id="drift-val" class="stat-value">STANDBY</div>
     </div>
 </div>
 
 <div id="final-report">
-    <div class="report-header">LABORATORY ANALYSIS COMPLETE</div>
+    <div class="report-header">NEURAL DIAGNOSTICS COMPLETE</div>
     <div id="report-content" class="report-item"></div>
-    <button class="btn" style="margin-top: 20px; width: 100%; font-size: 10px;" onclick="closeReport()">DISMISS</button>
+    <button class="btn" style="margin-top: 20px; width: 100%; font-size: 10px;" onclick="closeReport()">RESTART LINK</button>
 </div>
 
-<div id="ai-comms">> SYSTEM STANDBY</div>
+<div id="ai-comms">> SYSTEM READY</div>
 
 <div id="controls">
-    <button id="scan-trigger" class="btn" onclick="initSystem()">START SESSION</button>
-    <button id="stop-trigger" class="btn btn-stop" style="display:none;" onclick="stopSystem()">TERMINATE SESSION</button>
+    <button id="scan-trigger" class="btn" onclick="initSystem()">START SCAN</button>
+    <button id="stop-trigger" class="btn btn-stop" style="display:none;" onclick="stopSystem()">TERMINATE</button>
 </div>
 
 <div id="video-container">
@@ -112,29 +113,31 @@
     <canvas id="face-canvas"></canvas>
 </div>
 
+
+
 <script>
 let scene, camera, renderer, core, rings = [];
 let systemActive = false;
 let analysisData = [];
 let stream = null;
 let aiLoop = null;
-const ANALYSIS_THRESHOLD = 150; 
+const ANALYSIS_GOAL = 120; // Automatically ends after 120 successful samples
 const MODEL_URL = 'https://raw.githubusercontent.com/vladmandic/face-api/master/model/';
-
-const EMOTION_THEMES = {
-    neutral:  { color: 0x00e5ff, scale: 1.0 },
-    happy:    { color: 0x00ff88, scale: 1.3 },
-    sad:      { color: 0x0066ff, scale: 0.9 },
-    angry:    { color: 0xff3300, scale: 1.2 },
-    surprised:{ color: 0xffdd00, scale: 1.4 }
-};
 
 function speak(text) {
     const synth = window.speechSynthesis;
     synth.cancel();
     const utter = new SpeechSynthesisUtterance(text);
+    
+    // Attempt to find a soft female voice
+    const voices = synth.getVoices();
+    const femaleVoice = voices.find(v => (v.name.includes('Female') || v.name.includes('Zira') || v.name.includes('Google US English')) && v.lang.includes('en'));
+    
+    if (femaleVoice) utter.voice = femaleVoice;
+    utter.pitch = 1.2; // Slightly higher for a softer, feminine feel
+    utter.rate = 0.85; // Slightly slower for elegance
     utter.lang = 'en-US';
-    utter.pitch = 1.0; utter.rate = 0.9;
+    
     synth.speak(utter);
     document.getElementById('ai-comms').innerText = "> " + text.toUpperCase();
 }
@@ -197,11 +200,11 @@ async function initSystem() {
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             systemActive = true;
-            speak("Neural interface online. Commencing biometric scan.");
+            speak("Neural link established. Processing bio-signals.");
             runAI();
         };
     } catch (err) {
-        document.getElementById('ai-comms').innerText = "> ERROR: HARDWARE DISCONNECTED";
+        document.getElementById('ai-comms').innerText = "> ERROR: SENSOR FAILURE";
         document.getElementById('scan-trigger').style.display = 'inline-block';
     }
 }
@@ -210,6 +213,7 @@ async function runAI() {
     const video = document.getElementById('video-feed');
     aiLoop = setInterval(async () => {
         if (!systemActive) return;
+        
         const result = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 416 }))
             .withFaceLandmarks().withFaceExpressions();
 
@@ -218,16 +222,19 @@ async function runAI() {
             const top = Object.keys(result.expressions).reduce((a, b) => result.expressions[a] > result.expressions[b] ? a : b);
             
             document.getElementById('emo-val').innerText = top.toUpperCase();
-            document.getElementById('bpm-val').innerText = Math.round(68 + (result.expressions.angry * 30) + (result.expressions.happy * 10));
+            document.getElementById('bpm-val').innerText = Math.round(70 + (result.expressions.angry * 25));
             
-            const theme = EMOTION_THEMES[top] || EMOTION_THEMES.neutral;
-            core.material.color.lerp(new THREE.Color(theme.color), 0.1);
-            core.scale.lerp(new THREE.Vector3(theme.scale, theme.scale, theme.scale), 0.1);
+            core.material.color.lerp(new THREE.Color(top === 'angry' ? 0xff3300 : 0x00e5ff), 0.1);
             
             analysisData.push(top);
-            let prog = Math.min(100, Math.round((analysisData.length / ANALYSIS_THRESHOLD) * 100));
+            let prog = Math.min(100, Math.round((analysisData.length / ANALYSIS_GOAL) * 100));
             document.getElementById('prog-val').innerText = prog + "%";
-            document.getElementById('drift-val').innerText = "LINK ACTIVE";
+            document.getElementById('drift-val').innerText = "SCANNING";
+
+            // AUTOMATIC COMPLETION
+            if (analysisData.length >= ANALYSIS_GOAL) {
+                stopSystem();
+            }
         }
     }, 150);
 }
@@ -244,33 +251,29 @@ function stopSystem() {
 }
 
 function showLaboratoryReport() {
-    if (analysisData.length < 5) {
-        speak("Session too short for valid data.");
-        return;
-    }
-
     const counts = {};
     analysisData.forEach(e => counts[e] = (counts[e] || 0) + 1);
     const dominant = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
     const diversity = Object.keys(counts).length;
 
     const reportHTML = `
-        <div class="report-item"><b>Dominant State:</b> ${dominant.toUpperCase()}</div>
-        <div class="report-item"><b>Neural Diversity:</b> ${diversity} unique patterns identified.</div>
-        <div class="report-item"><b>Data Samples:</b> ${analysisData.length} biometric points collected.</div>
-        <div class="report-item" style="color: #81d4fa; margin-top: 15px;">
-            <i>AI Summary: Your neural core shows ${dominant === 'neutral' ? 'high stability' : 'dynamic activation'}. 
-            Biosignals suggest session completed with ${diversity > 2 ? 'varied' : 'consistent'} cognitive load.</i>
+        <div class="report-item"><b>Primary Emotion:</b> ${dominant.toUpperCase()}</div>
+        <div class="report-item"><b>Signal Stability:</b> ${diversity < 3 ? 'High (Consistent)' : 'Varied (Dynamic)'}</div>
+        <div class="report-item"><b>Data Points:</b> ${analysisData.length} clusters analyzed.</div>
+        <div class="report-item" style="color: #00e5ff; margin-top: 15px; border-top: 1px solid rgba(0,229,255,0.2); padding-top: 10px;">
+            <b>AI Insight:</b> Your neural profile during this session indicates a predominantly ${dominant} state. Biosignals remained within optimal parameters for cognitive focus.
         </div>
     `;
 
     document.getElementById('report-content').innerHTML = reportHTML;
     document.getElementById('final-report').style.display = 'block';
-    speak("Laboratory analysis report generated.");
+    speak("Scanning complete. Your neural diagnostic report is ready.");
 }
 
 function closeReport() {
     document.getElementById('final-report').style.display = 'none';
+    document.getElementById('prog-val').innerText = "0%";
+    document.getElementById('emo-val').innerText = "AWAITING...";
 }
 
 function drawNeurolink(landmarks) {
@@ -281,10 +284,10 @@ function drawNeurolink(landmarks) {
     ctx.strokeStyle = 'rgba(0, 229, 255, 0.4)';
     ctx.lineWidth = 0.8;
     ctx.beginPath();
-    for (let i = 0; i < pts.length; i += 3) {
-        for (let j = i + 1; j < pts.length; j += 7) {
+    for (let i = 0; i < pts.length; i += 4) {
+        for (let j = i + 1; j < pts.length; j += 8) {
             const dist = Math.hypot(pts[i].x - pts[j].x, pts[i].y - pts[j].y);
-            if (dist < 35) { ctx.moveTo(pts[i].x, pts[i].y); ctx.lineTo(pts[j].x, pts[j].y); }
+            if (dist < 40) { ctx.moveTo(pts[i].x, pts[i].y); ctx.lineTo(pts[j].x, pts[j].y); }
         }
     }
     ctx.stroke();
