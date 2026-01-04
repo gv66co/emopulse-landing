@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="lt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,23 +13,17 @@
             --neon-blue: #00e5ff;
             --aura-glow: rgba(0, 229, 255, 0.4);
             --ui-border: rgba(79, 195, 247, 0.3);
-            --joy-color: #ff9f1c;
             --stress-color: #ff3b3b;
         }
 
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
             background-color: var(--deep-space); color: #81d4fa;
-            font-family: 'Orbitron', sans-serif; overflow-x: hidden;
+            font-family: 'Orbitron', sans-serif; overflow: hidden;
         }
 
-        #aura-canvas {
-            display: block; position: fixed; top: 0; left: 0;
-            z-index: 1; pointer-events: none;
-        }
-
-        /* HUD & Panels */
-        #hud { position: relative; z-index: 10; padding: 20px; pointer-events: none; }
+        /* HUD Elementai */
+        #hud { position: absolute; inset: 0; z-index: 10; pointer-events: none; }
         
         .panel {
             position: absolute; background: rgba(0, 10, 30, 0.85);
@@ -46,50 +40,47 @@
         .stat-label { font-size: 0.6rem; opacity: 0.6; letter-spacing: 2px; margin-bottom: 5px; }
         .stat-value { font-size: 1.1rem; color: #fff; text-shadow: 0 0 10px var(--neon-blue); margin-bottom: 15px; }
 
-        /* Report Card CSS */
+        /* Ataskaitos kortelė */
         .story-card {
-            max-width: 600px; margin: 100px auto; background: rgba(255,255,255,0.05);
+            max-width: 500px; margin: 100px auto; background: rgba(255,255,255,0.05);
             border-radius: 20px; padding: 32px; border: 1px solid var(--ui-border);
             position: relative; z-index: 100; backdrop-filter: blur(20px);
             display: none; animation: storyFade 0.5s ease-out;
+            pointer-events: auto;
         }
         .story-card::before {
             content: ""; position: absolute; top: 0; left: 0; height: 6px; width: 100%;
             background: linear-gradient(90deg, #3a8dff, #7b5cff, #ff9f1c, #ff3b3b);
         }
-        .story-title { font-size: 22px; font-weight: 800; margin-bottom: 16px; color: #fff; }
-        .story-text { font-family: 'Inter'; font-size: 16px; line-height: 1.6; color: #81d4fa; }
-        .story-tag { 
-            display: inline-block; padding: 6px 14px; border-radius: 8px; 
-            font-size: 12px; font-weight: 600; margin: 5px; color: #fff; background: var(--neon-blue);
-        }
+        .story-title { font-size: 20px; font-weight: 800; margin-bottom: 16px; color: #fff; }
+        .story-text { font-family: 'Inter'; font-size: 15px; line-height: 1.6; color: #81d4fa; }
 
-        /* Controls */
+        /* Kameros langas */
+        #video-container {
+            position: absolute; bottom: 30px; right: 30px;
+            width: 240px; height: 180px; border: 1px solid var(--neon-blue);
+            z-index: 15; overflow: hidden; background: #000;
+        }
+        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); opacity: 0.4; filter: grayscale(1); }
+        #face-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: scaleX(-1); }
+
+        /* Valdymas */
         #controls {
-            position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%);
-            z-index: 200; text-align: center;
+            position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%);
+            z-index: 100; text-align: center;
         }
         .btn {
             background: transparent; border: 1px solid var(--neon-blue);
-            color: var(--neon-blue); padding: 15px 40px; font-family: 'Orbitron';
+            color: var(--neon-blue); padding: 12px 35px; font-family: 'Orbitron';
             cursor: pointer; transition: 0.3s; letter-spacing: 3px; margin: 0 10px;
         }
         .btn:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 20px var(--neon-blue); }
         .btn-stop { border-color: var(--stress-color); color: var(--stress-color); }
         .btn-stop:hover { background: var(--stress-color); color: #fff; box-shadow: 0 0 20px var(--stress-color); }
 
-        /* Camera Box */
-        #video-container {
-            position: absolute; bottom: 30px; right: 30px;
-            width: 240px; height: 180px; border: 1px solid var(--neon-blue);
-            z-index: 15; overflow: hidden; background: #000;
-        }
-        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); opacity: 0.5; }
-        #face-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: scaleX(-1); }
-
         #ai-comms {
             position: absolute; bottom: 120px; left: 50%; transform: translateX(-50%);
-            width: 60%; text-align: center; color: var(--neon-blue); font-size: 0.8rem;
+            width: 80%; text-align: center; color: var(--neon-blue); font-size: 0.8rem;
         }
 
         @keyframes storyFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -97,34 +88,32 @@
 </head>
 <body>
 
-<canvas id="aura-canvas"></canvas>
-
 <div id="hud">
     <div id="panel-l" class="panel">
-        <div class="stat-label">NEURAL LOAD</div>
+        <div class="stat-label">NEURAL STATE</div>
         <div id="emo-val" class="stat-value">OFFLINE</div>
-        <div class="stat-label">HEART RATE</div>
-        <div class="stat-value"><span id="bpm-val">--</span> BPM</div>
+        <div class="stat-label">BIOMETRIC BPM</div>
+        <div class="stat-value"><span id="bpm-val">--</span></div>
     </div>
     <div id="panel-r" class="panel">
-        <div class="stat-label">STABILITY INDEX</div>
-        <div id="drift-val" class="stat-value">AWAITING</div>
-        <div class="stat-label">SESSION SYNC</div>
+        <div class="stat-label">SYNC PROGRESS</div>
         <div id="prog-val" class="stat-value">0%</div>
+        <div class="stat-label">SYSTEM DRIFT</div>
+        <div id="drift-val" class="stat-value">AWAITING</div>
     </div>
 </div>
 
 <div id="final-report" class="story-card">
-    <div class="story-title">NEURAL SESSION SUMMARY</div>
-    <div id="report-text" class="story-text">Analysis data processed. No anomalies detected.</div>
-    <div id="report-tags" style="margin-top:20px;"></div>
+    <div class="story-title">SESSION ANALYSIS REPORT</div>
+    <div id="report-text" class="story-text">Procesas baigtas. Duomenys apdoroti.</div>
+    <button class="btn" style="margin-top: 20px; font-size: 10px;" onclick="this.parentElement.style.display='none'">CLOSE</button>
 </div>
 
-<div id="ai-comms">> READY FOR NEURAL SYNCHRONIZATION</div>
+<div id="ai-comms">> INITIALIZE NEURAL LINK TO COMMENCE</div>
 
 <div id="controls">
-    <button id="btn-start" class="btn" onclick="startLab()">START SCAN</button>
-    <button id="btn-stop" class="btn btn-stop" style="display:none;" onclick="stopLab()">TERMINATE</button>
+    <button id="scan-trigger" class="btn" onclick="initSystem()">START SCAN</button>
+    <button id="stop-trigger" class="btn btn-stop" style="display:none;" onclick="stopSystem()">TERMINATE</button>
 </div>
 
 <div id="video-container">
@@ -135,164 +124,187 @@
 
 
 <script>
-    let scene, camera, renderer, auraSphere, stream = null, aiInterval = null;
-    let systemActive = false;
-    let sessionLog = [];
-    const ANALYSIS_LIMIT = 200;
-    const MODEL_URL = 'https://raw.githubusercontent.com/vladmandic/face-api/master/model/';
+/* --- GLOBALŪS KINTAMIEJI --- */
+let scene, camera, renderer, core, rings = [];
+let systemActive = false;
+let analysisData = [];
+let stream = null;
+let aiLoop = null;
+const ANALYSIS_THRESHOLD = 150; 
+const MODEL_URL = 'https://raw.githubusercontent.com/vladmandic/face-api/master/model/';
 
-    const EMOTION_MAP = {
-        neutral:  { color: 0x00e5ff, msg: "Balanced state." },
-        happy:    { color: 0x00ff88, msg: "Neural harmony." },
-        sad:      { color: 0x0066ff, msg: "Frequency drop." },
-        angry:    { color: 0xff3300, msg: "Neural friction." },
-        surprised:{ color: 0xffdd00, msg: "Synaptic spike." }
+const EMOTION_THEMES = {
+    neutral:  { color: 0x00e5ff, speed: 0.005, scale: 1.0 },
+    happy:    { color: 0x00ff88, speed: 0.015, scale: 1.3 },
+    sad:      { color: 0x0066ff, speed: 0.002, scale: 0.9 },
+    angry:    { color: 0xff3300, speed: 0.040, scale: 1.2 },
+    surprised:{ color: 0xffdd00, speed: 0.020, scale: 1.4 }
+};
+
+/* --- 1. BALSAS --- */
+function speak(text) {
+    const synth = window.speechSynthesis;
+    synth.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.pitch = 1.1; utter.rate = 0.9;
+    synth.speak(utter);
+    document.getElementById('ai-comms').innerText = "> ANALYSIS: " + text;
+}
+
+/* --- 2. 3D BRANDUOLYS --- */
+function init3D() {
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    const light = new THREE.PointLight(0xffffff, 2, 100);
+    light.position.set(5, 5, 5);
+    scene.add(light, new THREE.AmbientLight(0x404040, 2));
+
+    const geometry = new THREE.IcosahedronGeometry(2.5, 15);
+    const material = new THREE.MeshPhongMaterial({ color: 0x00e5ff, wireframe: true, transparent: true, opacity: 0.4 });
+    core = new THREE.Mesh(geometry, material);
+    scene.add(core);
+
+    for(let i=0; i<2; i++) {
+        const rGeo = new THREE.TorusGeometry(4 + i, 0.01, 16, 100);
+        const rMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.2 });
+        const ring = new THREE.Mesh(rGeo, rMat);
+        rings.push(ring);
+        scene.add(ring);
+    }
+    camera.position.z = 10;
+
+    function animate() {
+        requestAnimationFrame(animate);
+        if (core) {
+            core.rotation.y += 0.005;
+            rings.forEach((r, i) => r.rotation.z += 0.002 * (i + 1));
+        }
+        renderer.render(scene, camera);
+    }
+    animate();
+}
+
+function updateVisuals(emotion, intensity) {
+    if (!core) return;
+    const theme = EMOTION_THEMES[emotion] || EMOTION_THEMES.neutral;
+    core.material.color.lerp(new THREE.Color(theme.color), 0.05);
+    const pulse = 1 + (Math.sin(Date.now() * 0.005) * 0.05);
+    const targetScale = theme.scale * pulse;
+    core.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
+}
+
+/* --- 3. SKENAVIMO LOGIKA --- */
+async function initSystem() {
+    if (systemActive) return;
+    document.getElementById('scan-trigger').style.display = 'none';
+    document.getElementById('stop-trigger').style.display = 'inline-block';
+    document.getElementById('final-report').style.display = 'none';
+    analysisData = [];
+
+    try {
+        await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+        await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+        await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
+
+        const video = document.getElementById('video-feed');
+        stream = await navigator.mediaDevices.getUserMedia({ video: {} });
+        video.srcObject = stream;
+
+        video.onloadedmetadata = () => {
+            const canvas = document.getElementById('face-canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            systemActive = true;
+            speak("Neural interface online. Commencing biometric scan.");
+            runAI();
+        };
+    } catch (err) {
+        document.getElementById('ai-comms').innerText = "> ERROR: CAMERA ACCESS DENIED.";
+        document.getElementById('scan-trigger').style.display = 'inline-block';
+    }
+}
+
+async function runAI() {
+    const video = document.getElementById('video-feed');
+    aiLoop = setInterval(async () => {
+        if (!systemActive) return;
+        const result = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 416 }))
+            .withFaceLandmarks().withFaceExpressions();
+
+        if (result) {
+            drawNeurolink(result.landmarks);
+            const top = Object.keys(result.expressions).reduce((a, b) => result.expressions[a] > result.expressions[b] ? a : b);
+            
+            document.getElementById('emo-val').innerText = top.toUpperCase();
+            document.getElementById('bpm-val').innerText = Math.round(68 + (result.expressions.angry * 30));
+            
+            updateVisuals(top, result.expressions[top]);
+            
+            analysisData.push(top);
+            const progress = Math.min(100, Math.round((analysisData.length / ANALYSIS_THRESHOLD) * 100));
+            document.getElementById('prog-val').innerText = progress + "%";
+            document.getElementById('drift-val').innerText = progress < 100 ? "ANALYZING" : "SYNCED";
+
+            if (analysisData.length === ANALYSIS_THRESHOLD) {
+                speak("Neural baseline established. Data synthesis complete.");
+            }
+        }
+    }, 150);
+}
+
+function stopSystem() {
+    systemActive = false;
+    clearInterval(aiLoop);
+    if (stream) stream.getTracks().forEach(track => track.stop());
+    
+    document.getElementById('scan-trigger').style.display = 'inline-block';
+    document.getElementById('stop-trigger').style.display = 'none';
+    document.getElementById('emo-val').innerText = "OFFLINE";
+    
+    generateFinalReport();
+}
+
+function generateFinalReport() {
+    if (analysisData.length === 0) return;
+    const counts = {};
+    analysisData.forEach(e => counts[e] = (counts[e] || 0) + 1);
+    const dominant = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
+
+    const insights = {
+        happy: "Jūsų būsena rodo optimalią neuralinę harmoniją. Dopamino lygis skatina kūrybinį mąstymą.",
+        neutral: "Sistemos stabilumas pasiektas. Jūsų kognityvinė apkrova yra minimali, o tai idealu giliam darbui.",
+        sad: "Užfiksuotas dažnio kritimas. Rekomenduojama atlikti aplinkos recalibraciją arba trumpą pertrauką.",
+        angry: "Neuralinė trintis aptikta. Jūsų bio-signalai rodo aukštą įtampą, rekomenduojama stabilizuoti kvėpavimą.",
+        surprised: "Aukštas kognityvinis sužadinimas. Jūsų neuralinis laukas reaguoja į naujus dirgiklius itin aktyviai."
     };
 
-    function init3D() {
-        scene = new THREE.Scene();
-        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('aura-canvas'), antialias: true, alpha: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
+    document.getElementById('report-text').innerText = insights[dominant] || "Analizė baigta.";
+    document.getElementById('final-report').style.display = 'block';
+    speak("Session terminated. Neural report ready.");
+}
 
-        const geo = new THREE.IcosahedronGeometry(2, 10);
-        const mat = new THREE.MeshPhongMaterial({ color: 0x00e5ff, wireframe: true, transparent: true, opacity: 0.3 });
-        auraSphere = new THREE.Mesh(geo, mat);
-        scene.add(auraSphere);
-
-        const light = new THREE.PointLight(0xffffff, 1.5);
-        light.position.set(5, 5, 5);
-        scene.add(light, new THREE.AmbientLight(0x404040, 2));
-        camera.position.z = 6;
-
-        function animate() {
-            requestAnimationFrame(animate);
-            if(auraSphere) {
-                auraSphere.rotation.y += 0.002;
-                auraSphere.rotation.x += 0.001;
-            }
-            renderer.render(scene, camera);
-        }
-        animate();
-    }
-
-    async function startLab() {
-        document.getElementById('btn-start').style.display = 'none';
-        document.getElementById('btn-stop').style.display = 'inline-block';
-        document.getElementById('final-report').style.display = 'none';
-        document.getElementById('ai-comms').innerText = "> INITIALIZING MODELS...";
-        sessionLog = [];
-
-        try {
-            await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
-            await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
-            await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
-
-            stream = await navigator.mediaDevices.getUserMedia({ video: {} });
-            const video = document.getElementById('video-feed');
-            video.srcObject = stream;
-
-            video.onloadedmetadata = () => {
-                const canvas = document.getElementById('face-canvas');
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                systemActive = true;
-                document.getElementById('ai-comms').innerText = "> LINK ACTIVE. COLLECTING BIOMETRICS.";
-                speak("Neural link active. Monitoring bio-signatures.");
-                runAI();
-            };
-        } catch (e) {
-            document.getElementById('ai-comms').innerText = "> ERROR: SENSOR ACCESS DENIED.";
-            document.getElementById('btn-start').style.display = 'inline-block';
+function drawNeurolink(landmarks) {
+    const canvas = document.getElementById('face-canvas');
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const pts = landmarks.positions;
+    ctx.strokeStyle = 'rgba(0, 229, 255, 0.3)';
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    for (let i = 0; i < pts.length; i += 2) {
+        for (let j = i + 1; j < pts.length; j += 4) {
+            const dist = Math.hypot(pts[i].x - pts[j].x, pts[i].y - pts[j].y);
+            if (dist < 30) { ctx.moveTo(pts[i].x, pts[i].y); ctx.lineTo(pts[j].x, pts[j].y); }
         }
     }
+    ctx.stroke();
+}
 
-    function runAI() {
-        const video = document.getElementById('video-feed');
-        aiInterval = setInterval(async () => {
-            if (!systemActive) return;
-            const res = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 320 }))
-                .withFaceLandmarks().withFaceExpressions();
-
-            if (res) {
-                const top = Object.keys(res.expressions).reduce((a, b) => res.expressions[a] > res.expressions[b] ? a : b);
-                const intensity = res.expressions[top];
-                sessionLog.push(top);
-
-                // Update UI
-                document.getElementById('emo-val').innerText = top.toUpperCase();
-                document.getElementById('bpm-val').innerText = Math.round(65 + (res.expressions.angry * 25) + (res.expressions.happy * 15));
-                document.getElementById('prog-val').innerText = Math.min(100, Math.round((sessionLog.length / ANALYSIS_LIMIT) * 100)) + "%";
-                document.getElementById('drift-val').innerText = intensity > 0.7 ? "CORE ALIGNED" : "STABILIZING";
-
-                // Update 3D
-                const theme = EMOTION_MAP[top] || EMOTION_MAP.neutral;
-                auraSphere.material.color.lerp(new THREE.Color(theme.color), 0.1);
-                
-                drawNeurolink(res.landmarks);
-            }
-        }, 150);
-    }
-
-    function stopLab() {
-        systemActive = false;
-        clearInterval(aiInterval);
-        if (stream) stream.getTracks().forEach(t => t.stop());
-        
-        document.getElementById('btn-start').style.display = 'inline-block';
-        document.getElementById('btn-start').innerText = "NEW SESSION";
-        document.getElementById('btn-stop').style.display = 'none';
-        
-        generateReport();
-    }
-
-    function generateReport() {
-        if (sessionLog.length < 5) return;
-        const counts = sessionLog.reduce((a, e) => { a[e] = (a[e] || 0) + 1; return a; }, {});
-        const dominant = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
-
-        const insights = {
-            happy: "Jūsų neuralinis profilis rodo aukštą kūrybinį potencialą ir dopamino balansą. Rekomenduojama tęsti pradėtas užduotis.",
-            neutral: "Fiksuojama kognityvinė ramybė. Jūsų smegenų bangos veikia stabiliausiu režimu, idealiai tinka giliam susikaupimui.",
-            sad: "Aptikti žemi biometriniai dažniai. Laboratorija siūlo 5 minučių pertrauką neuraliniam persikrovimui.",
-            angry: "Užfiksuota neuralinė įtampa. Rekomenduojamas kontroliuojamas kvėpavimo ciklas stabilumui atstatyti.",
-            surprised: "Aptiktas aukštas budrumo lygis. Tai rodo aktyvų informacijos apdorojimo procesą."
-        };
-
-        document.getElementById('report-text').innerText = insights[dominant] || "Sesija baigta sėkmingai.";
-        document.getElementById('report-tags').innerHTML = `
-            <div class="story-tag">${dominant.toUpperCase()} DOMINANT</div>
-            <div class="story-tag">SAMPLES: ${sessionLog.length}</div>
-            <div class="story-tag">STABILITY: EXCELLENT</div>
-        `;
-        document.getElementById('final-report').style.display = 'block';
-        speak("Session complete. Neural report generated.");
-    }
-
-    function drawNeurolink(landmarks) {
-        const ctx = document.getElementById('face-canvas').getContext('2d');
-        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-        const pts = landmarks.positions;
-        ctx.strokeStyle = 'rgba(0, 229, 255, 0.4)';
-        ctx.lineWidth = 0.5;
-        ctx.beginPath();
-        for (let i = 0; i < pts.length; i += 2) {
-            for (let j = i + 1; j < pts.length; j += 4) {
-                const d = Math.hypot(pts[i].x - pts[j].x, pts[i].y - pts[j].y);
-                if (d < 35) { ctx.moveTo(pts[i].x, pts[i].y); ctx.lineTo(pts[j].x, pts[j].y); }
-            }
-        }
-        ctx.stroke();
-    }
-
-    function speak(t) {
-        window.speechSynthesis.cancel();
-        const u = new SpeechSynthesisUtterance(t);
-        u.rate = 0.9; u.pitch = 1.1;
-        window.speechSynthesis.speak(u);
-    }
-
-    window.onload = init3D;
+window.onload = init3D;
 </script>
 </body>
 </html>
