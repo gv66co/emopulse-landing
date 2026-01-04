@@ -1,219 +1,230 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="lt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEURO-CORE v7.0 OMNI-NEURAL</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <title>NEURO-CORE v9.0 OMNI-DASHBOARD</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
     <style>
         :root {
-            --deep-space: #00040a;
             --neon-blue: #00f2ff;
             --neon-pink: #ff00ff;
             --stress-red: #ff3333;
-            --safe-green: #00ff9d;
-            --ui-bg: rgba(0, 8, 20, 0.95);
-            --glitch-speed: 0.3s;
+            --safe-green: #00ff88;
+            --panel-bg: rgba(0, 10, 20, 0.95);
+            --border: 1px solid rgba(0, 242, 255, 0.3);
         }
 
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--deep-space); color: #fff; font-family: 'Orbitron', sans-serif; overflow: hidden; }
+        body, html { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            background: #000205; color: #fff; font-family: 'Orbitron', sans-serif; 
+            overflow: hidden; touch-action: none;
+        }
 
-        /* --- BACKGROUND FX --- */
-        #noise-overlay { position: fixed; inset: 0; background: url('https://media.giphy.com/media/oEI9uWU0WMrQmToYIs/giphy.gif'); opacity: 0.03; pointer-events: none; z-index: 1000; }
+        /* --- GRID LAYOUT --- */
+        #ui-wrapper {
+            position: absolute; inset: 0; z-index: 100;
+            display: grid;
+            grid-template-areas: 
+                "top-l top-c top-r"
+                "mid-l mid-c mid-r"
+                "bot-l bot-c bot-r";
+            grid-template-columns: 280px 1fr 280px;
+            grid-template-rows: 150px 1fr 180px;
+            padding: 20px; gap: 15px;
+            pointer-events: none;
+        }
+
+        .hud-panel {
+            background: var(--panel-bg); border: var(--border);
+            padding: 15px; backdrop-filter: blur(20px);
+            pointer-events: auto; position: relative;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+        }
+
+        .corner { position: absolute; width: 10px; height: 10px; border: 2px solid var(--neon-blue); }
+        .top-l { top: -2px; left: -2px; border-right: 0; border-bottom: 0; }
+        .top-r { top: -2px; right: -2px; border-left: 0; border-bottom: 0; }
+
+        /* --- SPECIFIC PANELS --- */
+        #panel-neural { grid-area: top-l; border-left: 4px solid var(--neon-blue); }
+        #panel-bio { grid-area: top-r; border-right: 4px solid var(--neon-pink); text-align: right; }
+        #panel-graph { grid-area: mid-l; height: 200px; }
+        #panel-status { grid-area: bot-c; width: 100%; max-width: 600px; justify-self: center; }
+
+        /* --- CENTER VIEWPORT --- */
+        #viewport-container {
+            grid-area: mid-c; display: flex; align-items: center; justify-content: center;
+        }
+        #scanner {
+            position: relative; width: 100%; max-width: 450px; aspect-ratio: 4/3;
+            border: 1px solid var(--neon-blue); background: #000;
+            overflow: hidden; box-shadow: 0 0 50px rgba(0, 242, 255, 0.1);
+        }
+        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); opacity: 0.5; }
+        #face-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: scaleX(-1); z-index: 110; }
+
+        /* --- TEXT & STATS --- */
+        .label { font-family: 'JetBrains Mono'; font-size: 0.6rem; color: var(--neon-blue); letter-spacing: 2px; text-transform: uppercase; }
+        .val { font-size: 1.2rem; margin-top: 5px; color: #fff; text-shadow: 0 0 10px var(--neon-blue); }
         
-        /* --- DYNAMIC HUD PANELS --- */
-        .hud-panel { position: absolute; background: var(--ui-bg); border: 1px solid rgba(0, 242, 255, 0.2); backdrop-filter: blur(20px); padding: 20px; z-index: 100; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
-        .corner-tag { position: absolute; top: -1px; left: -1px; background: var(--neon-blue); color: #000; font-size: 0.5rem; padding: 2px 6px; font-weight: bold; }
+        /* --- LIVE GRAPH --- */
+        #live-chart { width: 100%; height: 80px; margin-top: 10px; border-bottom: 1px solid rgba(0,242,255,0.2); }
 
-        #panel-l { top: 30px; left: 30px; width: 220px; border-left: 5px solid var(--neon-blue); animation: slideInL 0.5s ease-out; }
-        #panel-r { top: 30px; right: 30px; width: 220px; border-right: 5px solid var(--neon-pink); text-align: right; animation: slideInR 0.5s ease-out; }
-        #panel-b { bottom: 30px; left: 50%; transform: translateX(-50%); width: 60%; max-width: 600px; display: flex; justify-content: space-around; align-items: center; border-bottom: 3px solid var(--neon-blue); }
+        /* --- PROGRESS --- */
+        .prog-bar { height: 4px; background: rgba(255,255,255,0.1); margin-top: 10px; overflow: hidden; }
+        #prog-fill { height: 100%; background: var(--neon-blue); width: 0%; transition: 0.2s; }
 
-        .stat-box { margin-bottom: 20px; }
-        .label { font-family: 'JetBrains Mono'; font-size: 0.6rem; color: var(--neon-blue); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px; }
-        .val { font-size: 1.2rem; text-shadow: 0 0 10px var(--neon-blue); }
+        /* --- MOBILE ADAPTATION --- */
+        @media (max-width: 900px) {
+            #ui-wrapper {
+                grid-template-areas: "top-l" "top-r" "mid-c" "bot-c";
+                grid-template-columns: 1fr; grid-template-rows: auto auto 1fr auto;
+                overflow-y: auto; pointer-events: auto;
+            }
+            #panel-graph { display: none; }
+            #scanner { max-width: 100%; aspect-ratio: 1; border-radius: 50%; }
+        }
 
-        /* --- SCANNER VIEWPORT --- */
-        #viewport { position: absolute; bottom: 30px; left: 30px; width: 280px; height: 210px; border: 1px solid var(--neon-blue); overflow: hidden; border-radius: 4px; box-shadow: 0 0 40px rgba(0, 242, 255, 0.1); }
-        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); opacity: 0.6; filter: contrast(1.2) brightness(1.1); }
-        #face-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: scaleX(-1); }
-        .scan-line { position: absolute; width: 100%; height: 2px; background: var(--neon-blue); top: 0; box-shadow: 0 0 15px var(--neon-blue); animation: scanMove 3s linear infinite; z-index: 5; }
-
-        /* --- REPORT SYSTEM --- */
-        #report-overlay { position: fixed; inset: 0; background: rgba(0, 2, 10, 0.98); z-index: 2000; display: none; align-items: center; justify-content: center; overflow-y: auto; padding: 40px; }
-        .report-card { width: 100%; max-width: 800px; background: var(--ui-bg); border: 1px solid var(--neon-blue); padding: 40px; position: relative; }
-        
-        .comp-table { width: 100%; border-collapse: collapse; margin: 30px 0; font-family: 'JetBrains Mono'; }
-        .comp-table th { color: var(--neon-blue); text-align: left; padding-bottom: 15px; border-bottom: 1px solid rgba(0, 242, 255, 0.3); }
-        .comp-table td { padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-
-        .gauge-bg { height: 8px; width: 100%; background: rgba(255,255,255,0.05); margin-top: 10px; position: relative; }
-        .gauge-fill { height: 100%; transition: width 1.5s cubic-bezier(0.1, 0, 0, 1); }
-        .opt-mark { position: absolute; height: 150%; width: 2px; background: #fff; top: -25%; }
-
-        #controls { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 500; }
-        .btn-mega { background: rgba(0, 242, 255, 0.1); border: 1px solid var(--neon-blue); color: var(--neon-blue); padding: 25px 60px; font-family: 'Orbitron'; font-size: 1.2rem; cursor: pointer; letter-spacing: 10px; transition: 0.3s; }
-        .btn-mega:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 50px var(--neon-blue); }
-
-        /* --- ANIMATIONS --- */
-        @keyframes scanMove { 0% { top: 0; } 100% { top: 100%; } }
-        @keyframes slideInL { from { transform: translateX(-100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes slideInR { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        /* --- REPORT OVERLAY --- */
+        #report-overlay {
+            position: fixed; inset: 0; background: rgba(0,3,10,0.98);
+            z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px;
+        }
+        .report-card {
+            width: 100%; max-width: 550px; background: var(--panel-bg);
+            border: 2px solid var(--neon-blue); padding: 30px;
+        }
     </style>
 </head>
 <body>
 
-<div id="noise-overlay"></div>
-
-<div id="hud">
-    <div id="panel-l" class="hud-panel">
-        <div class="corner-tag">BIOMETRICS</div>
-        <div class="stat-box"><div class="label">Neural State</div><div id="emo-val" class="val">AWAITING...</div></div>
-        <div class="stat-box"><div class="label">Stress Coefficient</div><div id="stress-val" class="val">0.000</div></div>
-        <div class="stat-box"><div class="label">Stability Index</div><div id="stab-val" class="val">100%</div></div>
+<div id="ui-wrapper">
+    <div id="panel-neural" class="hud-panel">
+        <div class="corner top-l"></div><div class="corner top-r"></div>
+        <div class="label">Neural Load</div>
+        <div id="emo-val" class="val">IDLE</div>
+        <div style="margin-top:15px" class="label">Stress Coefficient</div>
+        <div id="stress-val" class="val">0.000</div>
     </div>
 
-    <div id="panel-r" class="hud-panel">
-        <div class="corner-tag">SENSORS</div>
-        <div class="stat-box"><div class="label">Estimated BPM</div><div class="val"><span id="bpm-val">--</span></div></div>
-        <div class="stat-group" style="display:flex; justify-content: space-between;">
-            <div class="stat-box"><div class="label">Blinks</div><div id="blink-val" class="val">0</div></div>
-            <div class="stat-box"><div class="label">Focus</div><div id="gaze-val" class="val">N/A</div></div>
+    <div id="panel-bio" class="hud-panel">
+        <div class="label">Cardiac Est.</div>
+        <div class="val"><span id="bpm-val">--</span> BPM</div>
+        <div style="margin-top:15px" class="label">Ocular Sync (Blinks)</div>
+        <div id="blink-val" class="val">0</div>
+    </div>
+
+    <div id="panel-graph" class="hud-panel">
+        <div class="label">Real-time Stress Curve</div>
+        <canvas id="live-chart"></canvas>
+    </div>
+
+    <div id="viewport-container">
+        <div id="scanner">
+            <video id="video-feed" autoplay muted playsinline></video>
+            <canvas id="face-canvas"></canvas>
+            <div style="position:absolute; bottom:10px; right:10px; font-size:0.5rem; color:var(--neon-blue);">RE-CORE v9.0 ACTIVE</div>
         </div>
     </div>
 
-    <div id="panel-b" class="hud-panel">
-        <div class="label" id="status-msg">SYSTEM STANDBY // READY FOR NEURAL LINK</div>
-        <div style="width: 40%; height: 4px; background: rgba(255,255,255,0.1);"><div id="main-progress" style="width:0%; height:100%; background:var(--neon-blue); transition: 0.3s;"></div></div>
-        <div class="label" id="prog-percent">0%</div>
+    <div id="panel-status" class="hud-panel">
+        <div style="display:flex; justify-content:space-between">
+            <div class="label" id="status-msg">Awaiting Neural Initialization...</div>
+            <div class="label" id="prog-text">0%</div>
+        </div>
+        <div class="prog-bar"><div id="prog-fill"></div></div>
     </div>
 </div>
 
 <div id="report-overlay">
     <div class="report-card">
-        <h1 style="color:var(--neon-blue); margin:0; letter-spacing:5px;">DEBRIEF REPORT</h1>
-        <p class="label">Comparative Neural Analysis v7.0</p>
-        
-        <table class="comp-table">
-            <tr><th>METRIC</th><th>RECORDED</th><th>THRESHOLD</th><th>STATUS</th></tr>
-            <tr>
-                <td>STRESS INDEX<div class="gauge-bg"><div id="g-stress" class="gauge-fill"></div></div></td>
-                <td id="r-stress">0.00</td>
-                <td>0.30 MAX</td>
-                <td id="s-stress">OK</td>
-            </tr>
-            <tr>
-                <td>HEART RATE (EST)<div class="gauge-bg"><div id="g-bpm" class="gauge-fill"></div></div></td>
-                <td id="r-bpm">0</td>
-                <td>60-85 BPM</td>
-                <td id="s-bpm">OK</td>
-            </tr>
-            <tr>
-                <td>OCULAR FATIGUE<div class="gauge-bg"><div id="g-fatigue" class="gauge-fill"></div></div></td>
-                <td id="r-blink">0</td>
-                <td>8.00 BLNK</td>
-                <td id="s-fatigue">OK</td>
-            </tr>
-        </table>
-
-        <div id="action-plan" style="border: 1px solid var(--neon-blue); padding: 20px; font-family: 'JetBrains Mono'; background: rgba(0, 242, 255, 0.05);">
-            <div class="label" style="margin-bottom:10px;">Actionable Insights:</div>
-            <ul id="insight-list" style="margin:0; padding-left: 20px; font-size: 0.9rem;"></ul>
-        </div>
-
-        <button class="btn-mega" style="width:100%; margin-top:30px; font-size: 0.8rem;" onclick="location.reload()">RE-INITIALIZE INTERFACE</button>
+        <h2 style="color:var(--neon-blue); letter-spacing:5px; text-align:center;">DEEP SCAN COMPLETE</h2>
+        <div id="report-data" style="margin:25px 0; font-family:'JetBrains Mono'; line-height:1.8;"></div>
+        <button onclick="location.reload()" style="width:100%; padding:18px; background:none; border:1px solid var(--neon-blue); color:var(--neon-blue); font-family:'Orbitron'; cursor:pointer; letter-spacing:3px;">RE-SYNC SYSTEM</button>
     </div>
 </div>
 
-<div id="controls">
-    <button id="start-btn" class="btn-mega" onclick="masterInit()">ACTIVATE</button>
-</div>
-
-<div id="viewport">
-    <div class="scan-line"></div>
-    <video id="video-feed" autoplay muted playsinline></video>
-    <canvas id="face-canvas"></canvas>
-</div>
+<button id="start-btn" onclick="masterInit()" style="position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); padding:30px 60px; background:rgba(0,242,255,0.1); border:2px solid var(--neon-blue); color:var(--neon-blue); font-family:'Orbitron'; font-size:1.5rem; letter-spacing:10px; z-index:500; cursor:pointer;">ACTIVATE</button>
 
 <script>
-let scene, camera, renderer, systemActive = false;
-let analysisData = [], stream = null, blinkCount = 0, isBlinking = false;
-let voices = [];
-const ANALYSIS_GOAL = 150; // Daugiau duomenų gilesnei analizei
+let systemActive = false, analysisData = [], blinkCount = 0, isBlinking = false;
+let stressHistory = new Array(50).fill(0);
+let stream = null, voices = [];
+const ANALYSIS_GOAL = 150;
 const MODEL_URL = 'https://raw.githubusercontent.com/vladmandic/face-api/master/model/';
 
-// --- AUDIO ENGINE ---
 window.speechSynthesis.onvoiceschanged = () => voices = window.speechSynthesis.getVoices();
 
 function speak(text) {
     window.speechSynthesis.cancel();
     const utter = new SpeechSynthesisUtterance(text);
-    const aiVoice = voices.find(v => v.lang.includes('en') && (v.name.includes('Female') || v.name.includes('Zira') || v.name.includes('Samantha')));
-    if (aiVoice) utter.voice = aiVoice;
-    utter.pitch = 1.1; utter.rate = 0.95;
+    const ai = voices.find(v => v.lang.includes('en') && (v.name.includes('Female') || v.name.includes('Zira')));
+    if(ai) utter.voice = ai;
     window.speechSynthesis.speak(utter);
 }
 
-// --- FULL NEURO-MESH DRAWING ---
+// --- DYNAMIC GRAPH ENGINE ---
+function drawGraph() {
+    const canvas = document.getElementById('live-chart');
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0,0,canvas.width, canvas.height);
+    ctx.strokeStyle = '#00f2ff';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    const step = canvas.width / stressHistory.length;
+    for(let i=0; i<stressHistory.length; i++) {
+        const x = i * step;
+        const y = canvas.height - (stressHistory[i] * canvas.height);
+        if(i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+}
+
+// --- ULTRA NEURO-MESH ---
 function drawUltraMesh(ctx, landmarks, stress) {
     const pts = landmarks.positions;
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    
-    // Core Mesh
-    ctx.lineWidth = 0.6;
-    ctx.strokeStyle = stress > 0.5 ? 'rgba(255, 51, 51, 0.7)' : 'rgba(0, 242, 255, 0.5)';
-    
-    // Triangulation Loop
+    ctx.clearRect(0,0,ctx.canvas.width, ctx.canvas.height);
+    ctx.lineWidth = 0.8;
+    ctx.strokeStyle = stress > 0.4 ? '#ff3333' : '#00f2ff';
     ctx.beginPath();
-    for (let i = 0; i < pts.length; i++) {
-        for (let j = i + 1; j < pts.length; j++) {
-            const d = Math.hypot(pts[i].x - pts[j].x, pts[i].y - pts[j].y);
-            if (d < 30) {
-                ctx.moveTo(pts[i].x, pts[i].y);
-                ctx.lineTo(pts[j].x, pts[j].y);
-            }
+    for(let i=0; i<pts.length; i++) {
+        for(let j=i+1; j<pts.length; j++) {
+            const d = Math.hypot(pts[i].x-pts[j].x, pts[i].y-pts[j].y);
+            if(d < 32) { ctx.moveTo(pts[i].x, pts[i].y); ctx.lineTo(pts[j].x, pts[j].y); }
         }
     }
     ctx.stroke();
-
-    // Feature Highlights
-    ctx.fillStyle = ctx.strokeStyle;
-    const features = [landmarks.getLeftEye(), landmarks.getRightEye(), landmarks.getMouth(), landmarks.getNose()];
-    features.forEach(f => f.forEach(p => ctx.fillRect(p.x-1, p.y-1, 2, 2)));
 }
 
-// --- BIOMETRIC ENGINES ---
-function getEAR(eye) {
-    return (Math.hypot(eye[1].x-eye[5].x, eye[1].y-eye[5].y) + Math.hypot(eye[2].x-eye[4].x, eye[2].y-eye[4].y)) / (2 * Math.hypot(eye[0].x-eye[3].x, eye[0].y-eye[3].y));
-}
-
-// --- MAIN PROCESS ---
 async function masterInit() {
-    window.speechSynthesis.speak(new SpeechSynthesisUtterance("")); // Mobile wake
+    window.speechSynthesis.speak(new SpeechSynthesisUtterance("")); 
     document.getElementById('start-btn').style.display = 'none';
-    document.getElementById('status-msg').textContent = "UPLOADING NEURAL MODELS...";
+    document.getElementById('status-msg').textContent = "LINKING NEURAL NETS...";
 
     try {
         await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
         await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
         await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
 
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
-        document.getElementById('video-feed').srcObject = stream;
+        stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        const video = document.getElementById('video-feed');
+        video.srcObject = stream;
         
-        setTimeout(() => {
+        video.onloadedmetadata = () => {
+            const canvas = document.getElementById('face-canvas');
+            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
             systemActive = true;
-            document.getElementById('status-msg').textContent = "NEURAL LINK ESTABLISHED // ANALYZING";
-            speak("Neural interface online. Commencing full biometric deep-scan.");
+            speak("Neural interface online. Commencing biometric deep scan.");
             loop();
-        }, 1000);
-    } catch (e) { alert("CONNECTION FAILED: Camera Access Required"); location.reload(); }
+        };
+    } catch (e) { alert("ERROR: Camera Access Denied"); }
 }
 
 async function loop() {
-    if (!systemActive) return;
+    if(!systemActive) return;
     const video = document.getElementById('video-feed');
     const canvas = document.getElementById('face-canvas');
     const ctx = canvas.getContext('2d');
@@ -221,91 +232,51 @@ async function loop() {
     const res = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 224 }))
         .withFaceLandmarks().withFaceExpressions();
 
-    if (res) {
-        // Blink Logic
-        const ear = (getEAR(res.landmarks.getLeftEye()) + getEAR(res.landmarks.getRightEye())) / 2;
-        if (ear < 0.22 && !isBlinking) { isBlinking = true; blinkCount++; document.getElementById('blink-val').textContent = blinkCount; }
-        else if (ear > 0.25) isBlinking = false;
+    if(res) {
+        // Blinks
+        const ear = (getEAR(res.landmarks.getLeftEye()) + getEAR(res.landmarks.getRightEye()))/2;
+        if(ear < 0.22 && !isBlinking) { isBlinking = true; blinkCount++; document.getElementById('blink-val').textContent = blinkCount; }
+        else if(ear > 0.25) isBlinking = false;
 
-        // Gaze Logic
-        const nose = res.landmarks.getNose()[0];
-        const midX = (res.landmarks.getLeftEye()[0].x + res.landmarks.getRightEye()[3].x) / 2;
-        document.getElementById('gaze-val').textContent = Math.abs(nose.x - midX) > 15 ? (nose.x > midX ? "RIGHT" : "LEFT") : "CENTER";
-
-        // Stress & Emo
+        // Stats
         const ex = res.expressions;
-        const top = Object.keys(ex).reduce((a, b) => ex[a] > ex[b] ? a : b);
-        const stress = (ex.angry + ex.fearful + ex.sad) * 1.4;
-        const stability = 100 - (stress * 50);
-
-        document.getElementById('emo-val').textContent = top.toUpperCase();
+        const stress = (ex.angry + ex.fearful + ex.sad) * 1.5;
+        stressHistory.push(stress); stressHistory.shift();
+        
+        document.getElementById('emo-val').textContent = Object.keys(ex).reduce((a,b)=>ex[a]>ex[b]?a:b).toUpperCase();
         document.getElementById('stress-val').textContent = stress.toFixed(3);
-        document.getElementById('stab-val').textContent = Math.max(0, stability).toFixed(0) + "%";
-        document.getElementById('bpm-val').textContent = Math.round(70 + (stress * 20));
-
-        // Progress
-        const p = (analysisData.length / ANALYSIS_GOAL) * 100;
-        document.getElementById('main-progress').style.width = p + "%";
-        document.getElementById('prog-percent').textContent = Math.round(p) + "%";
+        document.getElementById('bpm-val').textContent = Math.round(72 + (stress * 20));
+        
+        const prog = (analysisData.length / ANALYSIS_GOAL) * 100;
+        document.getElementById('prog-fill').style.width = prog + "%";
+        document.getElementById('prog-text').textContent = Math.round(prog) + "%";
 
         drawUltraMesh(ctx, res.landmarks, stress);
-        analysisData.push({ stress, top, bpm: 70 + (stress * 20) });
-
-        if (analysisData.length >= ANALYSIS_GOAL) finalize();
+        drawGraph();
+        
+        analysisData.push({stress, bpm: 72 + (stress * 20)});
+        if(analysisData.length >= ANALYSIS_GOAL) finalize();
     }
-    if (systemActive) requestAnimationFrame(loop);
+    requestAnimationFrame(loop);
 }
+
+function getEAR(eye) { return (Math.hypot(eye[1].x-eye[5].x, eye[1].y-eye[5].y) + Math.hypot(eye[2].x-eye[4].x, eye[2].y-eye[4].y)) / (2 * Math.hypot(eye[0].x-eye[3].x, eye[0].y-eye[3].y)); }
 
 function finalize() {
     systemActive = false;
-    if (stream) stream.getTracks().forEach(t => t.stop());
-    if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 400]);
-
-    const avgStress = analysisData.reduce((a,b) => a+b.stress, 0) / analysisData.length;
-    const avgBpm = analysisData.reduce((a,b) => a+b.bpm, 0) / analysisData.length;
-
-    // Report Filling
-    document.getElementById('r-stress').textContent = avgStress.toFixed(2);
-    document.getElementById('r-bpm').textContent = Math.round(avgBpm);
-    document.getElementById('r-blink').textContent = blinkCount;
-
-    // Status & Gauges
-    updateComp('stress', avgStress * 100, 30);
-    updateComp('bpm', (avgBpm - 60) * 4, 85);
-    updateComp('fatigue', (blinkCount / 10) * 100, 70);
-
-    // AI Insights
-    const list = document.getElementById('insight-list');
-    list.innerHTML = "";
-    const addI = (txt) => list.innerHTML += `<li>${txt}</li>`;
+    if(stream) stream.getTracks().forEach(t=>t.stop());
+    const avgStress = analysisData.reduce((a,b)=>a+b.stress, 0)/analysisData.length;
     
-    if (avgStress > 0.3) addI("Stress levels exceed optimal baseline. Initiate 4-7-8 breathing sequence.");
-    if (blinkCount > 10) addI("High ocular fatigue detected. System recommends 20-20-20 eye rest rule.");
-    if (avgBpm > 85) addI("Elevated heart rate estimation. Reduce external stimulus immediately.");
-    if (list.innerHTML === "") addI("All biometric markers within baseline. Cognitive performance is optimal.");
-
+    document.getElementById('report-data').innerHTML = `
+        METRIC: STRESS INDEX <br> RECORDED: ${avgStress.toFixed(2)} | THRESHOLD: 0.30 <br>
+        STATUS: ${avgStress < 0.3 ? '<span style="color:var(--safe-green)">OPTIMAL</span>' : '<span style="color:var(--stress-red)">CRITICAL</span>'} <br><br>
+        METRIC: HEART RATE (EST) <br> RECORDED: ${Math.round(72+(avgStress*20))} BPM | OPTIMAL: 60-80 <br><br>
+        METRIC: OCULAR SYNC <br> TOTAL BLINKS: ${blinkCount} <br><br>
+        AI ADVICE: ${avgStress > 0.3 ? "System recommends immediate neural decoupling. High cognitive strain detected." : "Neural synchronization stable. All markers within safe parameters."}
+    `;
     document.getElementById('report-overlay').style.display = 'flex';
-    speak("Scanning cycle complete. Review your neural diagnostics below.");
+    speak("Analysis complete. Diagnostic data synchronized.");
 }
-
-function updateComp(id, val, thresh) {
-    const fill = document.getElementById('g-' + id);
-    const status = document.getElementById('s-' + id);
-    fill.style.width = Math.min(val, 100) + "%";
-    if (val > thresh) { fill.style.background = 'var(--stress-red)'; status.textContent = "CRITICAL"; status.style.color = 'var(--stress-red)'; }
-    else { fill.style.background = 'var(--safe-green)'; status.textContent = "NOMINAL"; status.style.color = 'var(--safe-green)'; }
-}
-
-// Background 3D
-const s = new THREE.Scene();
-const c = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-const r = new THREE.WebGLRenderer({ alpha: true });
-r.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(r.domElement);
-const core = new THREE.Mesh(new THREE.TorusKnotGeometry(10, 3, 100, 16), new THREE.MeshBasicMaterial({ color: 0x00f2ff, wireframe: true, transparent: true, opacity: 0.1 }));
-s.add(core); c.position.z = 40;
-function anim3d() { requestAnimationFrame(anim3d); core.rotation.y += 0.002; r.render(s, c); }
-anim3d();
 </script>
 </body>
 </html>
